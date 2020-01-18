@@ -467,10 +467,7 @@ exec function StartFire( optional byte FireModeNum )
         return;
 
 `if(`isdefined(APOC_PATCH))
-	if( FireModeNum==0 )
-		bFire = 1;
-	else if( FireModeNum==1 )
-		bAltFire = 1;
+    StartAutoFire( FireModeNum );
 `endif
 
     super.StartFire( FireModeNum );
@@ -479,19 +476,37 @@ exec function StartFire( optional byte FireModeNum )
 `if(`isdefined(APOC_PATCH))
 exec function StopFire( optional byte FireModeNum )
 {
-	if( FireModeNum==0 )
-		bFire = 0;
-	else if( FireModeNum==1 )
-		bAltFire = 0;
+    StopAutoFire(FireModeNum);
 
     super.StopFire( FireModeNum );
 }
 
 event PlayerTick( float DeltaTime )
 {
-	super.PlayerTick(DeltaTime);
+	super.PlayerTick( DeltaTime );
 
-    if( bAutoFire )
+    AutoFiring();
+}
+
+function StartAutoFire( optional byte FireModeNum )
+{
+    if( FireModeNum==0 )
+		bFire = 1;
+	else if( FireModeNum==1 )
+		bAltFire = 1;
+}
+
+function StopAutoFire( optional byte FireModeNum )
+{
+	if( FireModeNum==0 )
+		bFire = 0;
+	else if( FireModeNum==1 )
+		bAltFire = 0;
+}
+
+function AutoFiring()
+{
+   if( bAutoFire )
     {
         if( bFire!=0 && !Pawn.InvManager.IsPendingFire(None,0) )
             Pawn.Weapon.StartFire(0);
@@ -1231,11 +1246,16 @@ function NotifyLevelUp(class<KFPerk> PerkClass, byte PerkLevel, byte NewPrestige
 `if(`isdefined(APOC_PATCH))
 function HandleWalking()
 {
+    AlwaySprint();
+
+    super.HandleWalking();
+}
+
+function AlwaySprint()
+{
     if( bAlwaySprint && Pawn != none && KFWeapon(Pawn.Weapon) != none )
         bRun = KFWeapon(Pawn.Weapon).bUsingSights
             ? 0 : 1;
-
-    super.HandleWalking();
 }
 `endif
 

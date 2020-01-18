@@ -20,6 +20,11 @@ function InitMenu()
     // Client settings
     SettingsBox = KFGUI_ComponentList(FindComponentID('SettingsBox'));
 
+`if(`isdefined(APOC_PATCH))
+    AddCheckBox("[Apoc] Always sprint","Without sprint-key, always sprints.",'bAlwaySprint',PC.bAlwaySprint);
+    AddCheckBox("[Apoc] Auto Fire","Weapons fully automatic.",'bAutoFire',PC.bAutoFire);
+`endif
+
     AddCheckBox("Light HUD","Show a light version of the HUD.",'bLight',HUD.bLightHUD);
     AddCheckBox("Show weapon info","Show current weapon ammunition status.",'bWeapons',!HUD.bHideWeaponInfo);
     AddCheckBox("Show personal info","Display health and armor on the HUD.",'bPersonal',!HUD.bHidePlayerInfo);
@@ -42,11 +47,6 @@ function InitMenu()
     AddCheckBox("Enable Modern Scoreboard","Makes the scoreboard look more modern.",'bModernScoreboard',HUD.bModernScoreboard);
     AddCheckBox("Disallow others to pickup your weapons","Disables other players ability to pickup your weapons.",'bDisallowOthersToPickupWeapons',PC.bDisallowOthersToPickupWeapons);
     AddCheckBox("Disable console replacment","Disables the console replacment.",'bNoConsoleReplacement',HUD.bNoConsoleReplacement);
-
-`if(`isdefined(APOC_PATCH))
-    AddCheckBox("[Apoc] Always sprint","Without sprint-key, always sprints.",'bAlwaySprint',PC.bAlwaySprint);
-    AddCheckBox("[Apoc] Auto Fire","Weapons fully automatic.",'bAutoFire',PC.bAutoFire);
-`endif
 
     /*
     PerkStarsBox = AddEditBox("Max Perk Stars","How many perk stars to show.",'MaxPerkStars',string(HUD.MaxPerkStars),PerkStarsLabel);
