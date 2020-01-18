@@ -31,8 +31,11 @@ defaultproperties
         YPosition=0.025
         XSize=0.95
         YSize=0.8
-        Text="REPLACE ME|"
+        Text="#{F3E2A9}KFClassicMode#{DEF} - Written by Forrest Mark X||Credits:|#{01DF3A}Apocalypse Mode#{DEF} - Kyan"
     End Object
+    Components.Add(AboutText)
+
+`if(`notdefined(APOC_REMOVED))
     Begin Object Class=KFGUI_Button Name=AboutButton
         ID="Author"
         ButtonText="Author Profile"
@@ -45,6 +48,8 @@ defaultproperties
         OnClickLeft=ButtonClicked
         OnClickRight=ButtonClicked
     End Object
+    Components.Add(AboutButton)
+
     Begin Object Class=KFGUI_Button Name=ForumButton
         ID="Forum"
         ButtonText="Visit Forums"
@@ -57,8 +62,6 @@ defaultproperties
         OnClickLeft=ButtonClicked
         OnClickRight=ButtonClicked
     End Object
-    
-    Components.Add(AboutText)
-    Components.Add(AboutButton)
     Components.Add(ForumButton)
+`endif
 }
