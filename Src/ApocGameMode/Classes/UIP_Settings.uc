@@ -11,15 +11,15 @@ var ClassicPlayerController PC;
 function InitMenu()
 {
     local string S;
-    
+
     PC = ClassicPlayerController(GetPlayer());
     HUD = KFHUDInterface(PC.myHUD);
-    
+
     Super.InitMenu();
 
     // Client settings
     SettingsBox = KFGUI_ComponentList(FindComponentID('SettingsBox'));
-    
+
     AddCheckBox("Light HUD","Show a light version of the HUD.",'bLight',HUD.bLightHUD);
     AddCheckBox("Show weapon info","Show current weapon ammunition status.",'bWeapons',!HUD.bHideWeaponInfo);
     AddCheckBox("Show personal info","Display health and armor on the HUD.",'bPersonal',!HUD.bHidePlayerInfo);
@@ -42,20 +42,24 @@ function InitMenu()
     AddCheckBox("Enable Modern Scoreboard","Makes the scoreboard look more modern.",'bModernScoreboard',HUD.bModernScoreboard);
     AddCheckBox("Disallow others to pickup your weapons","Disables other players ability to pickup your weapons.",'bDisallowOthersToPickupWeapons',PC.bDisallowOthersToPickupWeapons);
     AddCheckBox("Disable console replacment","Disables the console replacment.",'bNoConsoleReplacement',HUD.bNoConsoleReplacement);
-    
+
+`if(`isdefined(APOC_PATCH))
+    AddCheckBox("Always sprint","Without sprint-key, always sprints.",'bAlwaySprint',PC.bAlwaySprint);
+`endif
+
     /*
     PerkStarsBox = AddEditBox("Max Perk Stars","How many perk stars to show.",'MaxPerkStars',string(HUD.MaxPerkStars),PerkStarsLabel);
     PerkStarsBox.bIntOnly = true;
-    
+
     PerkRowsBox = AddEditBox("Max Stars Per-Row","How many perk stars to draw per row.",'MaxStarsPerRow',string(HUD.MaxStarsPerRow),PerkStarsRowLabel);
     PerkRowsBox.bIntOnly = true;
     */
-    
+
     ControllerBox = AddComboBox("Controller Type","What controller type to use for GUI elements.",'ControllerType',ControllerTypeLabel);
     ControllerBox.Values.AddItem("Xbox One");
     ControllerBox.Values.AddItem("Playstation 4");
-    ControllerBox.SetValue(PC.ControllerType ~= "UI_Controller" ? "Xbox One" : "Playstation 4");    
-    
+    ControllerBox.SetValue(PC.ControllerType ~= "UI_Controller" ? "Xbox One" : "Playstation 4");
+
     switch(HUD.PlayerInfoType)
     {
         case INFO_CLASSIC:
@@ -68,19 +72,19 @@ function InitMenu()
             S = "Modern";
             break;
     }
-    
+
     ControllerBox = AddComboBox("Player Info Type","What style to draw the player info system in.",'PlayerInfo',PlayerInfoTypeLabel);
     ControllerBox.Values.AddItem("Classic");
     ControllerBox.Values.AddItem("Legacy");
     ControllerBox.Values.AddItem("Modern");
     ControllerBox.SetValue(S);
-    
+
     AddButton("Reset","Reset HUD Colors","Resets the color settings for the HUD.",'ResetColors',ResetColorLabel);
 }
 final function KFGUI_CheckBox AddCheckBox( string Cap, string TT, name IDN, bool bDefault )
 {
     local KFGUI_CheckBox CB;
-    
+
     CB = KFGUI_CheckBox(SettingsBox.AddListComponent(class'KFGUI_CheckBox'));
     CB.LableString = Cap;
     CB.ToolTip = TT;
@@ -94,7 +98,7 @@ final function KFGUI_Button AddButton( string ButtonText, string Cap, string TT,
 {
     local KFGUI_Button CB;
     local KFGUI_MultiComponent MC;
-    
+
     MC = KFGUI_MultiComponent(SettingsBox.AddListComponent(class'KFGUI_MultiComponent'));
     MC.InitMenu();
     Label = new(MC) class'KFGUI_TextLable';
@@ -119,7 +123,7 @@ final function KFGUI_EditBox AddEditBox( string Cap, string TT, name IDN, string
 {
     local KFGUI_EditBox EB;
     local KFGUI_MultiComponent MC;
-    
+
     MC = KFGUI_MultiComponent(SettingsBox.AddListComponent(class'KFGUI_MultiComponent'));
     MC.InitMenu();
     Label = new(MC) class'KFGUI_TextLable';
@@ -147,7 +151,7 @@ final function KFGUI_ComboBox AddComboBox( string Cap, string TT, name IDN, out 
 {
     local KFGUI_ComboBox CB;
     local KFGUI_MultiComponent MC;
-    
+
     MC = KFGUI_MultiComponent(SettingsBox.AddListComponent(class'KFGUI_MultiComponent'));
     MC.InitMenu();
     Label = new(MC) class'KFGUI_TextLable';
@@ -187,10 +191,10 @@ function OnComboChanged(KFGUI_ComboBox Sender)
                 HUD.PlayerInfoType = INFO_MODERN;
                 break;
         }
-    
+
         break;
     }
-    
+
     HUD.SaveConfig();
     PC.SaveConfig();
 }
@@ -206,7 +210,7 @@ function OnTextChanged(KFGUI_EditBox Sender)
         HUD.MaxStarsPerRow = int(Sender.TextStr);
         break;
     }
-    
+
     HUD.SaveConfig();
 }
 
@@ -217,7 +221,7 @@ function CheckChange( KFGUI_CheckBox Sender )
     local KFGameReplicationInfo GRI;
     local KFPawn_Monster MPawn;
     local bool bHideKillMsg, bHideDamageMsg, bEnableDamagePopups, bHidePlayerDeathMsg;
-    
+
     bHideKillMsg = PC.bHideKillMsg;
     bHideDamageMsg = PC.bHideDamageMsg;
     bHidePlayerDeathMsg = PC.bHidePlayerDeathMsg;
@@ -239,38 +243,38 @@ function CheckChange( KFGUI_CheckBox Sender )
         break;
     case 'bTallySpecimenKills':
         PC.bHideKillMsg = !Sender.bChecked;
-        break;       
+        break;
     case 'bHideDamageMsg':
         PC.bHideDamageMsg = !Sender.bChecked;
-        break;        
+        break;
     case 'bHidePlayerDeathMsg':
         PC.bHidePlayerDeathMsg = !Sender.bChecked;
-        break;    
+        break;
     case 'bEnableBWZEDTime':
         PC.bEnableBWZEDTime = Sender.bChecked;
-        break;    
+        break;
     case 'bDisableHiddenPlayers':
         HUD.bDisableHiddenPlayers = !Sender.bChecked;
-        break;    
+        break;
     case 'bDisallowOthersToPickupWeapons':
         PC.bDisallowOthersToPickupWeapons = Sender.bChecked;
         PC.SetServerIgnoreDrops(PC.bDisallowOthersToPickupWeapons);
         break;
     case 'bEnableDamagePopups':
         HUD.bEnableDamagePopups = Sender.bChecked;
-        break;    
+        break;
     case 'bDrawRegenBar':
         HUD.bDrawRegenBar = Sender.bChecked;
-        break;    
+        break;
     case 'bShowSpeed':
         HUD.bShowSpeed = Sender.bChecked;
-        break;    
+        break;
     case 'bDisableClassicTrader':
         PC.bDisableClassicTrader = Sender.bChecked;
-        break;        
+        break;
     case 'bDisableClassicMusic':
         PC.bDisableClassicMusic = Sender.bChecked;
-        
+
         MGRI = class'MusicGRI'.static.FindMusicGRI(PC.WorldInfo);
         if( MGRI != None )
         {
@@ -280,9 +284,9 @@ function CheckChange( KFGUI_CheckBox Sender )
             {
                 KFMI.ActionMusicTracks = MGRI.OriginalActionMusicTracks;
                 KFMI.AmbientMusicTracks = MGRI.OriginalAmbientMusicTracks;
-                
+
                 MGRI.ForceStopMusic();
-                
+
                 if( GRI.IsBossWave() )
                 {
                     foreach PC.WorldInfo.DynamicActors(class'KFPawn_Monster',MPawn)
@@ -316,51 +320,57 @@ function CheckChange( KFGUI_CheckBox Sender )
                 }
                 else GRI.PlayNewMusicTrack(false, !GRI.bWaveIsActive);
             }
-            else 
+            else
             {
                 KFMI.ActionMusicTracks = MGRI.ClassicActionMusicTracks;
                 KFMI.AmbientMusicTracks = MGRI.ClassicAmbientMusicTracks;
-                
+
                 GRI.MusicComp.StopEvents();
-                
+
                 if( GRI.IsBossWave() )
                     MGRI.PlayNewMusicTrack();
                 else MGRI.SelectNewTrack();
             }
         }
-        
-        break;    
+
+        break;
     case 'bDisableLastZEDIcons':
         HUD.bDisableLastZEDIcons = !Sender.bChecked;
-        break;    
+        break;
     case 'bDisablePickupInfo':
         HUD.bDisablePickupInfo = !Sender.bChecked;
-        break;    
+        break;
     case 'bDisableLockOnUI':
         HUD.bDisableLockOnUI = !Sender.bChecked;
-        break;   
+        break;
     case 'bDisableRechargeUI':
         HUD.bDisableRechargeUI = !Sender.bChecked;
-        break;    
+        break;
     case 'bModernScoreboard':
         HUD.bModernScoreboard = Sender.bChecked;
-        break;    
+        break;
     case 'bShowXPEarned':
         HUD.bShowXPEarned = Sender.bChecked;
-        break;    
+        break;
     case 'bNoConsoleReplacement':
         HUD.bNoConsoleReplacement = Sender.bChecked;
-        
+
         if( HUD.bNoConsoleReplacement )
             HUD.ResetConsole();
         else HUD.CreateAndSetConsoleReplacment();
-        
+
         break;
+
+`if(`isdefined(APOC_PATCH))
+    case 'bAlwaySprint':
+        PC.bAlwaySprint = Sender.bChecked;
+        break;
+`endif
     }
-    
+
     if( bHideKillMsg != PC.bHideKillMsg || bHideDamageMsg != PC.bHideDamageMsg || bEnableDamagePopups != HUD.bEnableDamagePopups || bHidePlayerDeathMsg != PC.bHidePlayerDeathMsg )
         PC.ServerSetSettings(PC.bHideKillMsg, PC.bHideDamageMsg, !HUD.bEnableDamagePopups, PC.bHidePlayerDeathMsg);
-        
+
     HUD.SaveConfig();
     PC.SaveConfig();
 }
@@ -386,6 +396,6 @@ defaultproperties
         ID="SettingsBox"
         ListItemsPerPage=16
     End Object
-    
+
     Components.Add(ClientSettingsBox)
 }
