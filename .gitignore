@@ -16,9 +16,11 @@
 /Config/KFLightmass.ini
 /Config/KFMultiAdmin.ini
 /Config/KFSystemSettings.ini
-/Config/KFxMapVote.ini
+/Config/KFTIM.ini
+/Config/KFUnofficialMod.ini
 /Config/KFUI.ini
 /Config/KFWeb.ini
 /Config/KFwebadmin.ini
+/Config/KFxMapVote.ini
 /Unpublished/BrewedPC/*.upk
 /Unpublished/BrewedPC/Script/*.u
