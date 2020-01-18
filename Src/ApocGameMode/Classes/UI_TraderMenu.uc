@@ -729,12 +729,13 @@ defaultproperties
     Begin Object class=KFGUI_ListHorz Name=QuickPerkSelect
         ID="QuickPerkSelect"
         YPosition=0.032775
-        XPosition=0.065
-        XSize=0.25
+        XPosition=0.053
+        XSize=0.277
         YSize=0.052
         ButtonScale=0.5
         bClickable=true
         bUseFocusSound=true
+		ListItemsPerPage=9
     End Object
     Components.Add(QuickPerkSelect)
 
@@ -846,13 +847,13 @@ defaultproperties
     Begin Object Class=KFGUI_ListHorz Name=PerkList
         ID="PerkList"
         YPosition=0.032775
-        XPosition=0.7
-        XSize=0.275
+        XPosition=0.671
+        XSize=0.322
         YSize=0.052
         ButtonScale=0.5
         bClickable=true
         bUseFocusSound=true
-        ListItemsPerPage=9
+        ListItemsPerPage=11
     End Object
     Components.Add(PerkList)
 
