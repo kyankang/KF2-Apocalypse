@@ -7,6 +7,9 @@
 /Src/Development/
 /Config/GFXSettings.KFGame.xml
 /Config/KFAI.ini
+/Config/KFClassicHUD.ini
+/Config/KFClassicInput.ini
+/Config/KFClassicPlayer.ini
 /Config/KFBenchmarking.ini
 /Config/KFEditorKeyBindings.ini
 /Config/KFEditorUserSettings.ini
