@@ -24,10 +24,10 @@ var int ItemIndex;
 function InitMenu()
 {
     Super.InitMenu();
-    
+
     bClickable = !bDisabled;
     TraderMenu = UI_TraderMenu(ParentComponent);
-    
+
     PC = ClassicPlayerController(GetPlayer());
 
     SetTimer( 1.f, true, nameof(Refresh) );
@@ -41,7 +41,7 @@ function PreDraw()
     {
         bIsFocused = true;
     }
-        
+
     Super.PreDraw();
 }
 
@@ -98,10 +98,10 @@ function SetBuyable( STraderItem Info )
     local ClassicPerk_Base Perk;
     local ClassicPerkManager PerkManager;
     local byte i;
-    
+
     Buyable = Info;
     CurrentName = Info.WeaponDef.static.GetItemName();
-    
+
     PerkManager = ClassicPlayerController(GetPlayer()).PerkManager;
     if( PerkManager != None )
     {
@@ -115,19 +115,19 @@ function SetBuyable( STraderItem Info )
                     break;
                 }
             }
-            
+
             if( Perk != None )
             {
                 CurrentIcon = Perk.static.GetCurrentPerkIcon(0);
             }
         }
     }
-    
+
     if( CurrentIcon == None )
     {
         CurrentIcon = Texture(DynamicLoadObject(class'KFGFxObject_TraderItems'.default.OffPerkIconPath, class'Texture'));
     }
-    
+
     Refresh(true);
 }
 
@@ -137,13 +137,13 @@ function SetSellable( SItemInformation Info, optional bool bHasAmmo )
     local ClassicPerkManager PerkManager;
     local KFAutoPurchaseHelper KFAPH;
     local byte i;
-    
+
     KFAPH = PC.GetPurchaseHelper();
     Sellable = Info;
     bUsesAmmo = bHasAmmo;
     bIsArmor = (Info == KFAPH.ArmorItem);
     bIsGrenade = (Info == KFAPH.GrenadeItem);
-    
+
     if( bIsSecondaryAmmo )
     {
         CurrentName = Info.DefaultItem.WeaponDef.static.GetItemLocalization("SecondaryAmmo");
@@ -152,7 +152,7 @@ function SetSellable( SItemInformation Info, optional bool bHasAmmo )
     {
         CurrentName = Info.DefaultItem.WeaponDef.static.GetItemName();
     }
-    
+
     PerkManager = ClassicPlayerController(GetPlayer()).PerkManager;
     if( PerkManager != None )
     {
@@ -166,39 +166,39 @@ function SetSellable( SItemInformation Info, optional bool bHasAmmo )
                     break;
                 }
             }
-            
+
             if( Perk != None )
             {
                 CurrentIcon = Perk.static.GetCurrentPerkIcon(0);
             }
         }
     }
-    
+
     if( CurrentIcon == None )
     {
         CurrentIcon = Texture(DynamicLoadObject(class'KFGFxObject_TraderItems'.default.OffPerkIconPath, class'Texture'));
     }
-    
+
     if( bHasAmmo )
     {
-        BuyMagB = AddButton('BuyMagB', "£ "$bIsSecondaryAmmo ? Sellable.DefaultItem.WeaponDef.default.SecondaryAmmoMagPrice : Sellable.AmmoPricePerMagazine, 0.775, 0.25, 0.1, 0.5);
+        BuyMagB = AddButton('BuyMagB', "$ "$bIsSecondaryAmmo ? Sellable.DefaultItem.WeaponDef.default.SecondaryAmmoMagPrice : Sellable.AmmoPricePerMagazine, 0.775, 0.25, 0.1, 0.5);
 
-        FillAmmoB = AddButton('FillAmmoB', "£ "$(Sellable == KFAPH.GrenadeItem ? KFAPH.GetFillGrenadeCost() : KFAPH.GetFillAmmoCost(Sellable)), 0.89, 0.25, 0.16, 0.5);
+        FillAmmoB = AddButton('FillAmmoB', "$ "$(Sellable == KFAPH.GrenadeItem ? KFAPH.GetFillGrenadeCost() : KFAPH.GetFillAmmoCost(Sellable)), 0.89, 0.25, 0.16, 0.5);
         FillAmmoB.GamepadButtonName = "XboxTypeS_X";
     }
     else if( bIsArmor )
     {
-        PurchaseVest = AddButton('PurchaseVest', "£ "$KFAPH.GetFillArmorCost(), 0.775, 0.25, 0.275, 0.5);
+        PurchaseVest = AddButton('PurchaseVest', "$ "$KFAPH.GetFillArmorCost(), 0.775, 0.25, 0.275, 0.5);
         PurchaseVest.GamepadButtonName = "XboxTypeS_X";
     }
-    
+
     Refresh(true);
 }
 
 final function KFGUI_Button AddButton(name ButtonID, coerce string S, float X, float Y, float XL, float YL)
 {
     local KFGUI_Button But;
-    
+
     But = new(Self) class'KFGUI_Button';
     But.ButtonText = S;
     But.XPosition = X;
@@ -208,7 +208,7 @@ final function KFGUI_Button AddButton(name ButtonID, coerce string S, float X, f
     But.OnClickLeft = InternalOnClick;
     But.OnClickRight = InternalOnClick;
     But.ID = ButtonID;
-    
+
     AddComponent(But);
     return But;
 }

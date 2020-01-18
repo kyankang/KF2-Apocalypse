@@ -8,17 +8,17 @@ var int OldFillAmmoCost;
 function InitMenu()
 {
     Super.InitMenu();
-    
+
     AutoFill = KFGUI_Button(FindComponentID('AutoFill'));
     AutoFill.GamepadButtonName = "XboxTypeS_Back";
     AutoFill.OnClickLeft = InternalOnClick;
     AutoFill.OnClickRight = InternalOnClick;
-    
+
     Exit = KFGUI_Button(FindComponentID('Exit'));
     Exit.GamepadButtonName = "XboxTypeS_Start";
     Exit.OnClickLeft = InternalOnClick;
     Exit.OnClickRight = InternalOnClick;
-    
+
     TraderMenu = UI_TraderMenu(ParentComponent);
 }
 
@@ -32,7 +32,7 @@ function Refresh()
 {
     local int FillCost;
     local KFAutoPurchaseHelper KFAPH;
-    
+
     KFAPH = ClassicPlayerController(GetPlayer()).GetPurchaseHelper();
     FillCost = KFAPH.GetAutoFillCost();
     if( FillCost != OldFillAmmoCost )
@@ -44,10 +44,10 @@ function Refresh()
         }
         else
         {
-            AutoFill.ButtonText = TraderMenu.AutoFillString @ "(£"$FillCost$")";
+            AutoFill.ButtonText = TraderMenu.AutoFillString @ "($ "$FillCost$")";
             AutoFill.bDisabled = false;
         }
-        
+
         OldFillAmmoCost = FillCost;
     }
 }
@@ -55,7 +55,7 @@ function Refresh()
 function InternalOnClick( KFGUI_Button Sender )
 {
     local KFAutoPurchaseHelper KFAPH;
-    
+
     KFAPH = ClassicPlayerController(GetPlayer()).GetPurchaseHelper();
     switch( Sender.ID )
     {
@@ -80,7 +80,7 @@ function bool ReceievedControllerInput(int ControllerId, name Key, EInputEvent E
                 {
                     KFPlayerController(GetPlayer()).PlayAKEvent(AkEvent'WW_UI_Menu.Play_TRADER_MAGFILL_BUTTON_CLICK');
                 }
-                
+
                 AutoFill.HandleMouseClick(false);
             }
             break;
@@ -91,12 +91,12 @@ function bool ReceievedControllerInput(int ControllerId, name Key, EInputEvent E
                 {
                     KFPlayerController(GetPlayer()).PlayAKEvent(AkEvent'WW_UI_Menu.Play_TRADER_EXIT_BUTTON_CLICK');
                 }
-                
+
                 DoClose();
             }
             break;
     }
-    
+
     return Super.ReceievedControllerInput(ControllerId, Key, Event);
 }
 
@@ -108,7 +108,7 @@ defaultproperties
     EdgeSize(1)=0.f
     EdgeSize(2)=0.f
     EdgeSize(3)=0.f
-        
+
     /* Fill Ammo Button */
     Begin Object class=KFGUI_Button Name=AutoFill
         ID="AutoFill"

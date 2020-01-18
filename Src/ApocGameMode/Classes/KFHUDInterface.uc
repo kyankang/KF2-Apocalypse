@@ -1,6 +1,6 @@
 class KFHUDInterface extends KFGFxHudWrapper
     config(ClassicHUD);
-   
+
 const MAX_WEAPON_GROUPS = 4;
 const HUDBorderSize = 3;
 
@@ -41,7 +41,7 @@ enum EDamageTypes
     DMG_Unspecified
 };
 
-enum PopupPosition 
+enum PopupPosition
 {
     PP_BOTTOM_CENTER,
     PP_BOTTOM_LEFT,
@@ -68,7 +68,7 @@ var config enum PlayerInfo
     INFO_CLASSIC,
     INFO_LEGACY,
     INFO_MODERN
-} PlayerInfoType; 
+} PlayerInfoType;
 
 struct InventoryCategory
 {
@@ -197,7 +197,7 @@ struct FPriorityMessage
     var Texture2D Icon,SecondaryIcon;
     var Color IconColor,SecondaryIconColor;
     var bool bSecondaryUsesFullLength;
-    
+
     structdefaultproperties
     {
         FadeInTime=0.15f
@@ -266,7 +266,7 @@ struct HUDBoxRenderInfo
     var array<String> StringArray;
     var bool bUseOutline, bUseRounded, bRoundedOutline, bHighlighted;
     var EJustificationType Justification;
-    
+
     structdefaultproperties
     {
         TextColor=(R=255,B=255,G=255,A=255)
@@ -297,7 +297,7 @@ var int NextDamagePopupIndex;
 var float DamagePopupFadeOutTime;
 var config bool bEnableDamagePopups;
 
-struct PopupMessage 
+struct PopupMessage
 {
     var string Header;
     var string Body;
@@ -350,25 +350,25 @@ var transient bool bIsMenu;
 simulated function PostBeginPlay()
 {
     local bool bSaveConfig;
-    
+
     if( iConfigVersion <= 0 )
     {
         MaxPerkStars = 5;
         MaxStarsPerRow = 5;
-        
+
         HudMainColor = DefaultHudMainColor;
         HudOutlineColor = DefaultHudOutlineColor;
         FontColor = DefaultFontColor;
-        
+
         bLightHUD = false;
         bHideWeaponInfo = false;
         bHidePlayerInfo = false;
         bHideDosh = false;
-        
+
         iConfigVersion++;
         bSaveConfig = true;
     }
-    
+
     if( iConfigVersion <= 1 )
     {
         bDisableHiddenPlayers = false;
@@ -388,10 +388,10 @@ simulated function PostBeginPlay()
         iConfigVersion++;
         bSaveConfig = true;
     }
-    
+
     if( bSaveConfig )
         SaveConfig();
-    
+
     bIsMenu = class'WorldInfo'.static.IsMenuLevel();
     if( !bIsMenu )
     {
@@ -401,20 +401,20 @@ simulated function PostBeginPlay()
             OnlineSub.AddOnInventoryReadCompleteDelegate(SearchInventoryForNewItem);
             SetTimer(60,false,'SearchInventoryForNewItem');
         }
-    
+
         SetTimer(300 + FRand()*120.f, false, 'CheckForItems');
         SetTimer(0.1f, true, 'BuildCacheItems');
         SetTimer(0.1f, true, 'CheckForWeaponPickup');
     }
-    
+
     Super.PostBeginPlay();
-    
+
     PlayerOwner.PlayerInput.OnReceivedNativeInputKey = NotifyInputKey;
     PlayerOwner.PlayerInput.OnReceivedNativeInputAxis = NotifyInputAxis;
     PlayerOwner.PlayerInput.OnReceivedNativeInputChar = NotifyInputChar;
-    
+
     ClassicPlayerOwner = ClassicPlayerController(PlayerOwner);
-    
+
     ClientViewport = LocalPlayer(PlayerOwner.Player).ViewportClient;
     if( ClientViewport != None )
         CreateAndSetConsoleReplacment();
@@ -424,7 +424,7 @@ function CreateAndSetConsoleReplacment()
 {
     if( (bNoConsoleReplacement && !bIsMenu) || ConsoleClass == None )
         return;
-        
+
     if( NewConsole == None )
     {
         NewConsole = New(ClientViewport) ConsoleClass;
@@ -434,9 +434,9 @@ function CreateAndSetConsoleReplacment()
 
     OrgConsole.OnReceivedNativeInputKey = NewConsole.InputKey;
     OrgConsole.OnReceivedNativeInputChar = NewConsole.InputChar;
-    
+
     ClientViewport.ViewportConsole = NewConsole;
-    
+
     if( UI_Console(NewConsole) != None )
         UI_Console(NewConsole).OriginalConsole = OrgConsole;
 }
@@ -453,7 +453,7 @@ function ResetHUDColors()
 function GetTraderVoiceClass()
 {
     local ClassicHumanPawn P;
-    
+
     P = ClassicHumanPawn(PlayerOwner.Pawn);
     if( P != None )
     {
@@ -469,18 +469,18 @@ function BuildCacheItems()
     local KFPawn KFPawn;
     local KFPawn_Human KFPH;
     local FScriptedPawnCache ScriptedCache;
-    
+
     foreach DynamicActors(class'KFDoorActor',Door)
     {
         if( DoorCache.Find('Door', Door) != INDEX_NONE )
             continue;
-            
+
         MyCache.Door = Door;
         MyCache.WeldUILocation = Door.WeldUILocation;
-        
+
         DoorCache.AddItem(MyCache);
     }
-    
+
     foreach WorldInfo.AllPawns( class'KFPawn', KFPawn )
     {
         Pawn = KFPawn_Scripted(KFPawn);
@@ -488,10 +488,10 @@ function BuildCacheItems()
         {
             ScriptedCache.Pawn = Pawn;
             ScriptedCache.Icon = Texture2D(DynamicLoadObject(Pawn.GetIconPath(),class'Texture2D'));
-            
+
             ScriptedPawnCache.AddItem(ScriptedCache);
         }
-        
+
         KFPH = KFPawn_Human(KFPawn);
         if( KFPH != None && PawnList.Find(KFPH) == INDEX_NONE )
             PawnList.AddItem(KFPH);
@@ -518,20 +518,20 @@ simulated function ClassicDroppedPickup GetWeaponPickup()
 
     EndTrace = PLCameraLoc + PLCameraDir * MaxWeaponPickupDist;
     HitActor = KFPlayerOwner.Trace(HitLocation, HitNormal, EndTrace, PLCameraLoc);
-    
+
     if (HitActor == None)
         return None;
-        
+
     foreach KFPlayerOwner.CollidingActors(class'KFPawn_Monster', KFPM, ZedScanRadius, HitLocation)
     {
         if (KFPM.IsAliveAndWell())
             return None;
-        
+
         ZedCount++;
         if (ZedCount > 20)
             return None;
     }
-        
+
     BestDistSq = WeaponPickupScanRadius * WeaponPickupScanRadius;
 
     foreach KFPlayerOwner.CollidingActors(class'ClassicDroppedPickup', KFDP, WeaponPickupScanRadius, HitLocation)
@@ -561,7 +561,7 @@ function PostRender()
         SetupHUDTextures();
         return;
     }
-    
+
     if( BossRef != None && BossInfoIcon == None )
     {
         BossInfoIcon = Texture2D(DynamicLoadObject(BossRef.GetIconPath(),class'Texture2D'));
@@ -570,16 +570,16 @@ function PostRender()
     {
         BossInfoIcon = None;
     }
-    
+
     if( !bReplicatedColorTextures && HudOutlineColor != DefaultHudOutlineColor )
     {
         bReplicatedColorTextures = true;
         SetupHUDTextures(true);
     }
-    
+
     if( GUIController!=None && PlayerOwner.PlayerInput==None )
         GUIController.NotifyLevelChange();
-        
+
     if( GUIController==None || GUIController.bIsInvalid )
     {
         GUIController = Class'ApocGameMode.KF2GUIController'.Static.GetGUIController(PlayerOwner);
@@ -591,24 +591,24 @@ function PostRender()
     }
     GUIStyle.Canvas = Canvas;
     GUIStyle.PickDefaultFontSize(Canvas.ClipY);
-    
+
     ScaledBorderSize = FMax(GUIStyle.ScreenScale(HUDBorderSize), 1.f);
-    
+
     Super.PostRender();
-    
+
     PlayerOwner.GetPlayerViewPoint(PLCameraLoc,PLCameraRot);
     PLCameraDir = vector(PLCameraRot);
-    
+
     if( ClassicPlayerOwner.bIsSpectating )
     {
         RenderVisibleSpectatorInfo();
     }
-    
+
     if( HUDWidgets.Length > 0 )
     {
         RenderHUDWidgets();
     }
-    
+
     DamageHistoryNum = 0;
 }
 
@@ -617,31 +617,31 @@ function RenderVisibleSpectatorInfo()
     local float FontScalar, XL, YL, BoxW, BoxH, BoxX, BoxY, TX, TY;
     local string UseKeyName,ItemInfo;
     local KFPawn Pawn;
-    
+
     Canvas.Font = GUIStyle.PickFont(FontScalar);
     FontScalar += 0.3f;
-    
+
     Pawn = KFPawn(ClassicPlayerOwner.ViewTarget);
     if( Pawn != None )
         ItemInfo = "heal player";
     else ItemInfo = "fire laser";
-    
+
     UseKeyName = "Tap ["$class'KFLocalMessage_Interaction'.static.GetKeyBind(PlayerOwner, IMT_DoshActivate)$"] to "$ItemInfo$".";
     Canvas.TextSize(UseKeyName, XL, YL, FontScalar, FontScalar);
-    
+
     BoxW = XL+(ScaledBorderSize*2)+16;
     BoxH = YL+(ScaledBorderSize*2)+16;
     BoxX = Canvas.ClipX - BoxW - (ScaledBorderSize*2) - 8;
     BoxY = Canvas.ClipY - BoxH - (ScaledBorderSize*2) - 8;
     GUIStyle.DrawRoundedBoxOutlined(ScaledBorderSize, BoxX, BoxY, BoxW, BoxH, HudMainColor, HudOutlineColor);
-    
+
     TX = BoxX + (BoxW/2) - (XL/2);
     TY = BoxY + (BoxH/2) - (YL/2) - 8;
-    
+
     Canvas.SetPos(TX,TY);
     Canvas.SetDrawColor(255,255,255,255);
     Canvas.DrawText(UseKeyName,, FontScalar, FontScalar);
-    
+
     if( ClassicPlayerOwner.NextFireTimer>WorldInfo.TimeSeconds )
     {
         Canvas.SetDrawColor(255,0,0,255);
@@ -673,32 +673,32 @@ function DrawHUD()
     }
 
     Super(HUD).DrawHUD();
-    
+
     Canvas.EnableStencilTest(true);
-    
+
     if( WeaponPickup != None )
     {
         DrawWeaponPickupInfo();
     }
-    
+
     if( bEnableDamagePopups )
     {
         DrawDamage();
     }
-    
+
     DrawDoorHealthBars();
-    
+
     if( KFPlayerOwner != None && KFPlayerOwner.Pawn != None )
     {
         if( !bDisableLockOnUI && KFWeap_MedicBase(KFPlayerOwner.Pawn.Weapon) != None )
         {
             DrawMedicWeaponLockOn(KFWeap_MedicBase(KFPlayerOwner.Pawn.Weapon));
         }
-        
+
         if( !bDisableRechargeUI && !KFPlayerOwner.bCinematicMode )
             DrawMedicWeaponRecharge();
     }
-    
+
     if( bShowProgress || PlayerOwner.Player==None )
     {
         if( ProgressMsgTime<WorldInfo.TimeSeconds )
@@ -716,9 +716,9 @@ function DrawHUD()
     }
     if( PlayerOwner.Player==None && class'GameEngine'.static.GetOnlineSubsystem()!=None )
         NotifyLevelChange();
-    
+
     Canvas.EnableStencilTest(false);
-    
+
     DrawTraderIndicator();
 
     if( KFGRI == None )
@@ -730,7 +730,7 @@ function DrawHUD()
     {
         return;
     }
-    
+
     if( !KFPlayerOwner.bCinematicMode )
     {
         LocActor = KFPlayerOwner.ViewTarget != none ? KFPlayerOwner.ViewTarget : KFPlayerOwner;
@@ -743,7 +743,7 @@ function DrawHUD()
         if( PlayerOwner.GetTeamNum() == 0 )
         {
             Canvas.EnableStencilTest(true);
-            
+
             // Probably slow but needed to properly sort the rendering so farther elements don't overlap closer ones.
             PawnList.Sort(SortRenderDistance);
             foreach PawnList( KFPH )
@@ -794,8 +794,8 @@ function DrawHUD()
 
                     TargetLocation = KFGRI.ObjectiveInterface.GetIconLocation();
                     ThisDot = Normal((TargetLocation + (class'KFPawn_Human'.default.CylinderComponent.CollisionHeight * vect(0, 0, 1))) - PLCameraLoc) dot PLCameraDir;
-                
-                    if (ThisDot > 0 &&  
+
+                    if (ThisDot > 0 &&
                         KFGRI.ObjectiveInterface.ShouldShowObjectiveHUD() &&
                         (!KFGRI.ObjectiveInterFace.HasObjectiveDrawDistance() || VSizeSq(TargetLocation - LocActor.Location) < MaxDrawDistanceObjective))
                     {
@@ -807,17 +807,17 @@ function DrawHUD()
             Canvas.EnableStencilTest(false);
         }
     }
-    
+
     if( PlayerOwner != None )
     {
         RenderKFHUD(KFPawn_Human(PlayerOwner.Pawn));
     }
-     
+
     if( KillMessages.Length > 0 )
     {
         RenderKillMsg();
     }
-    
+
     if( NonCriticalMessages.Length > 0 )
     {
         for( i=0; i<NonCriticalMessages.Length; ++i )
@@ -825,7 +825,7 @@ function DrawHUD()
             DrawNonCritialMessage(i, NonCriticalMessages[i], Canvas.ClipX * 0.5, Canvas.ClipY * 0.9);
         }
     }
-    
+
     if( PriorityMessage != default.PriorityMessage )
     {
         DrawPriorityMessage();
@@ -835,12 +835,12 @@ function DrawHUD()
     {
         DrawPortrait();
     }
-    
-    if ( NotificationPhase != PHASE_DONE ) 
+
+    if ( NotificationPhase != PHASE_DONE )
     {
         DrawAchievmentInfo();
     }
-    
+
     if( BossRef != None && BossRef.GetMonsterPawn().IsAliveAndWell() )
     {
         DrawBossHealthBars();
@@ -849,12 +849,12 @@ function DrawHUD()
     {
         DrawEscortHealthBars();
     }
-    
+
     if( NewItems.Length > 0 )
     {
         DrawItemsList();
     }
-    
+
     if( ClassicPlayerOwner.LobbyMenu == None )
     {
         if( TalkerPRIs.Length > 0 )
@@ -867,7 +867,7 @@ function DrawHUD()
             RenderVotingOptions();
         }
     }
-    
+
     if( KFGRI != None && KFGRI.bMatchIsOver )
     {
         if( !bCheckedForWin )
@@ -880,10 +880,10 @@ function DrawHUD()
                     break;
                 }
             }
-            
+
             bCheckedForWin = true;
         }
-        
+
         if( bVictory )
         {
             DrawVictoryEndScreen();
@@ -902,19 +902,19 @@ function LaunchHUDMenus()
         ClassicPlayerOwner.GUIController = GUIController;
         ClassicPlayerOwner.OpenLobbyMenu();
     }
-    
+
     if( bIsMenu )
         return;
-    
+
     ChatBox = UI_MainChatBox(GUIController.InitializeHUDWidget(ChatBoxClass));
     ChatBox.SetVisible(false);
-    
+
     SpectatorInfo = UIR_SpectatorInfoBox(GUIController.InitializeHUDWidget(SpectatorInfoClass));
     SpectatorInfo.SetSpectatedPRI(PlayerOwner.PlayerReplicationInfo);
-    
+
     VoiceComms = UIR_VoiceComms(GUIController.InitializeHUDWidget(VoiceCommsClass));
     VoiceComms.SetVisibility(false);
-    
+
     Scoreboard = KFScoreBoard(GUIController.InitializeHUDWidget(ScoreboardClass));
     Scoreboard.SetVisibility(false);
 }
@@ -922,7 +922,7 @@ function LaunchHUDMenus()
 function SetupHUDTextures(optional bool bUseColorIcons)
 {
     local ObjectReferencer RepObject;
-    
+
     if( ClientRep == None )
     {
         ClientRep = class'ClientPerkRepLink'.static.FindContentRep( WorldInfo );
@@ -931,12 +931,12 @@ function SetupHUDTextures(optional bool bUseColorIcons)
             return;
         }
     }
-    
+
     RepObject = ClientRep.ObjRef;
     if( RepObject != None )
     {
         ProgressBarTex = Texture2D(RepObject.ReferencedObjects[85]);
-        
+
         HealthIcon = bUseColorIcons ? Texture2D(RepObject.ReferencedObjects[146]) : Texture2D(RepObject.ReferencedObjects[27]);
         ArmorIcon = bUseColorIcons ? Texture2D(RepObject.ReferencedObjects[149]) : Texture2D(RepObject.ReferencedObjects[31]);
         WeightIcon = bUseColorIcons ? Texture2D(RepObject.ReferencedObjects[152]) : Texture2D(RepObject.ReferencedObjects[34]);
@@ -946,7 +946,7 @@ function SetupHUDTextures(optional bool bUseColorIcons)
         ClipsIcon = bUseColorIcons ? Texture2D(RepObject.ReferencedObjects[131]) : Texture2D(RepObject.ReferencedObjects[11]);
         BurstBulletIcon = bUseColorIcons ? Texture2D(RepObject.ReferencedObjects[137]) : Texture2D(RepObject.ReferencedObjects[18]);
         AutoTargetIcon = bUseColorIcons ? Texture2D(RepObject.ReferencedObjects[133]) : Texture2D(RepObject.ReferencedObjects[13]);
-        
+
         ArrowIcon = bUseColorIcons ? Texture2D(RepObject.ReferencedObjects[132]) : Texture2D(RepObject.ReferencedObjects[12]);
         FlameIcon = bUseColorIcons ? Texture2D(RepObject.ReferencedObjects[139]) : Texture2D(RepObject.ReferencedObjects[19]);
         FlameTankIcon = bUseColorIcons ? Texture2D(RepObject.ReferencedObjects[138]) : Texture2D(RepObject.ReferencedObjects[20]);
@@ -959,29 +959,29 @@ function SetupHUDTextures(optional bool bUseColorIcons)
         SingleBulletIcon = bUseColorIcons ? Texture2D(RepObject.ReferencedObjects[150]) : Texture2D(RepObject.ReferencedObjects[32]);
         SyringIcon = bUseColorIcons ? Texture2D(RepObject.ReferencedObjects[151]) : Texture2D(RepObject.ReferencedObjects[33]);
         SawbladeIcon = bUseColorIcons ? Texture2D(RepObject.ReferencedObjects[153]) : Texture2D(RepObject.ReferencedObjects[78]);
-        
+
         TraderBox = Texture2D(RepObject.ReferencedObjects[16]);
-        
+
         WaveCircle = bUseColorIcons ? Texture2D(RepObject.ReferencedObjects[134]) : Texture2D(RepObject.ReferencedObjects[15]);
         BioCircle = bUseColorIcons ? Texture2D(RepObject.ReferencedObjects[135]) : Texture2D(RepObject.ReferencedObjects[14]);
-        
+
         DoorWelderBG = TraderBox;
         DoorWelderIcon = bUseColorIcons ? Texture2D(RepObject.ReferencedObjects[154]) : Texture2D(RepObject.ReferencedObjects[88]);
-        
+
         InventoryBackgroundTexture = Texture2D(RepObject.ReferencedObjects[113]);
         SelectedInventoryBackgroundTexture = Texture2D(RepObject.ReferencedObjects[114]);
-        
+
         TraderPortrait = Texture2D(RepObject.ReferencedObjects[86]);
         PatriarchPortrait = Texture2D(RepObject.ReferencedObjects[58]);
         LockheartPortrait = Texture2D(RepObject.ReferencedObjects[70]);
         UnknownPortrait = Texture2D(RepObject.ReferencedObjects[56]);
         TraderPortraitBox = Texture2D(RepObject.ReferencedObjects[2]);
-        
+
         VictoryScreen = Texture2D(RepObject.ReferencedObjects[115]);
         DefeatScreen = Texture2D(RepObject.ReferencedObjects[117]);
         VictoryScreenOverlay = Texture2D(RepObject.ReferencedObjects[116]);
         DefeatScreenOverlay = Texture2D(RepObject.ReferencedObjects[118]);
-        
+
         bObjectReplicationFinished = true;
     }
 }
@@ -1018,11 +1018,11 @@ function string GetGameInfoText()
             {
                 return "---";
             }
-            
+
             return string(KFGRI.AIRemaining);
         }
     }
-    
+
     return "";
 }
 
@@ -1030,28 +1030,28 @@ function string GetGameInfoSubText()
 {
     local int WaveMax;
     local string S;
-    
+
     if( KFGRI != None && KFGRI.bWaveIsActive && !KFGRI.IsBossWave() )
     {
         WaveMax = KFGRI.WaveMax-1;
-        
+
         if( KFGameReplicationInfo_Endless(KFGRI) != None )
             S = string(KFGRI.WaveNum);
         else S = string(KFGRI.WaveNum) $ "/" $ string(WaveMax);
-        
+
         return class'KFGFxHUD_WaveInfo'.default.WaveString @ S;
     }
-    
+
     return "";
 }
 
 function DrawHUDBox
     (
-    out float X, 
-    out float Y, 
-    float Width, 
-    float Height, 
-    coerce string Text, 
+    out float X,
+    out float Y,
+    float Width,
+    float Height,
+    coerce string Text,
     float TextScale=1.f,
     optional HUDBoxRenderInfo HBRI
     )
@@ -1061,22 +1061,22 @@ function DrawHUDBox
     local int i;
     local FontRenderInfo FRI;
     local Color BoxColor, OutlineColor, TextColor, BlankColor;
-    
+
     FRI.bClipText = true;
     FRI.bEnableShadow = true;
-    
+
     bUseAlpha = HBRI.Alpha != -1.f;
     BoxColor = HBRI.BoxColor == BlankColor ? HudMainColor : HBRI.BoxColor;
     OutlineColor = HBRI.OutlineColor == BlankColor ? HudOutlineColor : HBRI.OutlineColor;
     TextColor = HBRI.TextColor == BlankColor ? FontColor : HBRI.TextColor;
-    
+
     if( bUseAlpha )
     {
         BoxColor.A = byte(Min(HBRI.Alpha, HudMainColor.A));
         OutlineColor.A = byte(Min(HBRI.Alpha, HudOutlineColor.A));
         TextColor.A = byte(HBRI.Alpha);
     }
-    
+
     if( !bLightHUD )
     {
         if( HBRI.bUseRounded )
@@ -1093,7 +1093,7 @@ function DrawHUDBox
                     Canvas.SetPos(X+(ScaledBorderSize*2), Y);
                     GUIStyle.DrawWhiteBox(Width-(ScaledBorderSize*4), Height);
                 }
-                
+
                 GUIStyle.DrawRoundedBoxEx(ScaledBorderSize*2, X, Y, ScaledBorderSize*2, Height, OutlineColor, true, false, true, false);
                 GUIStyle.DrawRoundedBoxEx(ScaledBorderSize*2, X+Width-(ScaledBorderSize*2), Y, ScaledBorderSize*2, Height, OutlineColor, false, true, false, true);
             }
@@ -1106,70 +1106,70 @@ function DrawHUDBox
         }
         else GUIStyle.DrawOutlinedBox(X, Y, Width, Height, ScaledBorderSize, BoxColor, OutlineColor);
     }
-    
+
     if( HBRI.IconTex != None )
     {
         if( HBRI.IconScale == 1.f )
         {
             HBRI.IconScale = Height;
         }
-        
+
         IconW = HBRI.IconScale - (HBRI.bUseRounded ? 0.f : ScaledBorderSize);
-        
+
         IconXL = X + (IconW/2);
         IconYL = Y + (Height / 2) - (IconW / 2);
-        
+
         if( HudOutlineColor != DefaultHudOutlineColor )
         {
             Canvas.DrawColor = HudOutlineColor;
-            if( !bUseAlpha ) 
+            if( !bUseAlpha )
                 Canvas.DrawColor.A = 255;
         }
         else Canvas.SetDrawColor(255, 255, 255, bUseAlpha ? byte(HBRI.Alpha) : 255);
-        
+
         Canvas.SetPos(IconXL, IconYL);
         Canvas.DrawRect(IconW, IconW, HBRI.IconTex);
     }
 
     Canvas.DrawColor = TextColor;
-    
+
     if( HBRI.StringArray.Length < 1 )
     {
         Canvas.TextSize(GUIStyle.StripTextureFromString(Text), XL, YL, TextScale, TextScale);
-        
+
         if( HBRI.IconTex != None )
             TextX = IconXL + IconW + (ScaledBorderSize*4);
         else TextX = X + (Width / 2) - (XL / 2);
-        
+
         TextY = Y + (Height / 2) - (YL / 2);
         if( !HBRI.bUseRounded )
         {
             TextY -= (ScaledBorderSize/2);
-            
+
             // Always one pixel off, could not find the source
             if( Canvas.SizeX != 1920 )
                 TextY -= GUIStyle.ScreenScale(1.f);
         }
-        
+
         GUIStyle.DrawTexturedString(Text, TextX, TextY, TextScale, FRI, HBRI.bUseOutline);
     }
     else
     {
         TextY = Y + ((Height*0.05)/2);
-        
+
         for( i=0; i<HBRI.StringArray.Length; ++i )
         {
             Canvas.TextSize(GUIStyle.StripTextureFromString(HBRI.StringArray[i]), XL, YL, TextScale, TextScale);
-            
+
             if( HBRI.IconTex != None )
                 TextX = IconXL + IconW + (ScaledBorderSize*4);
             else TextX = X + (Width / 2) - (XL / 2);
-            
+
             GUIStyle.DrawTexturedString(HBRI.StringArray[i], TextX, TextY, TextScale, FRI, HBRI.bUseOutline);
             TextY+=YL-(ScaledBorderSize/2);
         }
     }
-    
+
     switch(HBRI.Justification)
     {
         case HUDA_Right:
@@ -1192,12 +1192,12 @@ function DrawDeployTime(byte RemainingTime)
     local float FontScalar, XL, YL;
     local byte Glow;
     local string S;
-    
+
     RemainingTime = bFinalCountdown ? FinalCountTime : RemainingTime;
-    
+
     Canvas.Font = GUIStyle.PickFont(FontScalar);
     FontScalar += GUIStyle.ScreenScale(0.5);
-    
+
     if( RemainingTime == -1 )
     {
         S = class'UI_LobbyMenu'.default.WaitingForOtherPlayers;
@@ -1210,10 +1210,10 @@ function DrawDeployTime(byte RemainingTime)
         {
             Glow = Clamp(Sin(WorldInfo.TimeSeconds * 8) * 200 + 255, 0, 255);
             Canvas.DrawColor = MakeColor(255, Glow, Glow, 255);
-            
+
             if( LastWarningTime != RemainingTime )
             {
-                LastWarningTime = RemainingTime;   
+                LastWarningTime = RemainingTime;
                 //KFPlayerOwner.MyGFxHUD.PlaySoundFromTheme('PARTYWIDGET_COUNTDOWN', 'UI');
                 KFPlayerOwner.PlayAKEvent(AkEvent'WW_UI_Menu.Play_PARTYWIDGET_COUNTDOWN');
             }
@@ -1244,57 +1244,57 @@ function RenderKFHUD(KFPawn_Human KFPH)
     local Color HealthFontColor, OrgC;
     local HUDBoxRenderInfo HBRI;
     local KFInterface_MapObjective MapObjective;
-    
+
     if( bIsMenu || KFPlayerOwner.bCinematicMode || ClassicPlayerOwner.LobbyMenu != None )
         return;
-        
+
     if( KFGRI != None && !KFGRI.bMatchHasBegun && !KFGRI.bMatchIsOver && KFPawn_Customization(KFPlayerOwner.Pawn) == None )
     {
         DrawDeployTime(KFGRI.RemainingTime);
     }
-    
+
     FRI.bClipText = true;
     FRI.bEnableShadow = true;
-    
+
     Canvas.Font = GUIStyle.PickFont(OriginalFontScalar);
-    
+
     scale_w = GUIStyle.ScreenScale(64);
     scale_w2 = GUIStyle.ScreenScale(32);
-    
+
     BoxXL = SizeX * 0.015;
     BoxYL = SizeY * 0.935;
-    
+
     BoxSW = SizeX * 0.0625;
     BoxSH = SizeY * 0.0425;
-    
+
     // Trader/Wave info
     if( KFGRI != None )
     {
         CircleText = GetGameInfoText();
         SubCircleText = GetGameInfoSubText();
-        
+
         if( CircleText != "" )
         {
             Canvas.Font = GUIStyle.PickFont(OriginalFontScalar, false, KFGRI.IsEndlessWave());
-            
+
             FontScalar = OriginalFontScalar + GUIStyle.ScreenScale(KFGRI.IsEndlessWave() ? 0.75 : 0.3);
             DrawCircleSize = GUIStyle.ScreenScale(128);
-            
+
             if( !bLightHUD )
             {
                 if( HudOutlineColor != DefaultHudOutlineColor )
                     Canvas.SetDrawColor(HudOutlineColor.R, HudOutlineColor.G, HudOutlineColor.B, 255);
                 else Canvas.SetDrawColor(255, 255, 255, 255);
-                
+
                 Canvas.SetPos(Canvas.ClipX - DrawCircleSize, 2);
                 Canvas.DrawRect(DrawCircleSize, DrawCircleSize, (KFGRI != None && KFGRI.bWaveIsActive) ? BioCircle : WaveCircle);
             }
-            
+
             Canvas.TextSize(CircleText, XL, YL, FontScalar, FontScalar);
-            
+
             XPos = Canvas.ClipX - DrawCircleSize/2 - (XL / 2);
             YPos = SubCircleText != "" ? DrawCircleSize/2 - (YL / 1.5) : DrawCircleSize/2 - YL / 2;
-            
+
             Canvas.DrawColor = FontColor;
             if( bLightHUD )
             {
@@ -1305,17 +1305,17 @@ function RenderKFHUD(KFPawn_Human KFPH)
                 Canvas.SetPos(XPos, YPos);
                 Canvas.DrawText(CircleText, , FontScalar, FontScalar, FRI);
             }
-            
+
             if( SubCircleText != "" )
             {
                 Canvas.Font = GUIStyle.PickFont(OriginalFontScalar);
                 FontScalar = OriginalFontScalar;
-                
+
                 Canvas.TextSize(SubCircleText, XL, YL, FontScalar, FontScalar);
-                
+
                 XPos = Canvas.ClipX - DrawCircleSize/2 - (XL / 2);
                 YPos = DrawCircleSize/2 + (YL / 2.5);
-                
+
                 if( bLightHUD )
                 {
                     GUIStyle.DrawTextShadow(SubCircleText, XPos, YPos, 1, FontScalar);
@@ -1328,22 +1328,22 @@ function RenderKFHUD(KFPawn_Human KFPH)
             }
         }
     }
-    
+
     Canvas.Font = GUIStyle.PickFont(OriginalFontScalar);
-    
+
     if( !bShowHUD || KFPH == None )
         return;
-        
+
     Inv = KFInventoryManager(KFPH.InvManager);
-        
+
     Canvas.Font = GUIStyle.PickFont(OriginalFontScalar, true);
     FontScalar = OriginalFontScalar + GUIStyle.ScreenScale(0.3);
-    
+
     HBRI.IconScale = scale_w2;
     HBRI.Justification = HUDA_Right;
     HBRI.TextColor = FontColor;
     HBRI.bUseOutline = bLightHUD;
-    
+
     if( !bHidePlayerInfo )
     {
         // Health
@@ -1358,47 +1358,47 @@ function RenderKFHUD(KFPawn_Human KFPH)
         HBRI.TextColor = HealthFontColor;
         HBRI.IconTex = HealthIcon;
         DrawHUDBox(BoxXL, BoxYL, BoxSW, BoxSH, string(KFPH.Health), FontScalar, HBRI);
-        
+
         HBRI.TextColor = FontColor;
-    
+
         // Armor
         HBRI.IconTex = ArmorIcon;
         DrawHUDBox(BoxXL, BoxYL, BoxSW, BoxSH, string(KFPH.Armor), FontScalar, HBRI);
-        
+
         if( Inv != None )
         {
             HBRI.IconTex = WeightIcon;
-            
+
             // Weight
             BoxSW = SizeX * 0.082;
             DrawHUDBox(BoxXL, BoxYL, BoxSW, BoxSH, Inv.CurrentCarryBlocks$"/"$Inv.MaxCarryBlocks, FontScalar, HBRI);
         }
-        
+
         BoxSW = SizeX * 0.0625;
     }
-    
+
     MyKFPRI = KFPlayerReplicationInfo(KFPlayerOwner.PlayerReplicationInfo);
     if( MyKFPRI != None )
     {
         if( !bHideDosh )
         {
             FontScalar = OriginalFontScalar + GUIStyle.ScreenScale(0.625);
-            
+
             // Dosh
             DoshXL = SizeX * 0.85;
             DoshYL = SizeY * 0.835;
-            
+
             Canvas.DrawColor = PlayerBarShadowColor;
             Canvas.SetPos(DoshXL+1, DoshYL+1);
             Canvas.DrawRect(scale_w, scale_w, DoshIcon);
-            
+
             if( HudOutlineColor != DefaultHudOutlineColor )
                 Canvas.SetDrawColor(HudOutlineColor.R, HudOutlineColor.G, HudOutlineColor.B, 255);
             else Canvas.SetDrawColor(255, 255, 255, 255);
 
             Canvas.SetPos(DoshXL, DoshYL);
             Canvas.DrawRect(scale_w, scale_w, DoshIcon);
-            
+
             CurrentScore = int(MyKFPRI.Score);
             if( OldPlayerScore != CurrentScore )
             {
@@ -1407,7 +1407,7 @@ function RenderKFHUD(KFPawn_Human KFPH)
                     bInterpolating = true;
                     TimeX = WorldInfo.RealTimeSeconds;
                 }
-                
+
                 PlayerScore = Clamp(Lerp(PlayerScore, CurrentScore, `RealTimeSince(TimeX)), 0, CurrentScore);
                 if( PlayerScore == CurrentScore )
                 {
@@ -1415,28 +1415,28 @@ function RenderKFHUD(KFPawn_Human KFPH)
                     OldPlayerScore = CurrentScore;
                 }
             }
-            
+
             Canvas.TextSize(PlayerScore, XL, YL, FontScalar, FontScalar);
             Canvas.DrawColor = FontColor;
             GUIStyle.DrawTextShadow(PlayerScore, DoshXL + (DoshXL * 0.035), DoshYL + (scale_w / 2) - (YL / 2), 1, FontScalar);
         }
-        
+
         // Draw Perk Info
         if( MyKFPRI.CurrentPerkClass != None && class<ClassicPerk_Base>(MyKFPRI.CurrentPerkClass) != None )
         {
             FontScalar = OriginalFontScalar + GUIStyle.ScreenScale(0.15);
             PerkLevel = class<ClassicPerk_Base>(MyKFPRI.CurrentPerkClass).static.PreDrawPerk(Canvas, MyKFPRI.GetActivePerkLevel(), PerkIcon, PerkStarIcon);
-            
+
             //Perk Icon
             PerkXL = SizeX - (SizeX - 12);
             PerkYL = SizeY * 0.8625;
-            
+
             OrgC = Canvas.DrawColor;
-            
+
             Canvas.DrawColor = PlayerBarShadowColor;
             Canvas.SetPos(PerkXL+1, PerkYL+1);
             Canvas.DrawRect(scale_w, scale_w, PerkIcon);
-            
+
             Canvas.DrawColor = OrgC;
             Canvas.SetPos(PerkXL, PerkYL);
             Canvas.DrawRect(scale_w, scale_w, PerkIcon);
@@ -1447,19 +1447,19 @@ function RenderKFHUD(KFPawn_Human KFPH)
                 StarCount = 0;
                 PerkIconSize = GUIStyle.ScreenScale(default.PerkIconSize);
                 StarXL = PerkXL + (scale_w - (PerkIconSize / 4));
-                
+
                 for ( i = 0; i < PerkLevel; i++ )
                 {
                     StarYL = (PerkYL + (scale_w - PerkIconSize)) - (StarCount * PerkIconSize);
-                    
+
                     Canvas.DrawColor = PlayerBarShadowColor;
                     Canvas.SetPos(StarXL+1, StarYL+1);
                     Canvas.DrawRect(PerkIconSize, PerkIconSize, PerkStarIcon);
-                            
+
                     Canvas.DrawColor = OrgC;
                     Canvas.SetPos(StarXL, StarYL);
                     Canvas.DrawRect(PerkIconSize, PerkIconSize, PerkStarIcon);
-                    
+
                     if( ++StarCount == MaxStarsPerRow )
                     {
                         StarCount = 0;
@@ -1467,22 +1467,22 @@ function RenderKFHUD(KFPawn_Human KFPH)
                     }
                 }
             }
-            
+
             // Progress Bar
             PerkProgressSize = GUIStyle.ScreenScale(76);
             PerkProgressX = Canvas.ClipX * 0.007;
             PerkProgressY = PerkYL - (scale_w / 2);
             Canvas.DrawColor = WhiteColor;
-            
+
             bDisplayingProgress = true;
             LevelProgressBar = KFPlayerOwner.GetPerkLevelProgressPercentage(KFPlayerOwner.CurrentPerk.Class);
             DrawProgressBar(PerkProgressX,PerkProgressY-PerkProgressSize*0.12f,PerkProgressSize*2.f,PerkProgressSize*0.125f,VisualProgressBar);
-            
+
             if( bShowXPEarned )
                 DrawXPEarned(PerkProgressX + (PerkProgressSize/2), PerkProgressY-(PerkProgressSize*0.125f)-(ScaledBorderSize*2));
         }
     }
-    
+
     // Trader Distance/Objective Container
     if( KFGRI != None )
     {
@@ -1492,31 +1492,31 @@ function RenderKFHUD(KFPawn_Human KFPH)
             if( T != None )
             {
                 FontScalar = OriginalFontScalar + GUIStyle.ScreenScale(0.3);
-                
+
                 TraderDistanceText = "Trader"$": "$int(VSize(T.Location - KFPH.Location) / 100.f)$"m";
                 Canvas.TextSize(TraderDistanceText, XL, YL, FontScalar, FontScalar);
-                
+
                 Canvas.DrawColor = FontColor;
                 GUIStyle.DrawTextShadow(TraderDistanceText, Canvas.ClipX*0.015, YL, 1, FontScalar);
             }
         }
-        
+
         //Map Objectives
         MapObjective = KFInterface_MapObjective(KFGRI.CurrentObjective);
         if( MapObjective == None )
             MapObjective = KFInterface_MapObjective(KFGRI.PreviousObjective);
-            
+
         if( MapObjective != None && (MapObjective.IsActive() || ((MapObjective.IsComplete() || MapObjective.HasFailedObjective()) && KFGRI.bWaveIsActive)) )
         {
             FontScalar = OriginalFontScalar + GUIStyle.ScreenScale(0.155);
-            
+
             ObjectivePadding = GUIStyle.ScreenScale(8);
             ObjectiveH = GUIStyle.ScreenScale(142);
             ObjectiveSize = ObjectiveH * 2.25;
-            
+
             ObjX = Canvas.ClipX*0.015;
             ObjY = T != None ? (YL * 2) + ObjectivePadding : ObjectiveH;
-            
+
             ObjectiveTitle = Localize("Objectives", "ObjectiveTitle", "KFGame");
             Canvas.TextSize(ObjectiveTitle, XL, ObjYL, FontScalar, FontScalar);
 
@@ -1525,22 +1525,22 @@ function RenderKFHUD(KFPawn_Human KFPH)
                 GUIStyle.DrawOutlinedBox(ObjX, ObjY, ObjectiveSize, ObjectiveH, ScaledBorderSize, HudMainColor, HudOutlineColor);
                 GUIStyle.DrawOutlinedBox(ObjX, ObjY, ObjectiveSize, ObjYL, ScaledBorderSize, HudMainColor, HudOutlineColor);
             }
-        
+
             // Objective Title
             XPos = ObjX + ObjectivePadding;
             YPos = ObjY - (ObjectivePadding / 2) + (ScaledBorderSize / 2) + 1;
-        
+
             if( MapObjective.GetIcon() != None )
             {
                 Canvas.DrawColor = FontColor;
                 Canvas.SetPos(XPos + ScaledBorderSize, YPos + (ScaledBorderSize*2.5) + 0.5);
                 Canvas.DrawTile(MapObjective.GetIcon(), ObjYL - (ScaledBorderSize*4), ObjYL - (ScaledBorderSize*4), 0, 0, 256, 256);
-                
+
                 XPos += (ObjYL - (ScaledBorderSize*2)) + ObjectivePadding;
             }
-            
+
             Canvas.DrawColor = FontColor;
-            
+
             if( bLightHUD )
             {
                 GUIStyle.DrawTextShadow(ObjectiveTitle, XPos, YPos, 1, FontScalar);
@@ -1550,7 +1550,7 @@ function RenderKFHUD(KFPawn_Human KFPH)
                 Canvas.SetPos(XPos, YPos);
                 Canvas.DrawText(ObjectiveTitle,, FontScalar, FontScalar, FRI);
             }
-            
+
             // Objective Progress
             if( MapObjective.IsComplete() )
             {
@@ -1568,9 +1568,9 @@ function RenderKFHUD(KFPawn_Human KFPH)
                 Canvas.DrawColor = FontColor;
             }
             Canvas.TextSize(ObjectiveProgress, XL, YL, FontScalar, FontScalar);
-            
+
             XPos = ObjX + (ObjectiveSize - XL - ObjectivePadding);
-            
+
             if( bLightHUD )
             {
                 GUIStyle.DrawTextShadow(ObjectiveProgress, XPos, YPos, 1, FontScalar);
@@ -1580,17 +1580,17 @@ function RenderKFHUD(KFPawn_Human KFPH)
                 Canvas.SetPos(XPos, YPos);
                 Canvas.DrawText(ObjectiveProgress,, FontScalar, FontScalar, FRI);
             }
-            
+
             // Objective Reward
             Canvas.SetDrawColor(0, 255, 0, 255);
             FontScalar = OriginalFontScalar + GUIStyle.ScreenScale(0.1);
-        
-            ObjectiveReward = "£" $ (MapObjective.HasFailedObjective() ? 0 : MapObjective.GetDoshReward());
+
+            ObjectiveReward = "$ " $ (MapObjective.HasFailedObjective() ? 0 : MapObjective.GetDoshReward());
             Canvas.TextSize(ObjectiveReward, XL, YL, FontScalar, FontScalar);
-            
+
             XPos = ObjX + (ObjectiveSize - XL - ObjectivePadding);
             YPos = ObjY + ((ObjectiveH-ObjYL)/2) + (YL/2);
-            
+
             if( bLightHUD )
             {
                 GUIStyle.DrawTextShadow(ObjectiveReward, XPos, YPos, 1, FontScalar);
@@ -1600,16 +1600,16 @@ function RenderKFHUD(KFPawn_Human KFPH)
                 Canvas.SetPos(XPos, YPos);
                 Canvas.DrawText(ObjectiveReward,, FontScalar, FontScalar, FRI);
             }
-            
+
             // Objective Description
             ObjectiveDesc = MapObjective.GetLocalizedShortDescription();
             if( MapObjective.IsComplete() || MapObjective.HasFailedObjective() )
                 Canvas.DrawColor = FontColor * 0.5f;
             else Canvas.DrawColor = FontColor;
-            
+
             YPos = ObjY + ((ObjectiveH-ObjYL)/1.5f) - (YL/1.5f);
             XPos = ObjX + ObjectivePadding;
-            
+
             if( bLightHUD )
             {
                 GUIStyle.DrawTextShadow(ObjectiveDesc, XPos, YPos, 1, FontScalar);
@@ -1619,20 +1619,20 @@ function RenderKFHUD(KFPawn_Human KFPH)
                 Canvas.SetPos(XPos, YPos);
                 Canvas.DrawText(ObjectiveDesc,, FontScalar, FontScalar, FRI);
             }
-            
+
             // Status Message for the Objective
             MapObjective.GetLocalizedStatus(ObjectiveStatusMessage, bStatusWarning, bStatusNotification);
             if( ObjectiveStatusMessage != "" )
-            { 
+            {
                 if( bool(bStatusWarning) )
                     Canvas.SetDrawColor(255, Clamp(Sin(WorldInfo.TimeSeconds * 12) * 200 + 200, 0, 200), 0, 255);
                 else Canvas.DrawColor = FontColor;
-                
+
                 Canvas.TextSize(ObjectiveStatusMessage, XL, YL, FontScalar, FontScalar);
-                
+
                 XPos = ObjX + ObjectivePadding;
                 YPos += YL;
-                
+
                 if( bLightHUD )
                 {
                     GUIStyle.DrawTextShadow(ObjectiveStatusMessage, XPos, YPos, 1, FontScalar);
@@ -1645,14 +1645,14 @@ function RenderKFHUD(KFPawn_Human KFPH)
             }
         }
     }
-    
+
     CurrentWeapon = KFWeapon(KFPH.Weapon);
     if( CurrentWeapon != None )
     {
         if( !bHideWeaponInfo )
         {
             FontScalar = OriginalFontScalar + GUIStyle.ScreenScale(0.1);
-            
+
             // Weapon Name
             if( CachedWeaponInfo.Weapon != CurrentWeapon )
             {
@@ -1668,10 +1668,10 @@ function RenderKFHUD(KFPawn_Human KFPH)
                         }
                     }
                 }
-                
+
                 if( WeaponName == "" )
                     WeaponName = CurrentWeapon.ItemName;
-                    
+
                 CachedWeaponInfo.Weapon = CurrentWeapon;
                 CachedWeaponInfo.WeaponName = WeaponName;
             }
@@ -1679,51 +1679,51 @@ function RenderKFHUD(KFPawn_Human KFPH)
             {
                 WeaponName = CachedWeaponInfo.WeaponName;
             }
-            
+
             Canvas.TextSize(WeaponName, XL, YL, FontScalar, FontScalar);
             Canvas.DrawColor = FontColor;
             GUIStyle.DrawTextShadow(WeaponName, (SizeX * 0.95f) - XL, SizeY * 0.892f, 1, FontScalar);
-            
+
             Canvas.Font = GUIStyle.PickFont(OriginalFontScalar,true);
-            
+
             BoxXL = SizeX * 0.915;
             FontScalar = OriginalFontScalar + GUIStyle.ScreenScale(0.3);
-            
+
             HBRI.Justification = HUDA_Left;
-            
+
             if( Inv != None )
             {
                 // Grenades
                 HBRI.IconTex = GrenadesIcon;
                 DrawHUDBox(BoxXL, BoxYL, BoxSW, BoxSH, string(Inv.GrenadeCount), FontScalar, HBRI);
             }
-            
+
             // ToDo - Find better way to check for weapons like the Welder and Med Syringe
             if( CurrentWeapon.UsesAmmo() || (CurrentWeapon.IsA('KFWeap_Welder') || CurrentWeapon.IsA('KFWeap_Healer_Syringe')) )
             {
                 bSingleFire = CurrentWeapon.MagazineCapacity[0] <= 1;
                 bHasSecondaryAmmo = CurrentWeapon.UsesSecondaryAmmo();
-                
+
                 AmmoCount = CurrentWeapon.AmmoCount[0];
                 MagCount = bSingleFire ? CurrentWeapon.GetSpareAmmoForHUD() : FCeil(float(CurrentWeapon.GetSpareAmmoForHUD()) / float(CurrentWeapon.MagazineCapacity[0]));
-                
+
                 if( CurrentWeapon.IsA('KFWeap_Welder') || CurrentWeapon.IsA('KFWeap_Healer_Syringe') )
                 {
                     bSingleFire = true;
                     MagCount = AmmoCount;
                 }
-                
+
                 // Clips
                 HBRI.IconTex = GetClipIcon(CurrentWeapon, bSingleFire);
                 DrawHUDBox(BoxXL, BoxYL, BoxSW, BoxSH, string(MagCount), FontScalar, HBRI);
-                
+
                 // Bullets
                 if( !bSingleFire )
                 {
                     HBRI.IconTex = GetBulletIcon(CurrentWeapon);
                     DrawHUDBox(BoxXL, BoxYL, BoxSW, BoxSH, string(AmmoCount), FontScalar, HBRI);
                 }
-                
+
                 // Secondary Ammo
                 if( bHasSecondaryAmmo )
                 {
@@ -1734,17 +1734,17 @@ function RenderKFHUD(KFPawn_Human KFPH)
 
                         HBRI.IconTex = None;
                         HBRI.TextColor = MakeColor(255, Clamp(Sin(WorldInfo.TimeSeconds * 12) * 200 + 200, 0, 200), 0, 255);
-                        
+
                         DrawHUDBox(SecondaryXL, SecondaryYL, BoxSW, BoxSH, "RELOAD", FontScalar * 0.75, HBRI);
-                        
+
                         HBRI.TextColor = FontColor;
                     }
-                    
+
                     HBRI.IconTex = GetSecondaryAmmoIcon(CurrentWeapon);
                     DrawHUDBox(BoxXL, BoxYL, BoxSW, BoxSH, CurrentWeapon.GetSecondaryAmmoForHUD(), FontScalar, HBRI);
                 }
             }
-            
+
             // Flashlight
             FlashlightCharge = KFPH.BatteryCharge;
             if( FlashlightCharge != KFPH.default.BatteryCharge || KFPH.bFlashlightOn )
@@ -1752,7 +1752,7 @@ function RenderKFHUD(KFPawn_Human KFPH)
                 HBRI.IconTex = KFPH.bFlashlightOn ? FlashlightIcon : FlashlightOffIcon;
                 DrawHUDBox(BoxXL, BoxYL, BoxSW, BoxSH, string(int(KFPH.BatteryCharge)), FontScalar, HBRI);
             }
-            
+
             // Quick Syringe
             if ( bDisplayQuickSyringe && !CurrentWeapon.IsA('KFWeap_Healer_Syringe') )
             {
@@ -1774,7 +1774,7 @@ function RenderKFHUD(KFPawn_Human KFPH)
                         {
                             FadeAlpha = 255;
                         }
-                        
+
                         HBRI.IconTex = SyringIcon;
                         HBRI.Alpha = FadeAlpha;
                         DrawHUDBox(BoxXL, BoxYL, BoxSW, BoxSH, string(S.AmmoCount[0]), FontScalar, HBRI);
@@ -1787,26 +1787,26 @@ function RenderKFHUD(KFPawn_Human KFPH)
             }
         }
     }
-    
+
     if( CurrentRhythmCount > 0 )
     {
         DrawRhythmCounter();
     }
-    
+
     // Inventory
     if ( bDisplayInventory )
     {
         DrawInventory();
     }
-    
+
     // Speed
-    if ( bShowSpeed ) 
+    if ( bShowSpeed )
     {
         DrawSpeedMeter();
     }
-    
+
     // Achievements
-    if ( NotificationPhase != PHASE_DONE ) 
+    if ( NotificationPhase != PHASE_DONE )
     {
         DrawAchievmentInfo();
     }
@@ -1836,7 +1836,7 @@ function DrawInventory()
         bDisplayInventory = false;
         return;
     }
-    
+
     if ( TempSize < InventoryFadeInTime )
     {
         FadeAlpha = int((TempSize / InventoryFadeInTime) * 255.0);
@@ -1857,7 +1857,7 @@ function DrawInventory()
             Categorized[KFW.InventoryGroup].Items[Categorized[KFW.InventoryGroup].ItemCount++] = KFW;
         }
     }
-    
+
     Canvas.Font = GUIStyle.PickFont(OriginalFontScalar);
     FontScalar = OriginalFontScalar;
     AmmoFontScalar = OriginalFontScalar;
@@ -1870,7 +1870,7 @@ function DrawInventory()
     TempX = (Canvas.ClipX/2) - (((TempWidth + TempBorder) * MAX_WEAPON_GROUPS)/2);
 
     OrgFadeAlpha = FadeAlpha;
-    
+
     for ( i = 0; i < MAX_WEAPON_GROUPS; i++ )
     {
         if( SelectedInventoryCategory == i && MaxWeaponIndex[i] != 0 )
@@ -1879,7 +1879,7 @@ function DrawInventory()
             {
                 MinWeaponIndex[i] = 0;
             }
-            
+
             if( SelectedInventoryIndex > MaxWeaponIndex[i] )
                 MinWeaponIndex[i] = SelectedInventoryIndex - MaxWeaponsPerCatagory;
             else if( SelectedInventoryIndex < MinWeaponIndex[i] )
@@ -1889,17 +1889,17 @@ function DrawInventory()
         {
             MinWeaponIndex[i] = 0;
         }
-    
+
         TempY = InventoryY * Canvas.ClipY;
-        
+
         HBRI.Justification = HUDA_Top;
         HBRI.JustificationPadding = 24;
         HBRI.TextColor = FontColor;
         HBRI.Alpha = OrgFadeAlpha;
         HBRI.bUseOutline = bLightHUD;
-        
+
         DrawHUDBox(TempX, TempY, TempWidth, TempHeight * 0.25, GetWeaponCatagoryName(i), CatagoryFontScalar, HBRI);
-        
+
         if ( Categorized[i].ItemCount != 0 )
         {
             for ( j = 0; j < Categorized[i].ItemCount; j++ )
@@ -1913,69 +1913,69 @@ function DrawInventory()
                     FadeAlpha *= 0.5;
                 else if( FadeAlpha != OrgFadeAlpha )
                     FadeAlpha = OrgFadeAlpha;
-                
+
                 OutlineColor = KFW.CurrentWeaponUpgradeIndex > 0 ? MakeColor(255, 255, 0) : HudOutlineColor;
                 OutlineColor.A = Min(FadeAlpha, default.HudOutlineColor.A);
-                
+
                 if ( i == SelectedInventoryCategory && j == SelectedInventoryIndex )
                 {
                     MainColor = HudOutlineColor * 0.5;
                     MainColor.A = Min(FadeAlpha, default.HudOutlineColor.A);
-                
+
                     GUIStyle.DrawOutlinedBox(TempX, TempY, TempWidth, TempHeight, ScaledBorderSize, MainColor, OutlineColor);
-                    
+
                     if( KFGRI != None && KFGRI.TraderItems.GetItemIndicesFromArche(ItemIndex, KFW.Class.Name) )
                         WeaponName = KFGRI.TraderItems.SaleItems[ItemIndex].WeaponDef.static.GetItemName();
                     else WeaponName = KFW.ItemName;
-                        
+
                     Canvas.DrawColor = WhiteColor;
                     Canvas.DrawColor.A = FadeAlpha;
                     Canvas.TextSize(WeaponName, XS, YS, FontScalar, FontScalar);
-                    
+
                     while( XS > TempWidth )
                     {
                         FontScalar -= 0.1;
                         Canvas.TextSize(WeaponName, XS, YS, FontScalar, FontScalar);
                     }
-                    
+
                     Canvas.SetPos(TempX + ((TempWidth/2) - (XS/2)), TempY + (YS/4));
                     Canvas.DrawText(WeaponName,, FontScalar, FontScalar);
                 }
-                else 
+                else
                 {
                     MainColor = HudMainColor;
                     MainColor.A = Min(FadeAlpha, default.HudMainColor.A);
-                    
+
                     GUIStyle.DrawOutlinedBox(TempX, TempY, TempWidth, TempHeight, ScaledBorderSize, MainColor, OutlineColor);
                 }
-                
+
                 if( KFW.CurrentWeaponUpgradeIndex > 0 )
                 {
                     S = "*"$KFW.CurrentWeaponUpgradeIndex;
                     Canvas.TextSize(S, XS, YS, OriginalFontScalar, OriginalFontScalar);
-                    
+
                     UpgradeW = XS + (ScaledBorderSize*4);
                     UpgradeH = YS + (ScaledBorderSize*4);
                     UpgradeX = TempX + ScaledBorderSize;
                     UpgradeY = TempY + (TempHeight/2) - (UpgradeH/2);
-                    
+
                     GUIStyle.DrawRoundedBoxEx(ScaledBorderSize*2, UpgradeX, UpgradeY, UpgradeW, UpgradeH, OutlineColor, false, true, false, true);
-                    
+
                     Canvas.DrawColor = WhiteColor;
                     Canvas.DrawColor.A = FadeAlpha;
-                    
+
                     GUIStyle.DrawTextShadow(S, UpgradeX + ((UpgradeW/2) - (XS/2)), UpgradeY + (UpgradeH/2) - (YS/2), 2, OriginalFontScalar);
                 }
-                
+
                 Canvas.DrawColor = WhiteColor;
                 Canvas.DrawColor.A = FadeAlpha;
-                
+
                 XL = TempWidth * 0.75;
                 YL = TempHeight * 0.5;
- 
+
                 Canvas.SetPos(TempX + ((TempWidth/2) - (XL/2)), TempY + ((TempHeight/2) - (YL/2)));
                 Canvas.DrawRect(XL, YL, KFW.WeaponSelectTexture);
-                
+
                 if( KFW.static.UsesAmmo() )
                 {
                     S = KFW.AmmoCount[class'KFWeapon'.const.DEFAULT_FIREMODE]$"/"$KFW.SpareAmmoCount[class'KFWeapon'.const.DEFAULT_FIREMODE];
@@ -1983,46 +1983,46 @@ function DrawInventory()
                     Canvas.SetPos(TempX + (TempWidth - XS) - (ScaledBorderSize*2), TempY + (TempHeight - YS) - (ScaledBorderSize*2));
                     Canvas.DrawText(S,, AmmoFontScalar, AmmoFontScalar);
                 }
-                
+
                 if( KFW.UsesSecondaryAmmo() && KFW.bCanRefillSecondaryAmmo )
                 {
                     if( KFW.SpareAmmoCount[class'KFWeapon'.const.ALTFIRE_FIREMODE] <= 0 )
                         S = "[" @ string(KFW.AmmoCount[class'KFWeapon'.const.ALTFIRE_FIREMODE]) @ "]";
                     else S = "[" @ KFW.AmmoCount[class'KFWeapon'.const.ALTFIRE_FIREMODE]$"/"$KFW.SpareAmmoCount[class'KFWeapon'.const.ALTFIRE_FIREMODE] @ "]";
-                    
+
                     Canvas.TextSize(S, XS, YS, AmmoFontScalar, AmmoFontScalar);
                     Canvas.SetPos(TempX + (ScaledBorderSize*2), TempY + (TempHeight - YS) - (ScaledBorderSize*2));
                     Canvas.DrawText(S,, AmmoFontScalar, AmmoFontScalar);
                 }
-                
+
                 if( !bHasAmmo )
                 {
                     S = "EMPTY";
                     Canvas.TextSize(S, XS, YS, OriginalFontScalar, OriginalFontScalar);
-                    
+
                     EmptyW = XS * 1.25f;
                     EmptyH = YS * 1.25f;
                     EmptyX = TempX + ((TempWidth/2) - (EmptyW/2));
                     EmptyY = TempY + ((TempHeight/2) - (EmptyH/2));
-                    
+
                     MainColor = DefaultHudMainColor;
                     MainColor.A = Min(OrgFadeAlpha, default.DefaultHudMainColor.A);
-                    
+
                     GUIStyle.DrawRoundedBox(ScaledBorderSize*2, EmptyX, EmptyY, EmptyW, EmptyH, MainColor);
-                    
+
                     Canvas.DrawColor = WhiteColor;
                     Canvas.DrawColor.A = OrgFadeAlpha;
                     Canvas.SetPos(EmptyX + (EmptyW/2) - (XS/2), EmptyY + (EmptyH/2) - (YS/2));
                     Canvas.DrawText(S,, OriginalFontScalar, OriginalFontScalar);
                 }
-                
+
                 if( (TempY + TempHeight) > (Canvas.ClipY * 0.75) )
                 {
                     if( MaxWeaponsPerCatagory == 0 )
                     {
                         MaxWeaponsPerCatagory = j;
                     }
-                    
+
                     MaxWeaponIndex[i] = j;
                     break;
                 }
@@ -2052,11 +2052,11 @@ function string GetWeaponCatagoryName(int Index)
     }
 }
 
-function AddAchievmentPopup(const out PopupMessage NewMessage) 
+function AddAchievmentPopup(const out PopupMessage NewMessage)
 {
     MessageQueue.AddItem(NewMessage);
 
-    if( MessageQueue.Length == 1 ) 
+    if( MessageQueue.Length == 1 )
     {
         NotificationPhaseStartTime = WorldInfo.TimeSeconds;
         NotificationPhase = PHASE_SHOWING;
@@ -2068,16 +2068,16 @@ function DrawAchievmentInfo()
     local int i;
     local float IconSize, TempX, TempY, DrawHeight, TimeElapsed, TempWidth, TempHeight, FontScalar;
     local array<string> Parts;
-    
+
     TimeElapsed = `TimeSince(NotificationPhaseStartTime);
     switch( NotificationPhase )
     {
         case PHASE_SHOWING:
-            if (TimeElapsed < NotificationShowTime) 
+            if (TimeElapsed < NotificationShowTime)
             {
                 DrawHeight = (TimeElapsed / NotificationShowTime) * NotificationHeight;
-            } 
-            else 
+            }
+            else
             {
                 NotificationPhase = PHASE_DELAYING;
                 NotificationPhaseStartTime = `TimeSince(TimeElapsed - NotificationShowTime);
@@ -2085,11 +2085,11 @@ function DrawAchievmentInfo()
             }
             break;
         case PHASE_DELAYING:
-            if (TimeElapsed < NotificationHideDelay ) 
+            if (TimeElapsed < NotificationHideDelay )
             {
                 DrawHeight = NotificationHeight;
-            } 
-            else 
+            }
+            else
             {
                 NotificationPhase = PHASE_HIDING; // Hiding Phase
                 TimeElapsed -= NotificationHideDelay;
@@ -2098,20 +2098,20 @@ function DrawAchievmentInfo()
             }
             break;
         case PHASE_HIDING:
-            if (TimeElapsed < NotificationHideTime) 
+            if (TimeElapsed < NotificationHideTime)
             {
                 DrawHeight = (1.0 - (TimeElapsed / NotificationHideTime)) * NotificationHeight;
-            } 
-            else 
+            }
+            else
             {
                 // We're done
                 MessageQueue.Remove(0, 1);
-                if( MessageQueue.Length != 0 ) 
+                if( MessageQueue.Length != 0 )
                 {
                     NotificationPhaseStartTime = WorldInfo.TimeSeconds;
                     NotificationPhase = PHASE_SHOWING;
-                } 
-                else 
+                }
+                else
                 {
                     NotificationPhase = PHASE_DONE;
                 }
@@ -2120,7 +2120,7 @@ function DrawAchievmentInfo()
             break;
     }
 
-    switch( MessageQueue[0].MsgPosition ) 
+    switch( MessageQueue[0].MsgPosition )
     {
         case PP_TOP_LEFT:
         case PP_BOTTOM_LEFT:
@@ -2139,7 +2139,7 @@ function DrawAchievmentInfo()
             break;
     }
 
-    switch( MessageQueue[0].MsgPosition ) 
+    switch( MessageQueue[0].MsgPosition )
     {
         case PP_BOTTOM_CENTER:
         case PP_BOTTOM_LEFT:
@@ -2167,18 +2167,18 @@ function DrawAchievmentInfo()
     Canvas.SetDrawColor(255, 255, 255, 255);
     Canvas.SetPos(TempX, TempY);
     Canvas.DrawRect(IconSize, IconSize, MessageQueue[0].Image);
-    
+
     // Offset for desired Spacing between Icon and Text
     TempX += IconSize + NotificationIconSpacing;
 
     Canvas.Font = GUIStyle.PickFont(FontScalar);
     FontScalar = 0.3;
-    
+
     Canvas.SetPos(TempX, TempY);
     Canvas.DrawText(MessageQueue[0].Header,, FontScalar, FontScalar);
-    
+
     Canvas.SetClip(TempX + (NotificationWidth - IconSize - NotificationBorderSize * 2.0 - NotificationIconSpacing), TempY);
-    
+
     // Set up next line
     ParseStringIntoArray(MessageQueue[0].Body, Parts, NewLineSeparator, true);
     for(i= 0; i < Parts.Length; i++)
@@ -2195,18 +2195,18 @@ function DrawPriorityMessage()
     local float XS, YS, TextX, TextY, IconX, IconY, BoxW, OrgBoxW, BoxH, OrgBoxH, BoxX, BoxY, OrignalFontScalar, FontScalar, Box2W, OrgBox2W, Box2H, OrgBox2H, Box2X, Box2Y, Box3W, Box3X, SecondaryXS, SecondaryYS, SecondaryScaler;
     local float TempSize, BoxAlpha, SecondaryBoxAlpha;
     local bool bHasIcon, bHasSecondaryIcon, bHasSecondary, bAlignTop, bAlignBottom, bAnimFinished;
-    
+
     TempSize = `TimeSince(PriorityMessage.StartTime);
-    
+
     Canvas.Font = GUIStyle.PickFont(OrignalFontScalar);
-    
+
     bHasIcon = PriorityMessage.Icon != None;
     bHasSecondaryIcon = PriorityMessage.SecondaryIcon != None;
     bHasSecondary = PriorityMessage.SecondaryText != "";
-    
+
     FontScalar = OrignalFontScalar + GUIStyle.ScreenScale(0.85f);
     Canvas.TextSize(PriorityMessage.PrimaryText, XS, YS, FontScalar, FontScalar);
-    
+
     if( bHasSecondary )
     {
         SecondaryScaler = OrignalFontScalar + GUIStyle.ScreenScale(0.3f);
@@ -2215,10 +2215,10 @@ function DrawPriorityMessage()
     }
     else BoxW = XS+(YS*2)*2;
     BoxH = YS;
-   
+
     OrgBoxW = BoxW;
     OrgBoxH = BoxH;
-   
+
     if( PriorityMessage.FadeInTime - TempSize > 0 )
     {
         BoxAlpha = (PriorityMessage.FadeInTime - TempSize) / PriorityMessage.FadeInTime;
@@ -2232,7 +2232,7 @@ function DrawPriorityMessage()
     {
         BoxAlpha = 1.f;
     }
-    
+
     if( PriorityMessage.PrimaryAnim == ANIM_SLIDE )
         BoxW = Lerp(BoxH, BoxW, BoxAlpha);
     else BoxH = Lerp(0, BoxH, BoxAlpha);
@@ -2244,19 +2244,19 @@ function DrawPriorityMessage()
         CurrentSecondaryMessageA = 0;
         return;
     }
-    
+
     BoxX = CenterX - (BoxW/2);
     BoxY = (CenterY*0.5) - (BoxH/2);
-    
+
     TextX = BoxX + (BoxW/2) - (XS/2);
     TextY = BoxY + (BoxH/2) - (YS/2);
-    
+
     if( bHasIcon )
         GUIStyle.DrawOutlinedBox(BoxX+BoxH, BoxY, BoxW-(BoxH*2), BoxH, ScaledBorderSize, HudMainColor, HudOutlineColor);
     else GUIStyle.DrawRoundedBoxOutlined(ScaledBorderSize, BoxX, BoxY, BoxW, BoxH, HudMainColor, HudOutlineColor);
-    
+
     bAnimFinished = (PriorityMessage.PrimaryAnim == ANIM_SLIDE ? BoxW >= OrgBoxW : BoxH >= OrgBoxH) && (TempSize+PriorityMessage.FadeInTime+0.5f) > 1.f;
-    if( bAnimFinished ) 
+    if( bAnimFinished )
     {
         if( CurrentPriorityMessageA != 255 )
         {
@@ -2264,36 +2264,36 @@ function DrawPriorityMessage()
             if( CurrentPriorityMessageA > 255 )
                 CurrentPriorityMessageA = 255;
         }
-            
+
         Canvas.DrawColor = FontColor;
         Canvas.DrawColor.A = CurrentPriorityMessageA;
         GUIStyle.DrawTextBlurry(PriorityMessage.PrimaryText, TextX, TextY, FontScalar);
     }
-    
+
     if( bHasIcon )
     {
         IconX = BoxX;
-        
+
         GUIStyle.DrawRoundedBoxEx(ScaledBorderSize*2, IconX, BoxY, BoxH, BoxH, HudOutlineColor, true, false, true, false);
 
         Canvas.DrawColor = PriorityMessage.IconColor;
         Canvas.SetPos(IconX, TextY);
         Canvas.DrawRect(BoxH, BoxH, PriorityMessage.Icon);
-        
+
         IconX = BoxX+(BoxW-BoxH);
-        
+
         GUIStyle.DrawRoundedBoxEx(ScaledBorderSize*2, IconX, BoxY, BoxH, BoxH, HudOutlineColor, false, true, false, true);
-        
+
         Canvas.DrawColor = PriorityMessage.IconColor;
         Canvas.SetPos(IconX, TextY);
         Canvas.DrawRect(BoxH, BoxH, PriorityMessage.Icon);
     }
-    
+
     if( bHasSecondary && bAnimFinished && CurrentPriorityMessageA >= 255 )
     {
         if( PriorityMessage.SecondaryStartTime <= 0.f )
             PriorityMessage.SecondaryStartTime = WorldInfo.TimeSeconds;
-            
+
         if( PriorityMessage.bSecondaryUsesFullLength )
             Box2W = BoxW - (BoxH * 2) + (ScaledBorderSize*2);
         else
@@ -2303,7 +2303,7 @@ function DrawPriorityMessage()
                 Box2W += Box2H*2;
         }
         Box2H = SecondaryYS;
-        
+
         OrgBox2W = Box2W;
         OrgBox2H = Box2H;
 
@@ -2311,29 +2311,29 @@ function DrawPriorityMessage()
         if( PriorityMessage.SecondaryAnim == ANIM_SLIDE )
             Box2W = Lerp(0, Box2W, SecondaryBoxAlpha);
         else Box2H = Lerp(0, Box2H, SecondaryBoxAlpha);
-            
+
         Box2X = BoxX + (BoxW/2) - (Box2W/2);
-        
+
         bAlignTop = PriorityMessage.SecondaryAlign == PR_TOP;
         bAlignBottom = PriorityMessage.SecondaryAlign == PR_BOTTOM;
-        
+
         if( bAlignTop )
             Box2Y = BoxY - Box2H;
         else Box2Y = BoxY + BoxH;
-        
+
         Box3X = Box2X+ScaledBorderSize;
         Box3W = Box2W-(ScaledBorderSize*2);
-        
+
         Canvas.DrawColor = HudMainColor;
         Canvas.SetPos(Box3X, Box2Y);
         GUIStyle.DrawWhiteBox(Box3W, Box2H);
-       
+
         GUIStyle.DrawRoundedBoxEx(ScaledBorderSize*4, Box2X, Box2Y, ScaledBorderSize*2, Box2H, HudOutlineColor, bAlignTop, false, bAlignBottom, false);
         GUIStyle.DrawRoundedBoxEx(ScaledBorderSize*4, Box2X+(Box2W-(ScaledBorderSize*2)), Box2Y, ScaledBorderSize*2, Box2H, HudOutlineColor, false, bAlignTop, false, bAlignBottom);
 
         TextX = Box3X + (Box3W/2) - (SecondaryXS/2) + ScaledBorderSize;
         TextY = Box2Y + (Box2H/2) - (SecondaryYS/2) - (ScaledBorderSize/2);
-        
+
         if( PriorityMessage.SecondaryAnim == ANIM_SLIDE ? Box2W >= OrgBox2W : Box2H >= OrgBox2H )
         {
             if( CurrentSecondaryMessageA != 255 )
@@ -2342,22 +2342,22 @@ function DrawPriorityMessage()
                 if( CurrentSecondaryMessageA > 255 )
                     CurrentSecondaryMessageA = 255;
             }
-                
+
             Canvas.DrawColor = FontColor;
             Canvas.DrawColor.A = CurrentSecondaryMessageA;
             Canvas.SetPos(TextX, TextY);
             Canvas.DrawText(PriorityMessage.SecondaryText,,SecondaryScaler,SecondaryScaler);
         }
-        
+
         if( bHasSecondaryIcon )
         {
             IconX = TextX-Box2H;
             IconY = TextY+(ScaledBorderSize*2);
-            
+
             Canvas.DrawColor = PriorityMessage.SecondaryIconColor;
             Canvas.SetPos(IconX, IconY);
             Canvas.DrawRect(Box2H-(ScaledBorderSize*4), Box2H-(ScaledBorderSize*4), PriorityMessage.SecondaryIcon);
-            
+
             IconX = TextX+SecondaryXS+(ScaledBorderSize*2);
 
             Canvas.DrawColor = PriorityMessage.SecondaryIconColor;
@@ -2371,7 +2371,7 @@ function ShowPriorityMessage(FPriorityMessage Msg)
 {
     if( PriorityMessage != default.PriorityMessage || Msg.LifeTime < Msg.FadeInTime || Msg.LifeTime < Msg.FadeOutTime )
         return;
-        
+
     Msg.LifeTime += 0.5f;
     Msg.StartTime = WorldInfo.TimeSeconds;
     PriorityMessage = Msg;
@@ -2386,24 +2386,24 @@ function DrawNonCritialMessage( int Index, FCritialMessage Message, float X, flo
     local bool bAnimFinished, bTextAnimFinished;
     local string S;
     local Color TextColor;
-    
+
     Canvas.Font = GUIStyle.PickFont(FontScalar);
     FontScalar += GUIStyle.ScreenScale(0.1);
     TextColor = FontColor;
     DisplayTime = Message.bUseAnimation ? 1.775f : NonCriticalMessageDisplayTime;
-    
+
     TempSize = `TimeSince(Message.StartTime);
     if ( TempSize > DisplayTime )
     {
         NonCriticalMessages.RemoveItem(Message);
         return;
     }
-    
+
     if( Message.Delimiter != "" )
     {
         SArray = SplitString(Message.Text, Message.Delimiter);
         if( SArray.Length > 0 )
-        {    
+        {
             for( i=0; i<SArray.Length; ++i )
             {
                 if( SArray[i]!="" )
@@ -2413,7 +2413,7 @@ function DrawNonCritialMessage( int Index, FCritialMessage Message, float X, flo
                     TY += YS;
                 }
             }
-            
+
             XL = TX * 1.2;
             YL = TY * 1.05;
         }
@@ -2421,22 +2421,22 @@ function DrawNonCritialMessage( int Index, FCritialMessage Message, float X, flo
     else
     {
         Canvas.TextSize(GUIStyle.StripTextureFromString(Message.Text), XS, YS, FontScalar, FontScalar);
-        
+
         XL = XS * 1.2;
         YL = YS * 1.05;
     }
-    
+
     if( Message.bHighlight )
         XL += ScaledBorderSize*4;
-        
+
     if( Message.bUseAnimation )
     {
         FadeAlpha = -1.f;
         OrgXL = XL;
-        
+
         AnimFadeIn = NonCriticalMessageFadeInTime * 0.25;
         AnimFadeOut = NonCriticalMessageFadeOutTime * 0.25;
-        
+
         if( AnimFadeIn - TempSize > 0 )
         {
             BoxAlpha = (AnimFadeIn - TempSize) / AnimFadeIn;
@@ -2450,16 +2450,16 @@ function DrawNonCritialMessage( int Index, FCritialMessage Message, float X, flo
         {
             BoxAlpha = 1.f;
         }
-        
+
         BoxAlpha = FClamp(BoxAlpha, 0.f, 1.f);
         XL = Lerp(ScaledBorderSize*2, XL, BoxAlpha);
-        
+
         bAnimFinished = XL >= OrgXL && (TempSize+AnimFadeIn+0.5f) > 1.f;
         if( bAnimFinished )
         {
             HBRI.StringArray = SArray;
             S = Message.Text;
-            
+
             bTextAnimFinished = NonCriticalMessages[Index].TextAnimAlpha >= 255;
             if( !bTextAnimFinished )
             {
@@ -2467,7 +2467,7 @@ function DrawNonCritialMessage( int Index, FCritialMessage Message, float X, flo
                 if( NonCriticalMessages[Index].TextAnimAlpha > 255 )
                     NonCriticalMessages[Index].TextAnimAlpha =  255;
             }
-                
+
             TextColor.A = NonCriticalMessages[Index].TextAnimAlpha;
         }
     }
@@ -2485,35 +2485,35 @@ function DrawNonCritialMessage( int Index, FCritialMessage Message, float X, flo
         {
             FadeAlpha = 255;
         }
-        
+
         HBRI.StringArray = SArray;
         S = Message.Text;
     }
-    
+
     BoxXS = X - (XL / 2);
     BoxYS = Y - ((YL + (ScaledBorderSize * 2)) * Index);
-    
+
     if( (BoxYS + YL) > Canvas.ClipY )
         BoxYS = Canvas.ClipY - YL - (ScaledBorderSize * 2);
-        
+
     HBRI.TextColor = TextColor;
     HBRI.Alpha = FadeAlpha;
     HBRI.bUseOutline = bLightHUD;
     HBRI.bUseRounded = true;
     HBRI.bHighlighted = Message.bHighlight;
-    
+
     DrawHUDBox(BoxXS, BoxYS, XL, YL, S, FontScalar, HBRI);
 }
 
 function ShowNonCriticalMessage( string Message, optional string Delimiter, optional bool bHighlight, optional bool bUseAnimation )
-{    
+{
     local FCritialMessage Messages;
     local int Index;
     local float DisplayTime;
-    
+
     if( ClassicPlayerOwner.IsBossCameraMode() )
         return;
-        
+
     Index = NonCriticalMessages.Find('Text', Message);
     if( Index != INDEX_NONE )
     {
@@ -2524,19 +2524,19 @@ function ShowNonCriticalMessage( string Message, optional string Delimiter, opti
                 NonCriticalMessages[Index].StartTime = `TimeSince(NonCriticalMessageFadeInTime + ((DisplayTime - `TimeSince(NonCriticalMessages[Index].StartTime)) * NonCriticalMessageFadeInTime));
             else NonCriticalMessages[Index].StartTime = `TimeSince(NonCriticalMessageFadeInTime);
         }
-        
+
         return;
     }
-    
+
     if( NonCriticalMessages.Length >= (SpectatorInfo != None && SpectatorInfo.bVisible) ? 1 : MaxNonCriticalMessages )
         return;
-        
+
     Messages.Text = Message;
     Messages.Delimiter = Delimiter;
     Messages.StartTime = WorldInfo.TimeSeconds;
     Messages.bHighlight = bHighlight;
     Messages.bUseAnimation = bUseAnimation;
-    
+
     NonCriticalMessages.AddItem(Messages);
 }
 
@@ -2562,55 +2562,55 @@ function DrawImportantHealthBar(float X, float Y, float W, float H, string S, fl
 {
     local float FontScalar,MainBoxH,XPos,YPos,IconBoxX,IconBoxY,IconXL,IconYL,XL,YL,HistoryX,ShieldHealthPct;
     local Color BoxColor,FadeColor;
-    
+
     if( BorderScale == 0.f )
         BorderScale = ScaledBorderSize*2;
-        
+
     if( bDisabled )
         MainColor.A = 95;
-    
+
     MainBoxH = H * 2;
     IconBoxX = X;
     IconBoxY = Y;
-    
+
     BoxColor = MakeColor(30, 30, 30, 255);
     GUIStyle.DrawRoundedBoxEx(BorderScale, IconBoxX, IconBoxY, MainBoxH, MainBoxH, BoxColor, true, false, true, false);
-    
+
     X += MainBoxH;
     W -= MainBoxH;
-    
+
     GUIStyle.DrawRoundedBoxEx(BorderScale, X, Y, W, H, MainColor, false, true, false, true);
-    
+
     // ToDo - Make this code less ugly and more optimal. Moving the boss healthbar to a widget may help
     if( bTrackDamageHistory )
     {
         GUIStyle.DrawRoundedBoxEx(BorderScale, X, Y, W * HealthFrac, H, BarColor, false, !HealthBarDamageHistory[DamageHistoryNum].bDrawingHistory, false, !HealthBarDamageHistory[DamageHistoryNum].bDrawingHistory);
-        
+
         if( DamageHistoryNum >= HealthBarDamageHistory.Length )
             HealthBarDamageHistory.Length = DamageHistoryNum+1;
-            
+
         if( HealthBarDamageHistory[DamageHistoryNum].OldBarHealth != Health )
         {
             if( HealthBarDamageHistory[DamageHistoryNum].OldBarHealth > Health )
             {
                 HealthBarDamageHistory[DamageHistoryNum].bDrawingHistory = true;
-                
+
                 if( HealthBarDamageHistory[DamageHistoryNum].OldHealth != Health )
                 {
                     HealthBarDamageHistory[DamageHistoryNum].OldHealth = Health;
                     HealthBarDamageHistory[DamageHistoryNum].LastHealthUpdate = WorldInfo.RealTimeSeconds + 0.1f;
                     HealthBarDamageHistory[DamageHistoryNum].HealthUpdateEndTime = WorldInfo.RealTimeSeconds + 0.925f;
                 }
-                
+
                 HistoryX = X + (W * HealthFrac);
                 HealthFrac = FMin(float(HealthBarDamageHistory[DamageHistoryNum].OldBarHealth-Health) / float(HealthMax),1.f-HealthFrac);
-                
+
                 FadeColor = WhiteColor;
                 FadeColor.A  = BarColor.A;
                 if( HealthBarDamageHistory[DamageHistoryNum].LastHealthUpdate < WorldInfo.RealTimeSeconds )
                 {
                     FadeColor.A = Clamp(Sin(WorldInfo.RealTimeSeconds * 12) * 200 + 255, 0, BarColor.A);
-                    
+
                     if( HealthBarDamageHistory[DamageHistoryNum].HealthUpdateEndTime < WorldInfo.RealTimeSeconds )
                     {
                         HealthBarDamageHistory[DamageHistoryNum].OldBarHealth = Health;
@@ -2619,7 +2619,7 @@ function DrawImportantHealthBar(float X, float Y, float W, float H, string S, fl
                         HealthBarDamageHistory[DamageHistoryNum].HealthUpdateEndTime = 0.f;
                     }
                 }
-                
+
                 GUIStyle.DrawRoundedBoxEx(ScaledBorderSize*2, HistoryX, Y, W * HealthFrac, H, FadeColor, false, true, false, true);
             }
             else
@@ -2627,11 +2627,11 @@ function DrawImportantHealthBar(float X, float Y, float W, float H, string S, fl
                 HealthBarDamageHistory[DamageHistoryNum].OldBarHealth = Health;
             }
         }
-        
+
         DamageHistoryNum++;
     }
     else GUIStyle.DrawRoundedBoxEx(BorderScale, X, Y, W * HealthFrac, H, BarColor, false, true, false, true);
-    
+
     if( Interface != None )
     {
         ShieldHealthPct = Interface.GetShieldHealthPercent();
@@ -2642,17 +2642,17 @@ function DrawImportantHealthBar(float X, float Y, float W, float H, string S, fl
     Canvas.DrawColor = BoxColor;
     Canvas.SetPos(IconBoxX+MainBoxH,IconBoxY);
     GUIStyle.DrawCornerTex(BorderScale*2,3);
-    
+
     IconXL = MainBoxH-BorderScale;
     IconYL = IconXL;
-    
+
     XPos = IconBoxX + (MainBoxH/2) - (IconXL/2);
     YPos = IconBoxY + (MainBoxH/2) - (IconYL/2);
-    
+
     Canvas.SetDrawColor(255, 255, 255, bDisabled ? 95 : 255);
     Canvas.SetPos(XPos, YPos);
     Canvas.DrawRect(IconXL, IconYL, Icon);
-    
+
     if( S != "" )
     {
         Canvas.Font = GUIStyle.PickFont(FontScalar);
@@ -2660,7 +2660,7 @@ function DrawImportantHealthBar(float X, float Y, float W, float H, string S, fl
 
         XPos = X + BorderScale;
         YPos = (Y+H) + (H/2) - (YL/2);
-        
+
         Canvas.DrawColor = class'HUD'.default.WhiteColor;
         GUIStyle.DrawTextShadow(S, XPos, YPos, 1, FontScalar);
     }
@@ -2675,24 +2675,24 @@ function DrawBossHealthBars()
     local float HealthFrac, ArmorPct;
     local Color PawnHealthColor;
     local ArmorZoneInfo ArmorZone;
-    
+
     if( bDisplayInventory || ClassicPlayerOwner.bHideBossHealthBar )
         return;
-        
+
     MonsterPawn = BossRef.GetMonsterPawn();
     BossPawn = KFPawn_MonsterBoss(MonsterPawn);
-    
+
     if( MonsterPawn.IsDoingSpecialMove(SM_BossTheatrics) )
         return;
-    
+
     BarH = GUIStyle.DefaultHeight;
     BarW = Canvas.ClipX * 0.45;
-    
+
     MainBoxW = BarW * 0.125;
-    
+
     MainBarX = (Canvas.ClipX/2) - (BarW/2) + (MainBoxW/2);
     MainBarY = BarH;
-    
+
     HealthFrac = FClamp(BossRef.GetHealthPercent(), 0, 1);
     if( BossPawn != None )
     {
@@ -2708,22 +2708,22 @@ function DrawBossHealthBars()
             PawnHealthColor = BattlePhaseColors[1];
         else PawnHealthColor = BattlePhaseColors[0];
     }
-    
+
     DrawImportantHealthBar(MainBarX, MainBarY, BarW, BarH, GetNameOf(MonsterPawn.Class), HealthFrac, HudMainColor, PawnHealthColor, BossInfoIcon,,,true,MonsterPawn.Health,MonsterPawn.HealthMax,KFZEDBossInterface(MonsterPawn));
-    
+
     if( MonsterPawn.ArmorInfo != None )
     {
         ArmorW = BarW * 0.2;
         ArmorH = BarH * 0.45;
-        
+
         MainBarX = MainBarX + (BarW - ArmorW - ScaledBorderSize);
         MainBarY += (BarH/2) + ArmorH + (ScaledBorderSize*2);
-            
+
         for(i=0; i<MonsterPawn.ArmorInfo.ArmorZones.Length; i++)
         {
             ArmorZone = MonsterPawn.ArmorInfo.ArmorZones[i];
             ArmorPct = FClamp(ByteToFloat(MonsterPawn.RepArmorPct[i]), 0.f, 1.f);
-            
+
             DrawImportantHealthBar(MainBarX, MainBarY, ArmorW, ArmorH, "", ArmorPct, HudMainColor, MakeColor(0, 162, 232, 255), ArmorZone.ZoneIcon, ScaledBorderSize, ArmorPct <= 0.f);
             MainBarX -= ArmorW + (ScaledBorderSize*2);
         }
@@ -2738,10 +2738,10 @@ function DrawEscortHealthBars()
     local float HealthFrac;
     local Color PawnHealthColor;
     local Texture2D Icon;
-    
+
     if( bDisplayInventory || bShowScores )
         return;
-    
+
     foreach ScriptedPawnCache(ValidPawn)
     {
         if( ValidPawn.Pawn != None && ValidPawn.Pawn.ShouldShowOnHUD() )
@@ -2755,22 +2755,22 @@ function DrawEscortHealthBars()
             ScriptedPawnCache.RemoveItem(ValidPawn);
         }
     }
-    
+
     if( ScriptedPawn != None )
     {
         BarH = GUIStyle.DefaultHeight;
         BarW = Canvas.ClipX * 0.45;
-        
+
         MainBoxW = BarW * 0.125;
-        
+
         MainBarX = (Canvas.ClipX/2) - (BarW/2) + (MainBoxW/2);
         MainBarY = BarH;
-        
+
         HealthFrac = FClamp(float(ScriptedPawn.Health)/float(ScriptedPawn.HealthMax), 0, 1);
         PawnHealthColor = MakeColor(0, 150, 0, 175);
         PawnHealthColor.g = 150 * HealthFrac;
         PawnHealthColor.r = 150 - PawnHealthColor.g;
-        
+
         DrawImportantHealthBar(MainBarX, MainBarY, BarW, BarH, ScriptedPawn.GetLocalizedName(), HealthFrac, HudMainColor, PawnHealthColor, Icon,,, true, ScriptedPawn.Health, ScriptedPawn.HealthMax);
     }
 }
@@ -2786,7 +2786,7 @@ function DrawDoorHealthBars()
     local string IntegrityText;
     local bool bUsable;
     local KFPawn KFP;
-    
+
     KFP = KFPawn(PlayerOwner.Pawn);
 
     foreach DoorCache(MyCache)
@@ -2798,7 +2798,7 @@ function DrawDoorHealthBars()
             OffScreenPos.Y = SizeY * PI;
             Canvas.DeProject(OffScreenPos, OffScreenLoc, OffScreenRot);
             DamageDoor.WeldUILocation = OffScreenLoc;
-                
+
             bUsable = (KFP != None && KFP.GetPerk() != None && KFP.GetPerk().CanRepairDoors());
             if ( DamageDoor.WeldIntegrity > 0 || bUsable )
             {
@@ -2806,7 +2806,7 @@ function DrawDoorHealthBars()
                 {
                     return;
                 }
-                
+
                 MyDot = PLCameraDir dot (DamageDoor.Location - PLCameraLoc);
                 if( MyDot < 0.5f )
                 {
@@ -2817,7 +2817,7 @@ function DrawDoorHealthBars()
                 {
                     return;
                 }
-                
+
                 if( DamageDoor.bIsDestroyed && bUsable )
                 {
                     CurrentValue = float(DamageDoor.RepairProgress);
@@ -2841,7 +2841,7 @@ function DrawDoorHealthBars()
                         WeldPercentageFloat = 99.f;
                     }
                     IntegrityText = int(WeldPercentageFloat) $ "%";
-                    
+
                     BackgroundW = GUIStyle.ScreenScale(DoorWelderBG.GetSurfaceWidth() * 1.185);
                     BackgroundH = GUIStyle.ScreenScale(DoorWelderBG.GetSurfaceHeight() * 0.9);
 
@@ -2853,23 +2853,23 @@ function DrawDoorHealthBars()
 
                     Canvas.Font = GUIStyle.PickFont(OriginalFontScale);
                     FontScale = OriginalFontScale + 0.2;
-                    
+
                     Canvas.TextSize(IntegrityText, TextWidth, TextHeight, FontScale, FontScale);
                     Canvas.SetDrawColor(255, 50, 50, DrawToDistance(DamageDoor, 255, 0));
-                    
+
                     GUIStyle.DrawTextShadow(IntegrityText, ScreenLoc.X + 5, (DamageDoor.DemoWeld > 0 && !DamageDoor.bShouldExplode) ? ScreenLoc.Y - (TextHeight / 1.25f) : ScreenLoc.Y - (TextHeight / 2.f), 1, FontScale);
-                    
+
                     IconW = GUIStyle.ScreenScale(64);
                     IconH = GUIStyle.ScreenScale(48);
-                    
+
                     Canvas.SetPos((ScreenLoc.X - 5) - IconW, ScreenLoc.Y - (IconH/2));
                     Canvas.DrawTile(DoorWelderIcon, IconW, IconH, 0, 0, 256, 192);
-                    
+
                     if( DamageDoor.DemoWeld > 0 && !DamageDoor.bShouldExplode )
                     {
                         CurrentValue = float(DamageDoor.DemoWeld);
                         MaxValue = float(DamageDoor.DemoWeldRequired);
-                        
+
                         WeldPercentageFloat = (CurrentValue / MaxValue) * 100.0;
                         if( WeldPercentageFloat < 1.f && WeldPercentageFloat > 0.f )
                         {
@@ -2880,7 +2880,7 @@ function DrawDoorHealthBars()
                             WeldPercentageFloat = 99.f;
                         }
                         IntegrityText = int(WeldPercentageFloat) $ "%";
-                        
+
                         Canvas.SetDrawColor(OrangeColor.R, OrangeColor.G, OrangeColor.B, DrawToDistance(DamageDoor, 255, 0));
                         GUIStyle.DrawTextShadow(IntegrityText, ScreenLoc.X + 5, ScreenLoc.Y - (TextHeight / 1.25f) + TextHeight - (ScaledBorderSize*2), 1, OriginalFontScale);
                     }
@@ -2898,25 +2898,25 @@ function DrawVOIPStatus()
     local HUDBoxRenderInfo HBRI;
 
     Y = Canvas.ClipY*0.175;
-    
+
     Canvas.Font = GUIStyle.PickFont(TextScale);
     for( i=0; i <= 12 && i < TalkerPRIs.Length; i++ )
     {
         PlayerName = TalkerPRIs[i].GetHumanReadableName();
-        
+
         Canvas.TextSize(PlayerName, XL, YL, TextScale, TextScale);
-        
+
         H = YL + (ScaledBorderSize * 2);
         W = (XL + H + (ScaledBorderSize * 2)) * 1.25;
-        
+
         X = Canvas.ClipX-W-ScaledBorderSize;
-        
+
         HBRI.TextColor = WhiteColor;
         HBRI.IconTex = VoiceChatIcon;
         HBRI.Justification = HUDA_Top;
         HBRI.JustificationPadding = 12;
         HBRI.IconScale = H;
-        
+
         DrawHUDBox(X, Y, W, H, PlayerName, TextScale, HBRI);
     }
 }
@@ -2924,7 +2924,7 @@ function DrawVOIPStatus()
 function VOIPEventTriggered(PlayerReplicationInfo TalkerPRI, bool bIsTalking)
 {
     local KFPlayerReplicationInfo KFPRI;
-    
+
     KFPRI = KFPlayerReplicationInfo(TalkerPRI);
     if ( KFPRI == None )
     {
@@ -2952,30 +2952,30 @@ function RenderVotingOptions()
 {
     local float TextWidth, TextHeight, TextScale, OriginalTextScale;
     local float X, Y;
-    
+
     Canvas.Font = GUIStyle.PickFont(OriginalTextScale);
-    
+
     TextScale = OriginalTextScale + 0.5;
-    
+
     Canvas.TextSize(CurrentVoteName, TextWidth, TextHeight, TextScale, TextScale);
     Y = TextHeight;
     X = (Canvas.ClipX - TextWidth) * 0.5;
-    
+
     GUIStyle.DrawOutlinedBox(X, Y, TextWidth + ScaledBorderSize, TextHeight + ScaledBorderSize, ScaledBorderSize, HudMainColor, HudOutlineColor);
-    
+
     Canvas.DrawColor = WhiteColor;
     GUIStyle.DrawTextShadow(CurrentVoteName, X, Y, 1, TextScale);
-    
+
     Y += TextHeight;
-    
+
     TextScale = OriginalTextScale + 0.3;
-    
+
     Canvas.DrawColor = WhiteColor;
     Canvas.TextSize(CurrentVoteStatus, TextWidth, TextHeight, TextScale, TextScale);
-    
+
     X = (Canvas.ClipX - TextWidth) * 0.5;
     GUIStyle.DrawTextShadow(CurrentVoteStatus, X, Y, 1, TextScale);
-    
+
     Y += TextHeight;
     DrawAdditionalInfo(Canvas, Y);
 }
@@ -2986,7 +2986,7 @@ function ShowVoteUI(PlayerReplicationInfo PRI, byte VoteDuration, bool bShowChoi
 {
     if( bVoteActive )
         return;
-        
+
     switch( Type )
     {
         case VT_TYPE_KICK:
@@ -2994,11 +2994,11 @@ function ShowVoteUI(PlayerReplicationInfo PRI, byte VoteDuration, bool bShowChoi
             DrawAdditionalInfo = RenderVoteKick;
             break;
     }
-    
+
     ActiveVote.PRI = PRI;
     ActiveVote.VoteDuration = WorldInfo.TimeSeconds + VoteDuration;
     ActiveVote.bShowChoices = bShowChoices;
-    
+
     bVoteActive = true;
 }
 
@@ -3007,7 +3007,7 @@ function HideVoteUI()
     bVoteActive = false;
     DrawAdditionalInfo = None;
     ActiveVote = default.ActiveVote;
-    
+
     CurrentVoteStatus = "";
     CurrentVoteName = "";
 }
@@ -3026,55 +3026,55 @@ function RenderVoteKick(Canvas C, float Y)
     local int VoteTimeLeft;
     local KFPlayerInput KFInput;
     local KeyBind TempKeyBind;
-    
+
     KFInput = KFPlayerInput(PlayerOwner.PlayerInput);
-    
+
     VoteTimeLeft = Max(ActiveVote.VoteDuration - WorldInfo.TimeSeconds, 0);
 
     CurrentVoteStatus = GUIStyle.GetTimeString(VoteTimeLeft)@"-"@Class'KFCommon_LocalizedStrings'.default.YesString@"("$ActiveVote.YesVotes$")"@Class'KFCommon_LocalizedStrings'.default.NoString@"("$ActiveVote.NoVotes$")";
 
     KFInput.GetKeyBindFromCommand(TempKeyBind, "GBA_VoteYes");
     YesS = Class'KFCommon_LocalizedStrings'.default.YesString@"-"@Repl(KFInput.GetBindDisplayName(TempKeyBind), "XboxTypeS_", "");
-    
+
     KFInput.GetKeyBindFromCommand(TempKeyBind, "GBA_VoteNo");
     NoS = Class'KFCommon_LocalizedStrings'.default.NoString@"-"@Repl(KFInput.GetBindDisplayName(TempKeyBind), "XboxTypeS_", "");
-    
+
     C.Font = GUIStyle.PickFont(TextScale);
-    
+
     C.DrawColor = MakeColor(0, 255, 0, 255);
     C.TextSize(YesS, TextWidth, TextHeight, TextScale, TextScale);
     X = (C.ClipX - TextWidth) * 0.5;
-    GUIStyle.DrawTextShadow(YesS, X, Y, 1, TextScale); 
+    GUIStyle.DrawTextShadow(YesS, X, Y, 1, TextScale);
 
     Y += TextHeight;
     C.DrawColor = MakeColor(255, 0, 0, 255);
     C.TextSize(NoS, TextWidth, TextHeight, TextScale, TextScale);
     X = (C.ClipX - TextWidth) * 0.5;
-    GUIStyle.DrawTextShadow(NoS, X, Y, 1, TextScale);         
+    GUIStyle.DrawTextShadow(NoS, X, Y, 1, TextScale);
 }
 
 function DrawVictoryEndScreen()
 {
     local float TexW, TexH, XL, YL;
     local float X, Y;
-    
+
     Canvas.DrawColor = WhiteColor;
-    
+
     TexW = VictoryScreen.GetSurfaceWidth();
     TexH = VictoryScreen.GetSurfaceHeight();
-    
+
     XL = Canvas.ClipX * 0.9;
     YL = Canvas.ClipY * 0.9;
-    
+
     X = (Canvas.ClipX * 0.5) - (XL/2);
     Y = (Canvas.ClipY * 0.5) - (YL/2);
-    
+
     Canvas.SetPos(X + GUIController.FastFontBlurX, Y + GUIController.FastFontBlurY);
     Canvas.DrawTile(VictoryScreenOverlay, XL, YL, 0, 0, TexW, TexH);
-    
+
     Canvas.SetPos(X + GUIController.FastFontBlurX2, Y + GUIController.FastFontBlurY2);
     Canvas.DrawTile(VictoryScreenOverlay, XL, YL, 0, 0, TexW, TexH);
-    
+
     Canvas.SetPos(X, Y);
     Canvas.DrawTile(VictoryScreen, XL, YL, 0, 0, TexW, TexH);
 }
@@ -3083,24 +3083,24 @@ function DrawDefeatEndScreen()
 {
     local float TexW, TexH, XL, YL;
     local float X, Y;
-    
+
     Canvas.DrawColor = WhiteColor;
-    
+
     TexW = DefeatScreen.GetSurfaceWidth();
     TexH = DefeatScreen.GetSurfaceHeight();
-    
+
     XL = Canvas.ClipX * 0.9;
     YL = Canvas.ClipY * 0.9;
-    
+
     X = (Canvas.ClipX * 0.5) - (XL/2);
     Y = (Canvas.ClipY * 0.5) - (YL/2);
-    
+
     Canvas.SetPos(X + GUIController.FastFontBlurX, Y + GUIController.FastFontBlurY);
     Canvas.DrawTile(DefeatScreenOverlay, XL, YL, 0, 0, TexW, TexH);
-    
+
     Canvas.SetPos(X + GUIController.FastFontBlurX2, Y + GUIController.FastFontBlurY2);
     Canvas.DrawTile(DefeatScreenOverlay, XL, YL, 0, 0, TexW, TexH);
-    
+
     Canvas.SetPos(X, Y);
     Canvas.DrawTile(DefeatScreen, XL, YL, 0, 0, TexW, TexH);
 }
@@ -3112,12 +3112,12 @@ function Texture GetClipIcon(KFWeapon Wep, bool bSingleFire)
     {
         return GetBulletIcon(Wep);
     }
-        
+
     if( Wep.IsA('KFWeap_Flame_CaulkBurn') || Wep.IsA('KFWeap_Flame_Flamethrower') )
     {
         return FlameTankIcon;
     }
-    
+
     return ClipsIcon;
 }
 
@@ -3127,7 +3127,7 @@ function Texture GetBulletIcon(KFWeapon Wep)
     {
         return GetSecondaryAmmoIcon(Wep);
     }
-        
+
     if( Wep.IsA('KFWeap_Eviscerator') )
     {
         return SawbladeIcon;
@@ -3151,11 +3151,11 @@ function Texture GetBulletIcon(KFWeapon Wep)
     else if( Wep.IsA('KFWeap_RocketLauncher_RPG7') )
     {
         return RocketIcon;
-    }    
+    }
     else if( Wep.IsA('KFWeap_Welder') )
     {
         return BoltIcon;
-    }    
+    }
     else if( Wep.IsA('KFWeap_AssaultRifle_AR15') )
     {
         return BurstBulletIcon;
@@ -3163,12 +3163,12 @@ function Texture GetBulletIcon(KFWeapon Wep)
     else if( Wep.IsA('KFWeap_Thrown_C4') )
     {
         return PipebombIcon;
-    }    
+    }
     else if( Wep.IsA('KFWeap_Rifle_M99') )
     {
         return SingleBulletIcon;
     }
-    
+
     return BulletsIcon;
 }
 
@@ -3177,11 +3177,11 @@ function Texture GetSecondaryAmmoIcon(KFWeapon Wep)
     if( Wep.IsA('KFWeap_Eviscerator') )
     {
         return FlameTankIcon;
-    }    
+    }
     else if( Wep.IsA('KFWeap_AssaultRifle_M16M203') || Wep.IsA('KFWeap_AssaultRifle_MedicRifleGrenadeLauncher') )
     {
         return M79Icon;
-    }    
+    }
     else if( Wep.IsA('KFWeap_Rifle_RailGun') || Wep.IsA('KFWeap_RocketLauncher_Seeker6') )
     {
         return AutoTargetIcon;
@@ -3202,7 +3202,7 @@ function Texture GetSecondaryAmmoIcon(KFWeapon Wep)
     {
         return SyringIcon;
     }
-    
+
     return SingleBulletIcon;
 }
 
@@ -3214,7 +3214,7 @@ function byte DrawToDistance(Actor A, optional float StartAlpha=255.f, optional 
     if ( Dist <= HealthBarFullVisDist || PlayerOwner.PlayerReplicationInfo.bOnlySpectator )
         fZoom = 1.0;
     else fZoom = FMax(1.0 - (Dist - HealthBarFullVisDist) / (HealthBarCutoffDist - HealthBarFullVisDist), 0.0);
-    
+
     return Clamp(StartAlpha * fZoom, MinAlpha, StartAlpha);
 }
 
@@ -3244,7 +3244,7 @@ simulated function bool DrawFriendlyHumanPlayerInfo( KFPawn_Human KFPH )
     ScreenPos = Canvas.Project( TargetLocation );
     if( ScreenPos.X < 0 || ScreenPos.X > Canvas.ClipX || ScreenPos.Y < 0 || ScreenPos.Y > Canvas.ClipY )
         return false;
-        
+
     FadeAlpha = DrawToDistance(KFPH);
 
     //Draw player name (Top)
@@ -3255,7 +3255,7 @@ simulated function bool DrawFriendlyHumanPlayerInfo( KFPawn_Human KFPH )
     Canvas.DrawColor = WhiteColor;
     Canvas.DrawColor.A = FadeAlpha;
     GUIStyle.DrawTextShadow(KFPRI.PlayerName, ScreenPos.X - (BarLength * 0.5f), ScreenPos.Y - 3.5f, 1, FontScale);
-    
+
     //Info Color
     switch(PlayerInfoType)
     {
@@ -3270,14 +3270,14 @@ simulated function bool DrawFriendlyHumanPlayerInfo( KFPawn_Human KFPH )
         case INFO_MODERN:
             CurrentArmorColor = ArmorColor;
             CurrentHealthColor = HealthColor;
-            break;    
+            break;
     }
-    
+
     CurrentArmorColor.A = FadeAlpha;
     CurrentHealthColor.A = FadeAlpha;
-    
+
     BarY = ScreenPos.Y + BarHeight + (36 * FontScale * ResModifier);
-        
+
     //Draw armor bar
     Percentage = FMin(float(KFPH.Armor) / float(KFPH.MaxArmor), 100);
     DrawPlayerInfo(KFPH, Percentage, BarLength, BarHeight, ScreenPos.X - (BarLength * 0.5f), BarY, CurrentArmorColor, PlayerInfoType == INFO_CLASSIC);
@@ -3285,17 +3285,17 @@ simulated function bool DrawFriendlyHumanPlayerInfo( KFPawn_Human KFPH )
     if( PlayerInfoType == INFO_CLASSIC )
         BarY += BarHeight + 5;
     else BarY += BarHeight;
-    
+
     //Draw health bar
     Percentage = FMin(float(KFPH.Health) / float(KFPH.HealthMax), 100);
     DrawPlayerInfo(KFPH, Percentage, BarLength, BarHeight, ScreenPos.X - (BarLength * 0.5f), BarY, CurrentHealthColor, PlayerInfoType == INFO_CLASSIC, true);
 
     BarY += BarHeight;
-    
+
     PerkClass = class<ClassicPerk_Base>(KFPRI.CurrentPerkClass);
     if( PerkClass == None )
         return false;
-        
+
     PerkLevel = KFPRI.GetActivePerkLevel();
 
     //Draw perk level and name text
@@ -3339,7 +3339,7 @@ simulated function DrawPerkIcons(KFPawn_Human KFPH, float PerkIconXL, float Perk
 
     if( class<ClassicPerk_Base>(KFPRI.CurrentPerkClass) == None )
         return;
-        
+
     PrestigeLevel = KFPRI.GetActivePerkPrestigeLevel();
     ResModifier = WorldInfo.static.GetResolutionBasedHUDScale() * FriendlyHudScale;
     FadeAlpha = Canvas.DrawColor.A;
@@ -3400,17 +3400,17 @@ simulated function DrawPlayerInfo( KFPawn_Human P, float BarPercentage, float Ba
     {
         Canvas.SetDrawColor(185, 185, 185, 255);
         GUIStyle.DrawBoxHollow(XPos - 2, YPos - 2, BarLength + 4, BarHeight + 4, 1);
-        
+
         Canvas.SetPos(XPos, YPos);
         Canvas.DrawColor = PlayerBarBGColor;
         Canvas.DrawTileStretched(PlayerStatusBarBGTexture, BarLength, BarHeight, 0, 0, 32, 32);
-        
+
         Canvas.SetPos(XPos, YPos);
         Canvas.DrawColor = BarColor;
         Canvas.DrawTileStretched(PlayerStatusBarBGTexture, BarLength * BarPercentage, BarHeight, 0, 0, 32, 32);
     }
     else DrawKFBar(BarPercentage, BarLength, BarHeight, XPos, YPos, BarColor);
-    
+
     if( bDrawRegenBar && bDrawingHealth && ClassicHumanPawn(P) != None && P.Health<P.HealthMax && ClassicHumanPawn(P).RepRegenHP>0 )
     {
         if( !bDrawOutline )
@@ -3419,7 +3419,7 @@ simulated function DrawPlayerInfo( KFPawn_Human P, float BarPercentage, float Ba
             BarLength -= 2.0;
             BarHeight -= 2.0;
         }
-        
+
         // Draw to-regen bar.
         XPos+=(BarLength * BarPercentage);
         BarPercentage = FMin(float(ClassicHumanPawn(P).RepRegenHP) / float(P.HealthMax),1.f-BarPercentage);
@@ -3460,10 +3460,10 @@ function DrawHiddenHumanPlayerIcon( PlayerReplicationInfo PRI, vector IconWorldL
             {
                 IconColor = WhiteColor;
                 IconColor.A = Clamp(Sin(WorldInfo.TimeSeconds * 8) * 200 + 255, 0, 255);
-                
+
                 ScreenPos.X = Canvas.ClipX - ScreenPos.x;
                 ScreenPos = GetClampedScreenPosition(ScreenPos);
-                
+
                 Canvas.DrawColor = IconColor;
                 Canvas.SetPos(ScreenPos.X - (IconSizeMult * VoiceCommsIconHighlightScale / 2), ScreenPos.Y - (IconSizeMult * VoiceCommsIconHighlightScale / 2));
                 Canvas.DrawTile(IconHighLightTexture, IconSizeMult + (IconSizeMult * VoiceCommsIconHighlightScale), IconSizeMult + (IconSizeMult * VoiceCommsIconHighlightScale), 0, 0, 128, 128);
@@ -3475,9 +3475,9 @@ function DrawHiddenHumanPlayerIcon( PlayerReplicationInfo PRI, vector IconWorldL
     {
         IconColor = WhiteColor;
         IconColor.A = Clamp(Sin(WorldInfo.TimeSeconds * 8) * 200 + 255, 0, 255);
-        
+
         ScreenPos = GetClampedScreenPosition(ScreenPos);
-        
+
         Canvas.DrawColor = IconColor;
         Canvas.SetPos(ScreenPos.X - (IconSizeMult * VoiceCommsIconHighlightScale / 2), ScreenPos.Y - (IconSizeMult * VoiceCommsIconHighlightScale / 2));
         Canvas.DrawTile(IconHighLightTexture, IconSizeMult + (IconSizeMult * VoiceCommsIconHighlightScale), IconSizeMult + (IconSizeMult * VoiceCommsIconHighlightScale), 0, 0, 128, 128);
@@ -3486,7 +3486,7 @@ function DrawHiddenHumanPlayerIcon( PlayerReplicationInfo PRI, vector IconWorldL
 
     PerkLevel = KFPRI.GetActivePerkLevel();
     PlayerIcon = PlayerOwner.GetTeamNum() == 0 ? KFPRI.GetCurrentIconToDisplay() : GenericHumanIconTexture;
-    
+
     if( class<ClassicPerk_Base>(KFPRI.CurrentPerkClass) != None )
     {
         PerkColor = class<ClassicPerk_Base>(KFPRI.CurrentPerkClass).static.GetPerkColor(PerkLevel);
@@ -3501,7 +3501,7 @@ function DrawHiddenHumanPlayerIcon( PlayerReplicationInfo PRI, vector IconWorldL
     if( KFPRI.CurrentVoiceCommsRequest == VCT_NONE )
         Canvas.DrawColor = PerkColor;
     else Canvas.SetDrawColor(255, 255, 255, 192);
-    
+
     Canvas.SetPos( ScreenPos.X, ScreenPos.Y );
     Canvas.DrawTile( PlayerIcon, IconSizeMult, IconSizeMult, 0, 0, 256, 256 );
 }
@@ -3510,45 +3510,45 @@ function DrawRhythmCounter()
 {
     local float RhythmX, RhythmY, RhythmW, RhythmH, IconX, IconY, IconW, IconH, CountX, CountY, FontScaler, XL, YL, ProgressX, ProgressY, ProgressW, ProgressH;
     local string S;
-    
+
     RhythmW = Canvas.ClipX*0.0775;
     RhythmH = (Canvas.ClipX*0.05)-(ScaledBorderSize*4);
-    
+
     RhythmX = (Canvas.ClipX*0.5) - (RhythmW/2);
     RhythmY = Canvas.ClipY * 0.125;
-    
+
     GUIStyle.DrawRoundedBoxEx(ScaledBorderSize*2, RhythmX, RhythmY+(ScaledBorderSize*4), RhythmW, RhythmH, HudMainColor, false, false, true, true);
     GUIStyle.DrawRoundedBoxEx(ScaledBorderSize*4, RhythmX, RhythmY, RhythmW, ScaledBorderSize*4, MakeColor(60, 60, 60, 255), true, true, false, false);
-    
+
     IconH = RhythmH * 0.6;
     IconW = IconH;
-    
+
     IconX = RhythmX + ScaledBorderSize;
     IconY = RhythmY + (RhythmH/2) - (IconH/1.5f) + (ScaledBorderSize*2);
-    
+
     Canvas.DrawColor = class'HUD'.default.WhiteColor;
     Canvas.SetPos(IconX, IconY);
     Canvas.DrawRect(IconW, IconH, RhythmHUDIcon);
-    
+
     S = CurrentRhythmCount$"X";
-    
+
     Canvas.Font = GUIStyle.PickFont(FontScaler);
     FontScaler += 0.5;
-    
+
     Canvas.TextSize(S, XL, YL, FontScaler, FontScaler);
-    
+
     CountX = RhythmX + (RhythmW - XL - (ScaledBorderSize*4));
     CountY = RhythmY + (RhythmH/2) - (YL/1.5f) + (ScaledBorderSize*2);
-    
+
     Canvas.SetPos(CountX, CountY);
     Canvas.DrawText(S,, FontScaler, FontScaler);
-    
+
     ProgressH = RhythmH * 0.175;
     ProgressW = (RhythmW * 0.95) - (ScaledBorderSize*4);
-    
+
     ProgressX = RhythmX + (RhythmW/2) - (ProgressW/2);
     ProgressY = (RhythmY+RhythmH) - ProgressH;
-    
+
     GUIStyle.DrawRoundedBox(ScaledBorderSize, ProgressX, ProgressY, ProgressW, ProgressH, DefaultHudMainColor);
     GUIStyle.DrawRoundedBox(ScaledBorderSize, ProgressX, ProgressY, ProgressW*(float(CurrentRhythmCount) / float(CurrentRhythmMax)), ProgressH, MakeColor(173, 17, 22, 255));
 }
@@ -3566,21 +3566,21 @@ function RenderKillMsg()
     local string S;
     local int i;
     local KFInterface_MapObjective MapObjective;
-    
+
     Canvas.Font = GUIStyle.PickFont(Sc);
     Canvas.TextSize("A",XL,YL,Sc,Sc);
-    
+
     PDSc = Sc*1.375f;
     Canvas.TextSize("A",XL,PDYL,PDSc,PDSc);
 
     MapObjective = KFInterface_MapObjective(KFGRI.CurrentObjective);
     if( MapObjective == None )
         MapObjective = KFInterface_MapObjective(KFGRI.PreviousObjective);
-        
+
     if( MapObjective != None && (MapObjective.IsActive() || ((MapObjective.IsComplete() || MapObjective.HasFailedObjective()) && KFGRI.bWaveIsActive)) )
         Y = Canvas.ClipY*0.235;
     else Y = Canvas.ClipY*0.15;
-    
+
     for( i=0; i<KillMessages.Length; ++i )
     {
         T = WorldInfo.TimeSeconds-KillMessages[i].MsgTime;
@@ -3592,13 +3592,13 @@ function RenderKillMsg()
         else if( KillMessages[i].bPlayerDeath )
             S = (KillMessages[i].bSuicide ? "" : KillMessages[i].Name)$" <Icon>UI_PerkIcons_TEX.UI_PerkIcon_ZED</Icon> "$(KillMessages[i].OwnerPRI!=None ? KillMessages[i].OwnerPRI.GetHumanReadableName() : "Someone");
         else S = (KillMessages[i].OwnerPRI!=None ? KillMessages[i].OwnerPRI.GetHumanReadableName() : "Someone")$" +"$KillMessages[i].Counter@KillMessages[i].Name$(KillMessages[i].Counter>1 ? " kills" : " kill");
-        
+
         CurrentSc = KillMessages[i].bPlayerDeath ? PDSc : Sc;
-        
+
         if( T>6.f )
         {
             KillMessages[i].CurrentXPosition -= RenderDelta*400.f;
-            
+
             Canvas.TextSize(GUIStyle.StripTextureFromString(S),TextXL,TextYL,CurrentSc,CurrentSc);
             if( (KillMessages[i].CurrentXPosition+TextXL) <= 0.f )
             {
@@ -3611,7 +3611,7 @@ function RenderKillMsg()
             KillMessages[i].CurrentXPosition += RenderDelta*200.f;
             KillMessages[i].CurrentXPosition = FMin(KillMessages[i].CurrentXPosition, KillMessages[i].XPosition);
         }
-        
+
         Canvas.DrawColor = KillMessages[i].MsgColor;
         GUIStyle.DrawTexturedString(S, KillMessages[i].CurrentXPosition, Y, CurrentSc,, true);
         Y+=KillMessages[i].bPlayerDeath ? PDYL : YL;
@@ -3658,7 +3658,7 @@ function color GetMsgColor( bool bDamage, int Count )
 static function string StripMsgColors( string S )
 {
     local int i;
-    
+
     while( true )
     {
         i = InStr(S,Chr(6));
@@ -3687,31 +3687,31 @@ static function string GetNameOf( class<Pawn> Other )
 {
     local string S;
     local class<KFPawn_Monster> KFM;
-        
+
     KFM = class<KFPawn_Monster>(Other);
     if( KFM!=None )
         return KFM.static.GetLocalizedName();
-        
+
     if( Other.Default.MenuName!="" )
         return Other.Default.MenuName;
-        
+
     S = string(Other.Name);
     if( Left(S,10)~="KFPawn_Zed" )
         S = Mid(S,10);
     else if( Left(S,7)~="KFPawn_" )
         S = Mid(S,7);
     S = Repl(S,"_"," ");
-    
+
     return S;
 }
 
 function AddPlayerDeathMessage(class<Pawn> Victim, Pawn Killer, PlayerReplicationInfo PRI, bool FriendlyKill)
 {
     local FKillMessageType Msg;
-    
+
     if( Killer == None || Victim == None )
         return;
-    
+
     Msg.bPlayerDeath = true;
     Msg.Type = Victim;
     Msg.OwnerPRI = PRI;
@@ -3720,7 +3720,7 @@ function AddPlayerDeathMessage(class<Pawn> Victim, Pawn Killer, PlayerReplicatio
     Msg.bSuicide = !FriendlyKill && Victim == Killer.Class;
     Msg.MsgColor = MakeColor(0, 162, 232, 255);
     Msg.XPosition = GUIController.ScreenSize.X*0.015;
-    
+
     KillMessages.AddItem(Msg);
 }
 
@@ -3728,7 +3728,7 @@ function AddKillMessage( class<Pawn> Victim, int Value, PlayerReplicationInfo PR
 {
     local int i;
     local bool bDmg,bLcl;
-    
+
     bDmg = (Type==2);
     bLcl = (Type==0);
     for( i=0; i<KillMessages.Length; ++i )
@@ -3739,7 +3739,7 @@ function AddKillMessage( class<Pawn> Victim, int Value, PlayerReplicationInfo PR
             KillMessages[i].MsgColor = GetMsgColor(bDmg,KillMessages[i].Counter);
             return;
         }
-    
+
     KillMessages.Length = i+1;
     KillMessages[i].bDamage = bDmg;
     KillMessages[i].bLocal = bLcl;
@@ -3756,7 +3756,7 @@ function AddNumberMsg( int Amount, vector Pos, class<KFDamageType> Type )
 {
     local vector RandVect;
     local EDamageOverTimeGroup DotType;
-    
+
     RandVect.X = RandRange(-64, 64);
     RandVect.Y = RandRange(-64, 64);
     RandVect.Z = RandRange(-64, 64);
@@ -3765,7 +3765,7 @@ function AddNumberMsg( int Amount, vector Pos, class<KFDamageType> Type )
     DamagePopups[NextDamagePopupIndex].HitTime = WorldInfo.TimeSeconds;
     DamagePopups[NextDamagePopupIndex].HitLocation = Pos;
     DamagePopups[NextDamagePopupIndex].RandVect = RandVect;
-    
+
     if( Type == None )
         DamagePopups[NextDamagePopupIndex].FontColor = DamageMsgColors[DMG_Unspecified];
     else
@@ -3789,7 +3789,7 @@ function AddNumberMsg( int Amount, vector Pos, class<KFDamageType> Type )
             DamagePopups[NextDamagePopupIndex].FontColor = DamageMsgColors[DMG_High];
         else DamagePopups[NextDamagePopupIndex].FontColor = DamageMsgColors[DMG_Medium];
     }
-    
+
     if( ++NextDamagePopupIndex >= DAMAGEPOPUP_COUNT)
         NextDamagePopupIndex=0;
 }
@@ -3802,28 +3802,28 @@ function DrawDamage()
     local string S;
 
     Canvas.Font = GUIStyle.PickFont(Sc);
-    
-    for( i=0; i < DAMAGEPOPUP_COUNT ; i++ ) 
+
+    for( i=0; i < DAMAGEPOPUP_COUNT ; i++ )
     {
         TimeSinceHit = `TimeSince(DamagePopups[i].HitTime);
         if( TimeSinceHit > DamagePopupFadeOutTime || ( Normal(DamagePopups[i].HitLocation - PLCameraLoc) dot Normal(PLCameraDir) < 0.1 ) ) //don't draw if player faced back to the hit location
             continue;
-            
+
         S = string(DamagePopups[i].Damage);
-            
+
         Canvas.TextSize(S,TextWidth,TextHeight,Sc,Sc);
         Vel = RenderDelta*900.f;
 
         if ( i % 2 == 0 )
             DamagePopups[i].RandVect.X *= -1.f;
-        
+
         DamagePopups[i].HitLocation += DamagePopups[i].RandVect*RenderDelta;
         if( (TimeSinceHit/DamagePopupFadeOutTime) < 0.035f )
             DamagePopups[i].RandVect.Z += Vel*2;
         else DamagePopups[i].RandVect.Z -= Vel;
-        
+
         HBScreenPos = Canvas.Project(DamagePopups[i].HitLocation);
-        
+
         TextX = HBScreenPos.X-(TextWidth*0.5f);
         TextY = HBScreenPos.Y-(TextHeight*0.5f);
         if( TextX < 0 || TextX > Canvas.ClipX || TextY < 0 || TextY > Canvas.ClipY )
@@ -3831,7 +3831,7 @@ function DrawDamage()
 
         Canvas.DrawColor = DamagePopups[i].FontColor;
         Canvas.DrawColor.A = 255 * Cos(0.5f * Pi * TimeSinceHit/DamagePopupFadeOutTime);
-        
+
         GUIStyle.DrawTextShadow(S, TextX, TextY, 1, Sc);
     }
 }
@@ -3843,13 +3843,13 @@ function DrawXPEarned(float X, float Y)
     local string S;
 
     Canvas.Font = GUIStyle.PickFont(Sc);
-    
-    for( i=0; i<XPEARNED_COUNT; i++ ) 
+
+    for( i=0; i<XPEARNED_COUNT; i++ )
     {
         EndTime = `RealTimeSince(XPPopups[i].StartTime);
         if( EndTime > XPFadeOutTime )
             continue;
-            
+
         S = "+"$string(XPPopups[i].XP)@"XP";
         Canvas.TextSize(S,TextWidth,TextHeight,Sc,Sc);
 
@@ -3859,11 +3859,11 @@ function DrawXPEarned(float X, float Y)
             XPPopups[i].YPos = Y-(TextHeight*0.5f);
             XPPopups[i].bInit = false;
         }
-        
+
         if( XPPopups[i].XPos > 0.f && XPPopups[i].XPos < Canvas.ClipX )
             XPPopups[i].XPos += Asin(2 * Pi * EndTime/XPFadeOutTime) * (i % 2 == 0 ? -XPPopups[i].RandX : XPPopups[i].RandX);
         else XPPopups[i].XPos = FClamp(XPPopups[i].XPos, 0, Canvas.ClipX);
-        
+
         XPPopups[i].YPos -= (RenderDelta*62.f) * XPPopups[i].RandY;
 
         FadeAlpha = 255 * Cos(0.5f * Pi * EndTime/XPFadeOutTime);
@@ -3871,16 +3871,16 @@ function DrawXPEarned(float X, float Y)
         {
             Canvas.DrawColor = PlayerBarShadowColor;
             Canvas.DrawColor.A = FadeAlpha;
-            
+
             Canvas.SetPos(XPPopups[i].XPos+1, XPPopups[i].YPos+1);
             Canvas.DrawRect(TextHeight*1.25f, TextHeight*1.25f, XPPopups[i].Icon);
-            
+
             Canvas.DrawColor = XPPopups[i].IconColor;
             Canvas.DrawColor.A = FadeAlpha;
-            
+
             Canvas.SetPos(XPPopups[i].XPos, XPPopups[i].YPos);
             Canvas.DrawRect(TextHeight*1.25f, TextHeight*1.25f, XPPopups[i].Icon);
-            
+
             Canvas.SetDrawColor(255, 255, 255, FadeAlpha);
             GUIStyle.DrawTextShadow(S, XPPopups[i].XPos+(TextHeight*1.25f)+(ScaledBorderSize*2), XPPopups[i].YPos, 1, Sc);
         }
@@ -3901,7 +3901,7 @@ function NotifyXPEarned( int XP, Texture2D Icon, Color IconColor )
     XPPopups[NextXPPopupIndex].Icon = Icon;
     XPPopups[NextXPPopupIndex].IconColor = IconColor;
     XPPopups[NextXPPopupIndex].bInit = true;
-    
+
     if( ++NextXPPopupIndex >= XPEARNED_COUNT)
         NextXPPopupIndex=0;
 }
@@ -3920,7 +3920,7 @@ function string GetSpeedStr()
     Speed = VSize(Velocity2D);
     S = string(Speed) $ "/" $ int(PlayerOwner.Pawn.GroundSpeed);
 
-    if ( Speed >= int(KFPawn(PlayerOwner.Pawn).SprintSpeed) ) 
+    if ( Speed >= int(KFPawn(PlayerOwner.Pawn).SprintSpeed) )
         Canvas.SetDrawColor(0, 100, 255);
     else if ( Speed >= int(PlayerOwner.Pawn.GroundSpeed) )
         Canvas.SetDrawColor(0, 206, 0);
@@ -3933,12 +3933,12 @@ function DrawSpeedMeter()
 {
     local float FontScalar, XL, YL;
     local string S;
-    
+
     S = GetSpeedStr() $ " ups";
-    
+
     Canvas.Font = GUIStyle.PickFont(FontScalar);
     Canvas.TextSize(S,XL,YL,FontScalar,FontScalar);
-    
+
     GUIStyle.DrawTextShadow(S, Canvas.ClipX - XL + (ScaledBorderSize*2), Canvas.ClipY * 0.80, 1, FontScalar);
 }
 
@@ -3948,7 +3948,7 @@ function DrawMedicWeaponRecharge()
     local float IconBaseX, IconBaseY, IconHeight, IconWidth;
     local float IconRatioY, ChargePct, ChargeBaseY, WeaponBaseX;
     local color ChargeColor;
-    
+
     if (PlayerOwner.Pawn.InvManager == None)
         return;
 
@@ -3958,7 +3958,7 @@ function DrawMedicWeaponRecharge()
 
     IconBaseX = (Canvas.ClipX * 0.85) - IconWidth;
     IconBaseY = Canvas.ClipY * 0.8125;
-    
+
     WeaponBaseX = IconBaseX;
 
     Canvas.EnableStencilTest(false);
@@ -3966,18 +3966,18 @@ function DrawMedicWeaponRecharge()
     {
         if (KFWMB == PlayerOwner.Pawn.Weapon || !KFWMB.bRechargeHealAmmo)
             continue;
-            
+
         GUIStyle.DrawRoundedBox(ScaledBorderSize*2, WeaponBaseX, IconBaseY, IconWidth, IconHeight, MedicWeaponBGColor);
-        
+
         ChargePct = float(KFWMB.AmmoCount[1]) / float(KFWMB.MagazineCapacity[1]);
         ChargeBaseY = IconBaseY + IconHeight * (1.0 - ChargePct);
         ChargeColor = (KFWMB.HasAmmo(1) ? MedicWeaponChargedColor : MedicWeaponNotChargedColor);
         GUIStyle.DrawRoundedBox(ScaledBorderSize*2, WeaponBaseX, ChargeBaseY, IconWidth, IconHeight * ChargePct, ChargeColor);
-        
+
         Canvas.DrawColor = WeaponIconColor;
         Canvas.SetPos(WeaponBaseX + IconWidth, IconBaseY);
         Canvas.DrawRotatedTile(KFWMB.WeaponSelectTexture, MedicWeaponRot, IconHeight, IconWidth, 0, 0, KFWMB.WeaponSelectTexture.GetSurfaceWidth(), KFWMB.WeaponSelectTexture.GetSurfaceHeight(), 0, 0);
-        
+
         WeaponBaseX -= IconWidth * 1.2;
     }
     Canvas.EnableStencilTest(true);
@@ -4006,7 +4006,7 @@ function DrawMedicWeaponLockOn(KFWeap_MedicBase KFW)
         OldTarget = None;
         return;
     }
-        
+
     if (CurrentActor != OldTarget)
     {
         LockOnStartTime = WorldInfo.RealTimeSeconds;
@@ -4020,7 +4020,7 @@ function DrawMedicWeaponLockOn(KFWeap_MedicBase KFW)
 
     IconSize = WorldInfo.static.GetResolutionBasedHUDScale() * MedicLockOnIconSize;
     RealIconSize = FInterpEaseInOut(IconSize*2, IconSize, GUIStyle.TimeFraction(LockOnStartTime, LockOnEndTime, WorldInfo.RealTimeSeconds), 2.5);
-    
+
     Canvas.DrawColor = IconColor;
     Canvas.SetPos(ScreenPos.X - (RealIconSize / 2.0), ScreenPos.Y - (RealIconSize / 2.0));
     Canvas.DrawRect(RealIconSize, RealIconSize, MedicLockOnIcon);
@@ -4046,7 +4046,7 @@ function DrawWeaponPickupInfo()
     ScreenPos = Canvas.Project(WeaponPickup.Location + vect(0,0,25));
     if (ScreenPos.X < 0 || ScreenPos.X > Canvas.ClipX || ScreenPos.Y < 0 || ScreenPos.Y > Canvas.ClipY)
         return;
-        
+
     bHasAmmo = WeaponPickup.MagazineAmmo[0] >= 0;
 
     if (bHasAmmo)
@@ -4134,7 +4134,7 @@ function DrawWeaponPickupInfo()
         Canvas.DrawColor = WeaponIconColor;
         Canvas.SetPos(InfoBaseX, InfoBaseY);
         Canvas.DrawTile(WeaponAmmoIcon, IconSize, IconSize, 0, 0, 256, 256);
-    
+
         Canvas.DrawColor = WhiteColor;
         Canvas.SetPos(InfoBaseX + IconSize * 1.5, InfoBaseY + TextYOffset);
         Canvas.DrawText(AmmoText, , FontScale, FontScale, FRI);
@@ -4147,20 +4147,20 @@ function DrawWeaponPickupInfo()
     Canvas.DrawColor = WhiteColor;
     Canvas.SetPos(InfoBaseX + IconSize * 1.5, InfoBaseY + IconSize * 1.5 + TextYOffset);
     Canvas.DrawText(WeightText, , FontScale, FontScale, FRI);
-    
+
     if( WeaponPickup.OwnerController != None )
     {
         S = WeaponPickup.OwnerController.PlayerReplicationInfo.GetHumanReadableName();
         Canvas.TextSize(S, TextWidth, TextHeight, FontScale, FontScale);
-        
+
         SecondaryBGWidth = TextWidth * 1.125;
         SecondaryBGHeight = TextHeight * 1.125;
-        
+
         BGY += BGHeight + (TextHeight/2);
         BGX += (BGWidth/2) - (SecondaryBGWidth/2);
-        
+
         GUIStyle.DrawRoundedBox(ScaledBorderSize*2, BGX, BGY, SecondaryBGWidth, SecondaryBGHeight, HudMainColor);
-        
+
         Canvas.DrawColor = WhiteColor;
         Canvas.SetPos(BGX + (SecondaryBGWidth/2) - (TextWidth/2), BGY + (SecondaryBGHeight/2) - (TextHeight/2));
         Canvas.DrawText(S, , FontScale, FontScale, FRI);
@@ -4177,10 +4177,10 @@ exec function SetShowScores(bool bNewValue)
 function DrawTraderIndicator()
 {
     local KFTraderTrigger T;
-    
+
     if( KFGRI == None || (KFGRI.OpenedTrader == None && KFGRI.NextTrader == None) )
         return;
-    
+
     T = KFGRI.OpenedTrader != None ? KFGRI.OpenedTrader : KFGRI.NextTrader;
     if( T != None )
         DrawDirectionalIndicator(T.Location, bLightHUD ? TraderArrowLight : TraderArrow, Canvas.ClipY/33.f,, HudOutlineColor, class'KFGFxHUD_TraderCompass'.default.TraderString, true);
@@ -4197,9 +4197,9 @@ final function Vector DrawDirectionalIndicator(Vector Loc, Texture Mat, float Ic
     FI.bClipText = true;
     Canvas.Font = GUIStyle.PickFont(FontScalar);
     FontScalar *= FontMult;
-    
+
     X = PLCameraDir;
-    
+
     // First see if on screen.
     V = Loc - PLCameraLoc;
     if( (V Dot X)>0.997 ) // Front of camera.
@@ -4208,7 +4208,7 @@ final function Vector DrawDirectionalIndicator(Vector Loc, Texture Mat, float Ic
         if( V.X>0 && V.Y>0 && V.X<Canvas.ClipX && V.Y<Canvas.ClipY ) // Within screen bounds.
         {
             Canvas.EnableStencilTest(true);
-            
+
             Canvas.DrawColor = PlayerBarShadowColor;
             Canvas.DrawColor.A = DrawColor.A;
             Canvas.SetPos(V.X-(IconSize*0.5)+1,V.Y-IconSize+1);
@@ -4217,21 +4217,21 @@ final function Vector DrawDirectionalIndicator(Vector Loc, Texture Mat, float Ic
             Canvas.DrawColor = DrawColor;
             Canvas.SetPos(V.X-(IconSize*0.5),V.Y-IconSize);
             Canvas.DrawRect(IconSize, IconSize, Mat);
-            
+
             if( Text != "" )
             {
                 Canvas.TextSize(Text,XS,YS,FontScalar,FontScalar);
-                
+
                 if( bDrawBackground )
                 {
                     BoxW = XS+8.f;
                     BoxH = YS+8.f;
-                    
+
                     BoxX = V.X - (BoxW*0.5);
                     BoxY = V.Y - IconSize - BoxH;
-                    
+
                     GUIStyle.DrawOutlinedBox(BoxX, BoxY, BoxW, BoxH, FMax(ScaledBorderSize * 0.5, 1.f), HudMainColor, HudOutlineColor);
-                   
+
                     Canvas.DrawColor = WhiteColor;
                     Canvas.SetPos(BoxX + (BoxW/2) - (XS/2), BoxY + (BoxH/2) - (YS/2));
                     Canvas.DrawText(Text,, FontScalar, FontScalar, FI);
@@ -4242,16 +4242,16 @@ final function Vector DrawDirectionalIndicator(Vector Loc, Texture Mat, float Ic
                     GUIStyle.DrawTextShadow(Text, V.X-(XS*0.5), V.Y-IconSize-YS-4.f, 1, FontScalar);
                 }
             }
-            
+
             Canvas.EnableStencilTest(false);
             return V;
         }
     }
-    
+
     bWasStencilEnabled = Canvas.bStencilEnabled;
     if( bWasStencilEnabled )
         Canvas.EnableStencilTest(false);
-    
+
     // Draw the material towards the location.
     // First transform offset to local screen space.
     V = (Loc - PLCameraLoc) << PLCameraRot;
@@ -4266,20 +4266,20 @@ final function Vector DrawDirectionalIndicator(Vector Loc, Texture Mat, float Ic
 
     // Check screen edge location.
     V = FindEdgeIntersection(V.Y,-V.Z,IconSize);
-    
+
     // Draw material.
     Canvas.DrawColor = PlayerBarShadowColor;
     Canvas.DrawColor.A = DrawColor.A;
     Canvas.SetPos(V.X+1,V.Y+1);
     Canvas.DrawRotatedTile(Mat,R,IconSize,IconSize,0,0,Mat.GetSurfaceWidth(),Mat.GetSurfaceHeight());
-            
+
     Canvas.DrawColor = DrawColor;
     Canvas.SetPos(V.X,V.Y);
     Canvas.DrawRotatedTile(Mat,R,IconSize,IconSize,0,0,Mat.GetSurfaceWidth(),Mat.GetSurfaceHeight());
-    
+
     if( bWasStencilEnabled )
         Canvas.EnableStencilTest(true);
-    
+
     return V;
 }
 
@@ -4311,7 +4311,7 @@ final function vector FindEdgeIntersection( float XDir, float YDir, float ClampS
         // Look for best intersection axis.
         TimeXS = Abs((SX-ClampSize) / XDir);
         TimeYS = Abs((SY-ClampSize) / YDir);
-        
+
         if( TimeXS<TimeYS ) // X axis intersects first.
         {
             V.X = TimeXS*XDir;
@@ -4322,7 +4322,7 @@ final function vector FindEdgeIntersection( float XDir, float YDir, float ClampS
             V.X = TimeYS*XDir;
             V.Y = TimeYS*YDir;
         }
-        
+
         // Transform axis to screen center.
         V.X += SX;
         V.Y += SY;
@@ -4346,7 +4346,7 @@ function DrawProgressBar( float X, float Y, float XS, float YS, float Value )
 function DrawPortrait()
 {
     local float PortraitWidth, PortraitHeight, XL, YL, FontScalar;
-    
+
     if( CurrentTraderPortrait == None )
     {
         if( CurrentTraderVoiceClass == None )
@@ -4378,16 +4378,16 @@ function DrawPortrait()
     PortraitHeight = 1.5 * PortraitWidth;
 
     Canvas.DrawColor = WhiteColor;
-    
+
     Canvas.SetPos(-PortraitWidth * PortraitX, 0.5 * (Canvas.ClipY - PortraitHeight));
     Canvas.DrawTileStretched(TraderPortraitBox, 1.05 * PortraitWidth, 1.05 * PortraitHeight, 0, 0, TraderPortraitBox.GetSurfaceWidth(), TraderPortraitBox.GetSurfaceHeight());
-    
+
     Canvas.SetPos(-PortraitWidth * PortraitX + 0.025 * PortraitWidth, 0.5 * (Canvas.ClipY - PortraitHeight) + 0.025 * PortraitHeight);
     Canvas.DrawTile(CurrentTraderPortrait, PortraitWidth, PortraitHeight, 0, 0, 256, 384);
-    
+
     Canvas.Font = GUIStyle.PickFont(FontScalar);
     FontScalar += GUIStyle.ScreenScale(0.1);
-    
+
     Canvas.DrawColor = RedColor;
     Canvas.TextSize(CurrentTraderName, XL, YL, FontScalar, FontScalar);
     GUIStyle.DrawTextShadow(CurrentTraderName, Canvas.ClipY / 256 - PortraitWidth * PortraitX + 0.5 * (PortraitWidth - XL), 0.5 * (Canvas.ClipY + PortraitHeight) + 0.06 * PortraitHeight, 1, FontScalar);
@@ -4413,14 +4413,14 @@ simulated function Tick( float Delta )
         if ( PortraitX == 1 )
             bDrawingPortrait = false;
     }
-    
+
     Super.Tick(Delta);
 }
 
 function DrawMessageText(HudLocalizedMessage LocalMessage, float ScreenX, float ScreenY)
 {
     local class<ClassicLocalMessage> ClassicMessage;
-    
+
     ClassicMessage = class<ClassicLocalMessage>(LocalMessage.Message);
     if( ClassicMessage != None && ClassicMessage.default.bComplexString )
         ClassicMessage.static.RenderComplexMessage(Canvas, ScreenX, ScreenY, LocalMessage.StringMessage, LocalMessage.Switch, LocalMessage.OptionalObject);
@@ -4447,7 +4447,7 @@ function LocalizedMessage
     // Stops KFAIController_ScriptedPawn and KFAIController_Monster from spamming the chatbox with team change messages.
     if( KFDummyReplicationInfo(RelatedPRI_1) != None || KFDummyReplicationInfo(RelatedPRI_2) != None )
         return;
-    
+
     // Removing the flash HUD causes this to print a corrupted translation string to the chatbox, lets avoid that.
     // I can't remove the section of code that calls this because the class object it's called from can't be changed.
     if( class<KFLocalMessage_PlayerKills>(InMessageClass) != None )
@@ -4458,12 +4458,12 @@ function LocalizedMessage
         Super(HUD).LocalizedMessage(InMessageClass, RelatedPRI_1, RelatedPRI_2, MessageString, Switch, Position, LifeTime, FontSize, DrawColor, OptionalObject);
         return;
     }
-    
+
     if( MessageString == "" )
         return;
 
     MessageString = Repl(MessageString, "  ", " ");
-    
+
     if( !InMessageClass.default.bIsSpecial )
     {
         AddConsoleMessage( MessageString, InMessageClass, RelatedPRI_1 );
@@ -4478,11 +4478,11 @@ function LocalizedMessage
         HexClr = KFLocalMessageClass.static.GetHexColor(Switch);
     else if(InMessageClass == class'GameMessage')
         HexClr = class 'KFLocalMessage'.default.ConnectionColor;
-    
+
     TempS = "#{"$HexClr$"}"$MessageString$"<LINEBREAK>";
     if( ClassicPlayerOwner.LobbyMenu != None )
         ClassicPlayerOwner.LobbyMenu.ChatBox.AddText(TempS);
-    
+
     ChatBox.AddText(TempS);
 }
 
@@ -4519,10 +4519,10 @@ function RenderProgress()
 {
     local float X,Y,XL,YL,Sc,TY,TX,BoxX,BoxW,TextX;
     local int i;
-    
+
     Canvas.Font = GUIStyle.PickFont(Sc);
     Sc += 0.125f;
-    
+
     if( bProgressDC )
         Canvas.SetDrawColor(255,80,80,255);
     else Canvas.SetDrawColor(255,255,255,255);
@@ -4534,16 +4534,16 @@ function RenderProgress()
         TX = FMax(TX,XL);
     }
     TY = YL*ProgressLines.Length;
-    
+
     X = (Canvas.ClipX/2) - (TX/2);
-    
+
     BoxX = X+(ScaledBorderSize*2);
     BoxW = TX-(ScaledBorderSize*4);
-    
+
     Canvas.DrawColor = HudMainColor;
     Canvas.SetPos(BoxX, Y);
     GUIStyle.DrawWhiteBox(BoxW, TY);
-    
+
     GUIStyle.DrawRoundedBoxEx(ScaledBorderSize*2, X, Y, ScaledBorderSize*2, TY, HudOutlineColor, true, false, true, false);
     GUIStyle.DrawRoundedBoxEx(ScaledBorderSize*2, X+TX-(ScaledBorderSize*2), Y, ScaledBorderSize*2, TY, HudOutlineColor, false, true, false, true);
 
@@ -4551,9 +4551,9 @@ function RenderProgress()
     for( i=0; i<ProgressLines.Length; ++i )
     {
         Canvas.TextSize(ProgressLines[i],XL,YL,Sc,Sc);
-        
+
         TextX = BoxX + (BoxW/2) - (XL/2);
-        
+
         GUIStyle.DrawTextShadow(ProgressLines[i], TextX, Y, 1, Sc);
         Y+=YL;
     }
@@ -4564,12 +4564,12 @@ function RenderHUDWidgets()
 {
     local int i;
     local float OrgX,OrgY,ClipX,ClipY;
-    
+
     OrgX = Canvas.OrgX;
     OrgY = Canvas.OrgY;
     ClipX = Canvas.ClipX;
     ClipY = Canvas.ClipY;
-    
+
     for( i=(HUDWidgets.Length-1); i>=0; --i )
     {
         HUDWidgets[i].InputPos[0] = 0.f;
@@ -4579,7 +4579,7 @@ function RenderHUDWidgets()
         HUDWidgets[i].Canvas = Canvas;
         HUDWidgets[i].PreDraw();
     }
-    
+
     Canvas.SetOrigin(OrgX,OrgY);
     Canvas.SetClip(ClipX,ClipY);
 }
@@ -4587,39 +4587,39 @@ function RenderHUDWidgets()
 function bool NotifyInputKey(int ControllerId, Name Key, EInputEvent Event, float AmountDepressed, bool bGamepad)
 {
     local int i;
-    
+
     for( i=(HUDWidgets.Length-1); i>=0; --i )
     {
         if( HUDWidgets[i].bVisible && HUDWidgets[i].NotifyInputKey(ControllerId, Key, Event, AmountDepressed, bGamepad) )
             return true;
     }
-    
+
     return false;
 }
 
 function bool NotifyInputAxis(int ControllerId, name Key, float Delta, float DeltaTime, optional bool bGamepad)
 {
     local int i;
-    
+
     for( i=(HUDWidgets.Length-1); i>=0; --i )
     {
         if( HUDWidgets[i].bVisible && HUDWidgets[i].NotifyInputAxis(ControllerId, Key, Delta, DeltaTime, bGamepad) )
             return true;
     }
-    
+
     return false;
 }
 
 function bool NotifyInputChar(int ControllerId, string Unicode)
 {
     local int i;
-    
+
     for( i=(HUDWidgets.Length-1); i>=0; --i )
     {
         if( HUDWidgets[i].bVisible && HUDWidgets[i].NotifyInputChar(ControllerId, Unicode) )
             return true;
     }
-    
+
     return false;
 }
 
@@ -4634,7 +4634,7 @@ function ResetConsole()
 {
     if( OrgConsole == None || ClientViewport.ViewportConsole == OrgConsole )
         return;
-        
+
     ClientViewport.ViewportConsole = OrgConsole;
     OrgConsole.OnReceivedNativeInputKey = OrgConsole.InputKey;
     OrgConsole.OnReceivedNativeInputChar = OrgConsole.InputChar;
@@ -4644,7 +4644,7 @@ simulated function NotifyLevelChange( optional bool bMapswitch )
 {
     if( bMapswitch )
         SetTimer(0.5,false,'PendingMapSwitch');
-        
+
     if( OnlineSub!=None )
     {
         OnlineSub.ClearOnInventoryReadCompleteDelegate(SearchInventoryForNewItem);
@@ -4655,7 +4655,7 @@ simulated function NotifyLevelChange( optional bool bMapswitch )
 simulated function PendingMapSwitch()
 {
     ClassicPlayerOwner.ClientNotifyDisconnect();
-    
+
     class'MS_Game'.Static.SetReference();
     class'MS_PC'.Default.TravelData.PendingURL = WorldInfo.GetAddressURL();
     ConsoleCommand("Open KFMainMenu?Game="$PathName(class'MS_Game'));
@@ -4674,17 +4674,17 @@ simulated function SearchInventoryForNewItem()
             WasNewlyAdded[i] = 1;
             if( WorldInfo.TimeSeconds<80.f || !bLoadedInitItems ) // Skip initial inventory.
                 continue;
-            
+
             j = OnlineSub.ItemPropertiesList.Find('Definition', OnlineSub.CurrentInventory[i].Definition);
             if(j != INDEX_NONE)
             {
                 NewItems.Insert(0,1);
                 NewItems[0].Item = OnlineSub.ItemPropertiesList[j].Name$" ["$RarityStr(OnlineSub.ItemPropertiesList[j].Rarity)$"]";
                 NewItems[0].MsgTime = WorldInfo.TimeSeconds;
-                
+
                 if( OnlineSub.ItemPropertiesList[j].Rarity >= ITR_Legendary )
                     ClassicPlayerOwner.ServerItemDropGet(NewItems[0].Item);
-                    
+
                 ClassicPlayerOwner.PlayAKEvent(AkEvent'WW_UI_Menu.Play_UI_Drop');
             }
         }
@@ -4711,20 +4711,20 @@ simulated final function DrawItemsList()
     local int i;
     local float T,FontScale,XS,YS,YSize,XPos,YPos,BT,OT;
     local Color BackgroundColor,OutlineColor,TextColor;
-    
+
     FontScale = Canvas.ClipY / 660.f;
     Canvas.Font = GUIStyle.PickFont(FontScale);
     Canvas.TextSize("ABC",XS,YSize,FontScale,FontScale);
     YSize*=2.f;
     YPos = Canvas.ClipY*0.7 - YSize;
     XPos = Canvas.ClipX - YSize*0.15;
-    
+
     for( i=0; i<NewItems.Length; ++i )
     {
         T = WorldInfo.TimeSeconds-NewItems[i].MsgTime;
         BT = T;
         OT = T;
-        
+
         if( T>=10.f )
         {
             NewItems.Remove(i--,1);
@@ -4734,25 +4734,25 @@ simulated final function DrawItemsList()
         {
             T = 255.f * (10.f-T);
             TextColor = MakeColor(255,255,255,T);
-            
+
             BT = HudMainColor.A * (10.f-BT);
             BackgroundColor = MakeColor(HudMainColor.R, HudMainColor.G, HudMainColor.B, BT);
-            
+
             OT = HudOutlineColor.A * (10.f-OT);
             OutlineColor = MakeColor(HudOutlineColor.R, HudOutlineColor.G, HudOutlineColor.B, OT);
         }
-        else 
+        else
         {
             TextColor = MakeColor(255,255,255,255);
             BackgroundColor = HudMainColor;
             OutlineColor = HudOutlineColor;
         }
-        
+
         Canvas.TextSize(NewItems[i].Item,XS,YS,FontScale,FontScale);
         GUIStyle.DrawOutlinedBox(XPos-(XS+(ScaledBorderSize*2)), YPos-(ScaledBorderSize*0.5), XS+(ScaledBorderSize*4), YSize+(ScaledBorderSize*2), 1, BackgroundColor, OutlineColor);
-        
+
         XS = XPos-XS;
-        
+
         Canvas.DrawColor = TextColor;
         Canvas.SetPos(XS, YPos);
         Canvas.DrawText("New Item:",, FontScale, FontScale);
@@ -4783,7 +4783,7 @@ function SetFinalCountdown(bool B, int CountdownTime)
         FinalCountTime = 0;
         ClearTimer(nameOf(FinalCountdown));
     }
-    
+
     bFinalCountdown = B;
 }
 
@@ -4808,7 +4808,7 @@ function DrawZedIcon( Pawn ZedPawn, vector PawnLocation, float NormalizedAngle )
 defaultproperties
 {
     MaxNonCriticalMessages=2
-    
+
     HUDClass=class'ClassicMoviePlayer_HUD'
     ConsoleClass=class'UI_Console'
 
@@ -4816,13 +4816,13 @@ defaultproperties
     SpectatorInfoClass=class'UIR_SpectatorInfoBox'
     ScoreboardClass=class'KFScoreBoard'
     VoiceCommsClass=class'UIR_VoiceComms'
-    
+
     DefaultHudMainColor=(R=0,B=0,G=0,A=195)
     DefaultHudOutlineColor=(R=200,B=15,G=15,A=195)
     DefaultFontColor=(R=255,B=50,G=50,A=255)
-    
+
     BlueColor=(R=0,B=255,G=0,A=255)
-    
+
     MedicLockOnIcon=Texture2D'UI_SecondaryAmmo_TEX.UI_FireModeSelect_ManualTarget'
     MedicLockOnIconSize=40
     MedicLockOnColor=(R=0,G=255,B=255,A=192)
@@ -4836,47 +4836,47 @@ defaultproperties
     WeaponIconSize=32
     WeaponIconColor=(R=192,G=192,B=192,A=255)
     WeaponOverweightIconColor=(R=255,G=0,B=0,A=192)
-    
+
     MedicWeaponRot=(Yaw=16384)
     MedicWeaponHeight=88
     MedicWeaponBGColor=(R=0,G=0,B=0,A=128)
     MedicWeaponNotChargedColor=(R=224,G=0,B=0,A=128)
     MedicWeaponChargedColor=(R=0,G=224,B=224,A=128)
-    
+
     TraderArrow=Texture2D'UI_LevelChevrons_TEX.UI_LevelChevron_Icon_03'
     TraderArrowLight=Texture2D'UI_Objective_Tex.UI_Obj_World_Loc'
     VoiceChatIcon=Texture2D'UI_HUD.voip_icon'
     RhythmHUDIcon=Texture2D'WeeklyObjective_UI.UI_Weeklies_Zombies'
-    
+
     InventoryFadeTime=1.25
     InventoryFadeInTime=0.1
     InventoryFadeOutTime=0.15
-    
+
     InventoryX=0.35
     InventoryY=0.025
     InventoryBoxWidth=0.1
     InventoryBoxHeight=0.075
     BorderSize=0.005
-    
+
     PerkIconSize=16
-    
+
     DamagePopupFadeOutTime=2.25
     XPFadeOutTime=1.0
-    
+
     QuickSyringeDisplayTime=5.0
     QuickSyringeFadeInTime=1.0
-    QuickSyringeFadeOutTime=0.5    
-    
+    QuickSyringeFadeOutTime=0.5
+
     NonCriticalMessageDisplayTime=3.0
     NonCriticalMessageFadeInTime=0.65
     NonCriticalMessageFadeOutTime=0.5
-    
+
     BattlePhaseColors.Add((R=0,B=0,G=150,A=175))
     BattlePhaseColors.Add((R=255,B=18,G=176,A=175))
     BattlePhaseColors.Add((R=255,B=18,G=96,A=175))
     BattlePhaseColors.Add((R=173,B=17,G=22,A=175))
     BattlePhaseColors.Add((R=0,B=0,G=0,A=175))
-    
+
     DamageMsgColors[DMG_Fire]=(R=206,G=103,B=0,A=255)
     DamageMsgColors[DMG_Toxic]=(R=58,G=232,B=0,A=255)
     DamageMsgColors[DMG_Bleeding]=(R=255,G=100,B=100,A=255)
@@ -4887,9 +4887,9 @@ defaultproperties
     DamageMsgColors[DMG_High]=(R=0,G=206,B=0,A=255)
     DamageMsgColors[DMG_Medium]=(R=206,G=206,B=0,A=255)
     DamageMsgColors[DMG_Unspecified]=(R=150,G=150,B=150,A=255)
-    
+
     NewLineSeparator="|"
-    
+
     NotificationBackground=Texture2D'ApocGameMode_Assets.HUD.Med_border_SlightTransparent'
     NotificationWidth=250.0f
     NotificationHeight=70.f
