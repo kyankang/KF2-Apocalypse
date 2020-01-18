@@ -239,6 +239,10 @@ simulated function PostBeginPlay()
             ConfigVer = 3;
         }
 
+`if(`isdefined(APOC_PATCH))
+        bAlwaySprint = true;
+`endif
+
         SaveConfig();
     }
 
