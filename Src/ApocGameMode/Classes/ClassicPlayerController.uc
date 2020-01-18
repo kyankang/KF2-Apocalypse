@@ -48,7 +48,7 @@ var transient bool bDisableGameplayChanges, bDisableUpgrades, bEnableTraderSpeed
 var globalconfig bool bHideKillMsg, bHideDamageMsg, bHidePlayerDeathMsg, bEnableBWZEDTime, bDisallowOthersToPickupWeapons, bDisableClassicTrader, bDisableClassicMusic;
 
 `if(`isdefined(APOC_PATCH))
-var globalconfig bool bAlwaySprint;
+var globalconfig bool bAlwaySprint, bAutoFire;
 `endif
 
 replication
@@ -241,6 +241,7 @@ simulated function PostBeginPlay()
 
 `if(`isdefined(APOC_PATCH))
         bAlwaySprint = true;
+        bAutoFire = true;
 `endif
 
         SaveConfig();
@@ -465,8 +466,40 @@ exec function StartFire( optional byte FireModeNum )
     if (MyGFxHUD != none && MyGFxHUD.VoiceCommsWidget != none && MyGFxHUD.VoiceCommsWidget.bActive)
         return;
 
+`if(`isdefined(APOC_PATCH))
+	if( FireModeNum==0 )
+		bFire = 1;
+	else if( FireModeNum==1 )
+		bAltFire = 1;
+`endif
+
     super.StartFire( FireModeNum );
 }
+
+`if(`isdefined(APOC_PATCH))
+exec function StopFire( optional byte FireModeNum )
+{
+	if( FireModeNum==0 )
+		bFire = 0;
+	else if( FireModeNum==1 )
+		bAltFire = 0;
+
+    super.StopFire( FireModeNum );
+}
+
+event PlayerTick( float DeltaTime )
+{
+	super.PlayerTick(DeltaTime);
+
+    if( bAutoFire )
+    {
+        if( bFire!=0 && !Pawn.InvManager.IsPendingFire(None,0) )
+            Pawn.Weapon.StartFire(0);
+        else if( bAltFire!=0 && !Pawn.InvManager.IsPendingFire(None,1) )
+            Pawn.Weapon.StartFire(1);
+    }
+}
+`endif
 
 reliable client function ReceiveServerMOTD( string S, bool bFinal )
 {

@@ -44,7 +44,8 @@ function InitMenu()
     AddCheckBox("Disable console replacment","Disables the console replacment.",'bNoConsoleReplacement',HUD.bNoConsoleReplacement);
 
 `if(`isdefined(APOC_PATCH))
-    AddCheckBox("Always sprint","Without sprint-key, always sprints.",'bAlwaySprint',PC.bAlwaySprint);
+    AddCheckBox("[Apoc] Always sprint","Without sprint-key, always sprints.",'bAlwaySprint',PC.bAlwaySprint);
+    AddCheckBox("[Apoc] Auto Fire","Weapons fully automatic.",'bAutoFire',PC.bAutoFire);
 `endif
 
     /*
@@ -364,6 +365,9 @@ function CheckChange( KFGUI_CheckBox Sender )
 `if(`isdefined(APOC_PATCH))
     case 'bAlwaySprint':
         PC.bAlwaySprint = Sender.bChecked;
+        break;
+    case 'bAutoFire':
+        PC.bAutoFire = Sender.bChecked;
         break;
 `endif
     }
