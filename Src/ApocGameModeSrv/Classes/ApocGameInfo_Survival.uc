@@ -35,6 +35,36 @@ static event class<GameInfo> SetGameType(string MapName, string Options, string 
 	return Default.class;
 }
 
+event Broadcast(Actor Sender, coerce string Msg, optional name Type)
+{
+    if ( Type == 'Say' )
+	{
+        if (ChatCommandHandler(Sender, Msg))
+            return;
+	}
+
+    super.Broadcast(Sender, Msg, Type);
+}
+
+function bool ChatCommandHandler(Actor Sender, coerce string Msg)
+{
+    local bool IsCommandHandled;
+    local ClassicPlayerController KFPC;
+
+    KFPC = ClassicPlayerController(GetALocalPlayerController());
+
+    if ( 3 == Len( Msg ) && ( Left( Msg, 3 ) ~= "!ot" ) )
+    {
+        if( KFPC != none )
+        {
+            KFPC.OpenTraderMenu();
+            IsCommandHandled = true;
+        }
+    }
+
+    return IsCommandHandled;
+}
+
 defaultproperties
 {
 }
