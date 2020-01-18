@@ -22,5 +22,6 @@
 /Config/KFWeb.ini
 /Config/KFwebadmin.ini
 /Config/KFxMapVote.ini
+/Config/KFxMapVoteHistory.ini
 /Unpublished/BrewedPC/*.upk
 /Unpublished/BrewedPC/Script/*.u
