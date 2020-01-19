@@ -8,7 +8,7 @@ struct PassiveInfo
 };
 var array<PassiveInfo> PassiveInfos;
 
-struct PerkIconData 
+struct PerkIconData
 {
     var Texture2D PerkIcon;
     var Texture2D StarIcon;
@@ -18,7 +18,7 @@ var array<PerkIconData> OnHUDIcons;
 
 var const PerkSkill WeaponDamage;
 var const PerkSkill WeaponDiscount;
-    
+
 var class<KFPerk> BasePerk;
 var array<string> EXPActions;
 var string CustomLevelInfo, CustomPerkName;
@@ -46,11 +46,11 @@ var int FirstLevelExp, // How much EXP needed for first level.
         MinimumLevel,
         MaximumLevel,
         CurrentVetLevel;
-                
+
 var int CurrentEXP, // Current amount of EXP user has.
         NextLevelEXP, // Experience needed for next level.
         LastLevelEXP; // Number of XP was needed for last level.
-        
+
 replication
 {
     // Things the server should send to the client.
@@ -66,7 +66,7 @@ simulated function PostBeginPlay()
     {
         SetTimer(0.01,false,'InitPerk');
     }
-    
+
     `TimerHelper.SetTimer(0.1, true, 'GetRepLink', self);
     PerkAchieved = SoundCue(DynamicLoadObject(PerkAchievedName, class'SoundCue'));
 }
@@ -75,15 +75,15 @@ simulated function GetRepLink()
 {
     local ClassicPerk_Base Perk;
     local ClientPerkRepLink RepLink;
-    
+
     RepLink = class'ClientPerkRepLink'.static.FindContentRep(WorldInfo);
     if( RepLink != None )
     {
         GetPerkIcons(RepLink.ObjRef);
-        
+
         Perk = ClassicPerk_Base(FindObject(Class.GetPackageName()$".Default__"$Class.Name,Class));
         Perk.OnHUDIcons = OnHUDIcons;
-        
+
         `TimerHelper.ClearTimer('GetRepLink', self);
     }
 }
@@ -108,33 +108,33 @@ function bool EarnedEXP( int EXP )
 {
     local int Index;
     local KFGameEngine Engine;
-    
+
     Engine = KFGameEngine(class'Engine'.static.GetEngine());
-    
+
     bForceNetUpdate = true;
     CurrentEXP+=EXP;
-    
+
     if( CurrentEXP >= NextLevelEXP && CurrentVetLevel < MaximumLevel )
     {
         LastLevelEXP = NextLevelEXP;
         NextLevelEXP = GetNeededExp(CurrentVetLevel + 1);
-        
+
         SetLevel(CurrentVetLevel + 1);
 
         ClassicPlayerReplicationInfo(MyPRI).CurrentPerkLevel = CurrentVetLevel;
-        
+
         PerkAchieved.VolumeMultiplier = (Engine.SFxVolumeMultiplier/100.f) * (Engine.MasterVolumeMultiplier/100.f);
         OwnerPC.ClientPlaySound(PerkAchieved);
-        
+
         Index = OwnerPC.GetPerkIndexFromClass(Class);
         ClassicPlayerController(OwnerPC).SetPerkStaticLevel(Index, CurrentVetLevel);
         OwnerPC.PerkList[Index].PerkLevel = CurrentVetLevel;
-        
+
         WorldInfo.Game.BroadcastLocalizedMessage(class'KFLevelUpNotification', CurrentVetLevel, MyPRI,,Class);
-        
+
         PostLevelUp();
     }
-    
+
     return true;
 }
 
@@ -160,7 +160,7 @@ function ApplySkillsToPawn()
             KFIM.GrenadeCount = MaxGrenadeCount;
         }
     }
-    
+
     Super.ApplySkillsToPawn();
 }
 
@@ -219,10 +219,10 @@ function int GetNeededExp( int LevelNum )
 {
     if( LevelNum<MinimumLevel || LevelNum>=MaximumLevel )
         return 0;
-        
+
     LevelNum -= MinimumLevel;
     LevelNum = ( FirstLevelExp + (LevelNum*LevelUpExpCost) + ((LevelNum^2)*LevelUpIncCost) );
-    
+
     return LevelNum;
 }
 
@@ -234,19 +234,19 @@ simulated function bool HasNightVision()
 simulated function string GetPrimaryWeaponClassPath()
 {
     local class<KFWeaponDefinition> Def;
-    
+
     Def = GetWeaponDef(CurrentVetLevel);
     if( Def != None )
         return Def.default.WeaponClassPath;
-        
+
     return "";
 }
-    
+
 simulated static function class<KFWeaponDefinition> GetWeaponDef(int Level)
 {
     return default.PrimaryWeaponDef;
 }
-    
+
 simulated static function class<KFWeaponDefinition> GetSecondaryDef(int Level)
 {
     return default.SecondaryWeaponDef;
@@ -263,7 +263,7 @@ simulated static function class<KFWeaponDefinition> GetGrenadeDef(int Level)
 }
 
 simulated static function array<PassiveInfo> GetPerkInfoStrings(int Level)
-{    
+{
     return default.PassiveInfos;
 }
 
@@ -273,7 +273,7 @@ static simulated function bool IsWeaponOnPerk(KFWeapon W, optional array < class
     {
         return Super.IsWeaponOnPerk(W, WeaponPerkClass, InstigatorPerkClass, WeaponClassName);
     }
-    
+
     if( W != None )
     {
         return W.static.AllowedForAllPerks() || W.static.GetWeaponPerkClass( InstigatorPerkClass ) == default.BasePerk;
@@ -292,7 +292,7 @@ static function bool IsDamageTypeOnPerk(class<KFDamageType> KFDT)
     {
         return Super.IsDamageTypeOnPerk(KFDT);
     }
-    
+
     if( KFDT != none )
     {
         return KFDT.default.ModifierPerkList.Find(default.BasePerk) > INDEX_NONE;
@@ -307,7 +307,7 @@ static function bool IsBackupDamageTypeOnPerk(class<DamageType> DT)
     {
         return Super.IsBackupDamageTypeOnPerk(DT);
     }
-    
+
     if( DT != none )
     {
         return default.BasePerk.default.BackupWeaponDamageTypeNames.Find(DT.Name) > INDEX_NONE;
@@ -339,7 +339,7 @@ simulated function ModifyDamageGiven( out int InDamage, optional Actor DamageCau
             TempDamage += InDamage * GetPassiveValue(WeaponDamage, CurrentVetLevel);
         }
     }
-    
+
     if( GetIsHeadShotComboActive() && HeadShotComboCount > 0 )
     {
         TempDamage += Indamage * HeadShotDamageIncrements * HeadShotComboCount;
@@ -354,7 +354,7 @@ simulated function float GetCostScaling(byte Level, optional STraderItem TraderI
     {
         return 1.f - GetPassiveValue( WeaponDiscount, Level );
     }
-    
+
     return 1.f;
 }
 
@@ -372,46 +372,167 @@ simulated static function string GetPerkName()
 {
     if( default.BasePerk != None && default.BasePerk.default.PerkName != "" )
         return default.BasePerk.default.PerkName;
-        
+
     if( default.CustomPerkName != "" )
         return default.CustomPerkName;
-        
+
     return default.PerkName;
 }
 
 simulated static function byte GetPerkIconIndex( out byte Level )
 {
     local byte MaxStars, Index;
-    
+
     MaxStars = class'KFHUDInterface'.default.MaxPerkStars;
     Index = Min((Level-1)/MaxStars, default.OnHUDIcons.Length - 1);
     Level -= Index*MaxStars;
-    
+
     return Index;
 }
 
 simulated static function Texture2D GetCurrentPerkIcon( byte Level )
 {
     local Texture2D Icon;
-    
+
     Icon = default.OnHUDIcons[GetPerkIconIndex(Level)].PerkIcon;
     if( Icon == None )
         return class'KFHUDBase'.default.GenericHumanIconTexture;
-    
+
     return Icon;
 }
 
 simulated static function Texture2D GetCurrentPerkStarIcon( byte Level )
 {
     local Texture2D Icon;
-    
+
     Icon = default.OnHUDIcons[GetPerkIconIndex(Level)].StarIcon;
     if( Icon == None )
         return class'KFHUDBase'.default.GenericHumanIconTexture;
-    
+
     return Icon;
 }
 
+`if(`isdefined(APOC_PATCH))
+static function int ColorAdjust(float ColorValue, float Factor)
+{
+    local float Gamma, IntensityMax;
+    local int Result;
+
+    Gamma = 0.80f;
+    IntensityMax = 255.f;
+
+    if (ColorValue == 0.f)
+        Result = 0; // Don't want 0^x = 1 for x < > 0
+    else
+        Result = Round(IntensityMax  * (ColorValue * Factor)^Gamma);
+
+    return Result;
+}
+
+// WaveLength[700~380]
+static function Color WavelengthToColor(int Wavelength)
+{
+    local float Red, Green, Blue, Factor;
+    local Color ResultColor;
+
+    if (380 <= Wavelength && Wavelength <= 439)
+    {
+        Red = -float(Wavelength - 440) / float(440 - 380);
+        Green = 0.0f;
+        Blue = 1.0f;
+    }
+    else if (440 <= Wavelength && Wavelength <= 489)
+    {
+        Red = 0.0f;
+        Green = float(Wavelength - 440) / float(490 - 440);
+        Blue = 1.0f;
+    }
+    else if (490 <= Wavelength && Wavelength <= 509)
+    {
+        Red = 0.0f;
+        Green = 1.0f;
+        Blue = -float(Wavelength - 510) / float(510 - 490);
+    }
+    else if (510 <= Wavelength && Wavelength <= 579)
+    {
+        Red = float(Wavelength - 510) / float(580 - 510);
+        Green = 1.0;
+        Blue = 0.0;
+    }
+    else if (580 <= Wavelength && Wavelength <= 644)
+    {
+        Red = 1.0f;
+        Green = -float(Wavelength - 645) / float(645 - 580);
+        Blue = 0.0f;
+    }
+    else if (645 <= Wavelength && Wavelength <= 780)
+    {
+        Red = 1.0f;
+        Green = 0.0f;
+        Blue = 0.0f;
+    }
+    else
+    {
+        Red = 0.0;
+        Green = 0.0;
+        Blue = 0.0;
+    }
+
+    // Let the intensity fall off near the vision limits
+    if (380 <= Wavelength && Wavelength <= 419)
+    {
+        Factor = 0.3f + 0.7f * float(Wavelength - 380) / float(420 - 380);
+    }
+    else if (420 <= Wavelength && Wavelength <= 700)
+    {
+        Factor = 1.0f;
+    }
+    else if (701 <= Wavelength && Wavelength <= 780)
+    {
+        Factor = 0.3f + 0.7f * float(780 - Wavelength) / float(780 - 700);
+    }
+    else
+    {
+        Factor = 0.0f;
+    }
+
+    ResultColor.R = ColorAdjust(Red, Factor);
+    ResultColor.G = ColorAdjust(Green, Factor);
+    ResultColor.B = ColorAdjust(Blue, Factor);
+    ResultColor.A = 255;
+
+    return ResultColor;
+}
+
+simulated static function Color GetPerkColor( byte Level )
+{
+    local float LevelPct;
+    local float Wavelength;
+
+    LevelPct = Level / `APOC_MAX_PERK_LEVEL;
+    Wavelength = Lerp(650, 460, LevelPct);
+    return WavelengthToColor(Wavelength);
+}
+
+simulated static function byte PreDrawPerk( Canvas C, byte Level, out Texture2D Icon, out Texture2D StarIcon )
+{
+    local byte Index;
+
+    Index = GetPerkIconIndex(Level);
+
+    Icon = default.OnHUDIcons[Index].PerkIcon;
+    if( Icon == None )
+        Icon = class'KFHUDBase'.default.GenericHumanIconTexture;
+
+    StarIcon = default.OnHUDIcons[Index].StarIcon;
+    if( StarIcon == None )
+        StarIcon = class'KFHUDBase'.default.GenericHumanIconTexture;
+
+    C.DrawColor = GetPerkColor(Level);
+
+    return Level;
+}
+`else // `if(`isdefined(APOC_PATCH))
 simulated static function Color GetPerkColor( byte Level )
 {
     return default.OnHUDIcons[GetPerkIconIndex(Level)].DrawColor;
@@ -420,21 +541,22 @@ simulated static function Color GetPerkColor( byte Level )
 simulated static function byte PreDrawPerk( Canvas C, byte Level, out Texture2D Icon, out Texture2D StarIcon )
 {
     local byte Index;
-    
+
     Index = GetPerkIconIndex(Level);
-    
+
     Icon = default.OnHUDIcons[Index].PerkIcon;
     if( Icon == None )
         Icon = class'KFHUDBase'.default.GenericHumanIconTexture;
-        
+
     StarIcon = default.OnHUDIcons[Index].StarIcon;
     if( StarIcon == None )
         StarIcon = class'KFHUDBase'.default.GenericHumanIconTexture;
-        
+
     C.DrawColor = default.OnHUDIcons[Index].DrawColor;
-        
+
     return Level;
 }
+`endif // `if(`isdefined(APOC_PATCH))
 
 simulated function string GetCustomLevelInfo( byte Level )
 {
@@ -447,8 +569,8 @@ static function string GetPercentStr( PerkSkill Skill, byte Level  )
 }
 
 simulated event bool GetIsHeadShotComboActive()
-{ 
-    return bEnableRackEmUp; 
+{
+    return bEnableRackEmUp;
 }
 
 function AddToHeadShotCombo( class<KFDamageType> KFDT, KFPawn_Monster KFPM )
@@ -467,7 +589,7 @@ function UpdatePerkHeadShots( ImpactInfo Impact, class<DamageType> DamageType, i
 {
        local int HitZoneIdx;
        local KFPawn_Monster KFPM;
-    
+
     if( !GetIsHeadShotComboActive() )
         return;
 
@@ -500,8 +622,8 @@ reliable client function HeadShotMessage( byte HeadShotNum, byte DisplayValue, o
         case 0:
             TempAkEvent = RhythmMethodSoundReset;
             break;
-        case 1:    case 2:    case 3:    
-        case 4:    
+        case 1:    case 2:    case 3:
+        case 4:
             if( !bMissed )
             {
                 TempAkEvent = RhythmMethodSoundHit;
@@ -547,7 +669,7 @@ reliable server function ServerClearHeadShotsCombo()
 function Destroyed()
 {
     Super.Destroyed();
-    
+
     if( Role == Role_Authority )
     {
         ServerClearHeadShotsCombo();
@@ -572,19 +694,19 @@ defaultproperties
        RhythmMethodSoundReset=AkEvent'WW_UI_PlayerCharacter.Play_R_Method_Reset'
     RhythmMethodSoundHit=AkEvent'WW_UI_PlayerCharacter.Play_R_Method_Hit'
     RhythmMethodSoundTop=AkEvent'WW_UI_PlayerCharacter.Play_R_Method_Top'
-    
+
     FirstLevelExp=7500
     LevelUpExpCost=9375
     LevelUpIncCost=1218
-    
+
     MinimumLevel=-1
     MaximumLevel=-1
-    
+
     ProgressStatID=1
     PerkBuildStatID=2
-    
+
     bInitialized=true
-    
+
     OnHUDIcons.Add((DrawColor=(R=255,G=15,B=15,A=255)))
     OnHUDIcons.Add((DrawColor=(R=255,G=255,B=0,A=255)))
     OnHUDIcons.Add((DrawColor=(R=0,G=255,B=0,A=255)))
@@ -600,11 +722,11 @@ defaultproperties
     OnHUDIcons.Add((DrawColor=(R=255,G=140,B=0,A=255)))
     OnHUDIcons.Add((DrawColor=(R=148,G=0,B=211,A=255)))
     OnHUDIcons.Add((DrawColor=(R=240,G=255,B=255,A=255)))
-    
+
     WeaponDiscount=(Name="Weapon Discount",Increment=0.1f,Rank=0,StartingValue=0.1f,MaxValue=0.9f)
-    
+
     PerkAchievedName="ApocGameMode_Assets.Perks.PerkAchievedCue"
-    
+
     SecondaryWeaponDef=class'ClassicWeapDef_9mm'
     GrenadeWeaponDef=class'ClassicWeapDef_Grenade_Support'
 }
