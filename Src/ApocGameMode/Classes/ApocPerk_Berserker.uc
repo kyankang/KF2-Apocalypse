@@ -1,4 +1,6 @@
-class ApocPerk_Berserker extends ClassicPerk_Berserker;
+class ApocPerk_Berserker extends ClassicPerk_Base;
+
+var const PerkSkill DamageResistance;
 
 var const 	private 	float 		NinjaSprintModifer;
 var const 	private 	float		SmashStumbleModifier;
@@ -779,6 +781,15 @@ simulated event bool ShouldUseFastInstigatorDilation(KFWeapon Weap)
     return false;
 }
 
+/*********************************************************************************************
+* @name	 Classic Perk
+******************************************************************************************** */
+
+function AddDefaultInventory( KFPawn P )
+{
+    Super.AddDefaultInventory(P);
+}
+
 simulated static function array<PassiveInfo> GetPerkInfoStrings(int Level)
 {
     return default.PassiveInfos;
@@ -794,6 +805,19 @@ simulated function float GetCostScaling(byte Level, optional STraderItem TraderI
     return 1.f;
 }
 
+simulated static function GetPassiveStrings( out array<string> PassiveValues, out array<string> Increments, byte Level )
+{
+	PassiveValues[0] = Round(GetPassiveValue( default.WeaponDamage, Level ) * 100) $ "%";
+	PassiveValues[1] = Round(GetPassiveDamageResistance( Level ) * 100) $ "%";
+	PassiveValues[2] = "";
+	PassiveValues[3] = "";
+
+	Increments[0] = "[" @ Left( string( default.WeaponDamage.Increment * 100 ), InStr(string(default.WeaponDamage.Increment * 100), ".") + 2 )$"% /" @ default.LevelString @ "]";
+	Increments[1] = "[" @ Left( string( default.DamageResistance.Increment * 100 ), InStr(string(default.DamageResistance.Increment * 100), ".") + 2 )$"% / 5" @ default.LevelString @ "]";
+	Increments[2] = "";
+	Increments[3] = "";
+}
+
 simulated function string GetCustomLevelInfo( byte Level )
 {
     local string S;
@@ -803,21 +827,8 @@ simulated function string GetCustomLevelInfo( byte Level )
 
     ReplaceText(S,"%d",GetPercentStr(default.WeaponDamage, Level));
     ReplaceText(S,"%s",GetPercentStr(default.DamageResistance, Level));
-    ReplaceText(S,"%a",GetPercentStr(default.MeleeAttackSpeed, Level));
-    ReplaceText(S,"%m",GetPercentStr(default.MeleeMovementSpeed, Level));
-    ReplaceText(S,"%b",GetPercentStr(default.BloatBileResistance, Level));
 
     S = S $ "|Can't be grabbed by Clots";
-
-    if( IsVampireActive() )
-    {
-        S = S $ "|Heals from killing ZEDs";
-    }
-
-    if( IsSpartanActive() )
-    {
-        S = S $ "|Move and attack in realtime during ZED Time";
-    }
 
     SpawnDef = GetWeaponDef(Level);
     if( SpawnDef != None )
@@ -825,9 +836,18 @@ simulated function string GetCustomLevelInfo( byte Level )
         S = S $ "|Spawn with a " $ SpawnDef.static.GetItemName();
     }
 
-    S = S $ "|Can't be grabbed by Clots";
-
     return S;
+}
+
+simulated function GetPerkIcons(ObjectReferencer RepInfo)
+{
+    local int i;
+
+    for (i = 0; i < OnHUDIcons.Length; i++)
+    {
+        OnHUDIcons[i].PerkIcon = Texture2D(RepInfo.ReferencedObjects[59]);
+        OnHUDIcons[i].StarIcon = Texture2D(RepInfo.ReferencedObjects[28]);
+    }
 }
 
 DefaultProperties
@@ -888,4 +908,12 @@ DefaultProperties
 	HitAccuracyHandicap=2.5
 	HeadshotAccuracyHandicap=-2.0
     AutoBuyLoadOutPath=(class'KFWeapDef_Crovel', class'KFWeapDef_Katana', class'KFWeapDef_Pulverizer', class'KFWeapDef_Eviscerator', class'KFWeapDef_AbominationAxe')
+
+    BasePerk=class'KFPerk_Berserker'
+	EXPActions(0)="Dealing Berserker weapon damage"
+    EXPActions(1)="Killing Zeds near a player with a Berserker weapon"
+	PassiveInfos(0)=(Title="Melee Weapon Damage")
+    PassiveInfos(1)=(Title="Damage Resistance")
+    PassiveInfos(2)=(Title="Clots cannot grab you")
+	CustomLevelInfo="%d increase in melee weapon damage|%s resistence to all damage"
 }
