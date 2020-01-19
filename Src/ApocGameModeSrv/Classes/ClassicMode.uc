@@ -210,6 +210,7 @@ function PostBeginPlay()
 
     foreach Perks(MyPerk)
     {
+`if(`notdefined(APOC_REMOVED))
         if( bDisableGameplayChanges )
         {
             switch(MyPerk)
@@ -237,6 +238,7 @@ function PostBeginPlay()
                     break;
             }
         }
+`endif // `if(`notdefined(APOC_REMOVED))
 
         LoadedPerk = class<ClassicPerk_Base>(DynamicLoadObject(MyPerk,class'Class'));
         if( LoadedPerk != None )
@@ -591,6 +593,7 @@ function SetupDefaultConfig()
             DefaultInventory.AddItem(DefPath);
         }
 
+`if(`notdefined(APOC_REMOVED))
         Perks.AddItem("ApocGameMode.ClassicPerk_Berserker");
         Perks.AddItem("ApocGameMode.ClassicPerk_Commando");
         Perks.AddItem("ApocGameMode.ClassicPerk_Support");
@@ -598,6 +601,7 @@ function SetupDefaultConfig()
         Perks.AddItem("ApocGameMode.ClassicPerk_Demolitionist");
         Perks.AddItem("ApocGameMode.ClassicPerk_Firebug");
         Perks.AddItem("ApocGameMode.ClassicPerk_Sharpshooter");
+`endif // `if(`notdefined(APOC_REMOVED))
 
         MapInfo.Name = "KF-KrampusLair";
         MapInfo.Type = "XMas";
@@ -1661,13 +1665,18 @@ function InitializePerks( ClassicPlayerController Other )
 {
     local ClassicPerkManager              PM;
     local ClassicPerk_Base                P;
-    local int                             i,Index;
+    local int                             i;
+
+`if(`notdefined(APOC_REMOVED))
+    local int                             Index;
+`endif
 
     Other.OnSpectateChange = PlayerChangeSpec;
 
     PM = Other.PerkManager;
     PM.InitPerks();
 
+`if(`notdefined(APOC_REMOVED))
     if( bDisableGameplayChanges )
     {
         if( !bDisableGunslinger )
@@ -1684,6 +1693,7 @@ function InitializePerks( ClassicPlayerController Other )
                 LoadedPerks.AddItem(class'ApocGameMode.ClassicPerk_SWAT_Default');
         }
     }
+`endif // `if(`notdefined(APOC_REMOVED))
 
     for( i=0; i<LoadedPerks.Length; ++i )
     {
