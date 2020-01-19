@@ -1701,7 +1701,12 @@ function InitializePerks( ClassicPlayerController Other )
         if( P != None )
         {
             P.MinimumLevel = MinPerkLevel;
+
+`if(`isdefined(APOC_PATCH))
+            P.MaximumLevel = MaxPerkLevel;
+`else
             P.MaximumLevel = bDisableGameplayChanges ? byte(Max(25, MaxPerkLevel)) : MaxPerkLevel;
+`endif
 
             P.FirstLevelExp *= RequirementScaling;
             P.LevelUpExpCost *= RequirementScaling;

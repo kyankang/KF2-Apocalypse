@@ -99,10 +99,25 @@ simulated function byte GetLevel()
     return CurrentVetLevel;
 }
 
+`if(`isdefined(APOC_PATCH))
+simulated function ApocPerkSkillUnlock( byte NewLevel )
+{
+    if( NewLevel<=PerkSkills.Length )
+        PerkSkills[NewLevel-1].bActive = true;
+}
+
+simulated function SetLevel( byte NewLevel )
+{
+    ApocPerkSkillUnlock(NewLevel);
+
+    CurrentVetLevel = NewLevel;
+}
+`else // `if(`isdefined(APOC_PATCH))
 simulated function SetLevel( byte NewLevel )
 {
     CurrentVetLevel = NewLevel;
 }
+`endif // `if(`isdefined(APOC_PATCH))
 
 function bool EarnedEXP( int EXP )
 {
