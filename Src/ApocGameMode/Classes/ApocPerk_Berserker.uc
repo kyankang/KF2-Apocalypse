@@ -818,30 +818,6 @@ simulated static function GetPassiveStrings( out array<string> PassiveValues, ou
 	Increments[3] = "";
 }
 
-simulated function string GetCustomLevelInfo( byte Level )
-{
-    local string S;
-	local bool bCurrentVetLevel;
-
-	bCurrentVetLevel = (CurrentVetLevel == Level);
-
-	if (bCurrentVetLevel)
-	{
-		S = ApocGetCurrentRankString();
-		S = S $ ApocGetBasicLoadoutString(BasePerk, Level);
-		S = S $ ApocGetPassiveSkillSummary(BasePerk, Level);
-		S = S $ ApocGetActiveSkillSummary(BasePerk, Level);
-	}
-	else
-	{
-		S = ApocGetNextRankString();
-		S = S $ ApocGetNextPassiveSkillSummary(BasePerk, Level);
-		S = S $ ApocGetNextUnlockActiveSkill(BasePerk, Level);
-	}
-
-    return S;
-}
-
 simulated function GetPerkIcons(ObjectReferencer RepInfo)
 {
     local int i;
@@ -912,11 +888,11 @@ DefaultProperties
 	HeadshotAccuracyHandicap=-2.0
     AutoBuyLoadOutPath=(class'KFWeapDef_Crovel', class'KFWeapDef_Katana', class'KFWeapDef_Pulverizer', class'KFWeapDef_Eviscerator', class'KFWeapDef_AbominationAxe')
 
+	// ClassicPerk
     BasePerk=class'KFPerk_Berserker'
 	EXPActions(0)="Dealing Berserker weapon damage"
     EXPActions(1)="Killing Zeds near a player with a Berserker weapon"
 	PassiveInfos(0)=(Title="Melee Weapon Damage")
     PassiveInfos(1)=(Title="Damage Resistance")
     PassiveInfos(2)=(Title="Clots cannot grab you")
-	CustomLevelInfo="%d increase in melee weapon damage|%s resistence to all damage"
 }

@@ -565,7 +565,33 @@ simulated static function byte PreDrawPerk( Canvas C, byte Level, out Texture2D 
 
     return Level;
 }
+
+simulated function string GetCustomLevelInfo( byte Level )
+{
+    local string S;
+	local bool bCurrentVetLevel;
+
+	bCurrentVetLevel = (CurrentVetLevel == Level);
+
+	if (bCurrentVetLevel)
+	{
+		S = ApocGetCurrentRankString();
+		S = S $ ApocGetBasicLoadoutString(BasePerk, Level);
+		S = S $ ApocGetPassiveSkillSummary(BasePerk, Level);
+		S = S $ ApocGetActiveSkillSummary(BasePerk, Level);
+	}
+	else
+	{
+		S = ApocGetNextRankString();
+		S = S $ ApocGetNextPassiveSkillSummary(BasePerk, Level);
+		S = S $ ApocGetNextUnlockActiveSkill(BasePerk, Level);
+	}
+
+    return S;
+}
+
 `else // `if(`isdefined(APOC_PATCH))
+
 simulated static function Color GetPerkColor( byte Level )
 {
     return default.OnHUDIcons[GetPerkIconIndex(Level)].DrawColor;
@@ -589,12 +615,12 @@ simulated static function byte PreDrawPerk( Canvas C, byte Level, out Texture2D 
 
     return Level;
 }
-`endif // `if(`isdefined(APOC_PATCH))
 
 simulated function string GetCustomLevelInfo( byte Level )
 {
     return default.CustomLevelInfo;
 }
+`endif // `if(`isdefined(APOC_PATCH))
 
 static function string GetPercentStr( PerkSkill Skill, byte Level  )
 {
@@ -732,7 +758,7 @@ function string ApocGetCompletedLevelInfo()
 
 function string ApocGetCurrentRankString()
 {
-    return "|" $ Localize("KFGFxPerksContainer_Prestige", "CurrentRankString", "KFGame");
+    return Localize("KFGFxPerksContainer_Prestige", "CurrentRankString", "KFGame");
 }
 
 function string ApocGetNextRankString()
