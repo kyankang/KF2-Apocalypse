@@ -13,7 +13,7 @@ function InitMenu()
 function ShowMenu()
 {
     Super.ShowMenu();
-    
+
     Timer();
     SetTimer(0.1,true);
 }
@@ -24,23 +24,33 @@ function Timer()
     local ClassicPlayerController PC;
     local string S;
     local byte CurrentVetLevel;
-    
+
     PC = ClassicPlayerController(GetPlayer());
     if( PC == None )
         return;
-        
+
     CurrentPerk = ClassicPerk_Base(PC.CurrentPerk);
     if( CurrentPerk == None || (CurrentSelectedPerk == CurrentPerk && CurrentPerkLevel == CurrentPerk.GetLevel()) )
         return;
-        
+
     CurrentVetLevel = CurrentPerk.GetLevel();
     S = CurrentPerk.GetCustomLevelInfo(CurrentVetLevel);
-    
+
     if( CurrentVetLevel < CurrentPerk.MaximumLevel )
+`if(`isdefined(APOC_PATCH))
+    {
+        S = S $ CurrentPerk.GetCustomLevelInfo(CurrentVetLevel+1);
+    }
+    else
+    {
+        S = S $ CurrentPerk.ApocGetCompletedLevelInfo();
+    }
+`else
     {
         S = S $ "|| --- Next Level Effects --- ||" $ CurrentPerk.GetCustomLevelInfo(CurrentVetLevel+1);
     }
-        
+`endif
+
     CurrentPerkLevel = CurrentVetLevel;
     CurrentSelectedPerk = CurrentPerk;
     PerkEffectsScroll.SetText(S);

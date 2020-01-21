@@ -51,6 +51,16 @@ var int CurrentEXP, // Current amount of EXP user has.
         NextLevelEXP, // Experience needed for next level.
         LastLevelEXP; // Number of XP was needed for last level.
 
+`if(`isdefined(APOC_PATCH))
+struct ApocPassiveLocalize
+{
+    var array<string> Title;
+    var array<string> Description;
+};
+
+var const string ApocItemPrefix;
+`endif
+
 replication
 {
     // Things the server should send to the client.
@@ -203,7 +213,11 @@ final function int CalcLevelForExp( int InExp )
     local int i,a,b;
 
     // Fast method to calc level for a player.
+`if(`isdefined(APOC_PATCH))
+    b = MaximumLevel;
+`else
     b = MaximumLevel+1;
+`endif
     a = Min(MinimumLevel,b);
     while( true )
     {
@@ -700,13 +714,230 @@ simulated event SetPerkBuild( int NewPerkBuild );
 simulated event GetUnpackedSkillsArray( Class<KFPerk> PerkClass, int NewPerkBuild,  out byte SelectedSkillsHolder[`MAX_PERK_SKILLS] );
 simulated function UnpackSkill( byte PerkLevel, int NewPerkBuild, byte SkillTier, int SkillFlag1, int SkillFlag2, out byte SelectedSkillsHolder[`MAX_PERK_SKILLS] );
 
+`if(`isdefined(APOC_PATCH))
+function string ApocGetCompletedLevelInfo()
+{
+    local string S;
+
+    S = ApocGetNextRankString();
+    S = S $ "|" $ ApocItemPrefix;
+    S = S @ Localize("KFGFxWidget_LevelUpNotification", "ObjectiveCompleteString", "KFGame");
+
+    return S;
+}
+
+function string ApocGetCurrentRankString()
+{
+    return "|" $ Localize("KFGFxPerksContainer_Prestige", "CurrentRankString", "KFGame");
+}
+
+function string ApocGetNextRankString()
+{
+    return "||" $ Localize("KFGFxPerksContainer_Prestige", "NextRankString", "KFGame");
+}
+
+function string ApocGetBasicLoadoutString(class<KFPerk> Perk, byte Level)
+{
+    local string S;
+    local class<KFWeaponDefinition> SpawnDef;
+
+    if( Perk!=none )
+    {
+        SpawnDef = GetWeaponDef(Level);
+        if( SpawnDef != None )
+        {
+            S = "|" $ ApocItemPrefix;
+            S = S @ Localize("KFGFxPerksContainer_Details", "BasicLoadoutString", "KFGame") @ ":";
+            S = S @ SpawnDef.static.GetItemName();
+        }
+    }
+
+    return S;
+}
+
+function ApocPassiveLocalize ApocGetPassiveSkillLocalize(class<KFPerk> Perk, int Index)
+{
+    local string S;
+    local array<string> SArr;
+    local ApocPassiveLocalize Result;
+
+    if( Perk!=none )
+    {
+        S = Localize(String(Perk.Name), "Passives["$Index$"]", "KFGame");
+        if( 0<Len(S) )
+        {
+            S = Repl( S, "(", "" );
+            S = Repl( S, ");", "" );
+            S = Repl( S, "\"", "" );
+            SArr = SplitString( S, ",");
+            Result.Title = SplitString( SArr[0], "=");
+            Result.Description = SplitString( SArr[1], "=");
+        }
+    }
+
+    return Result;
+}
+
+function string ApocGetPassiveSkillSummary(class<KFPerk> Perk, byte Level)
+{
+	local int i;
+    local string S;
+    local ApocPassiveLocalize PassiveLocalize;
+	local array<string> PassiveValues, Increments;
+
+    if( Perk!=none )
+    {
+        GetPassiveStrings( PassiveValues, Increments, Level);
+
+        for( i=0; i<PassiveValues.length; i++ )
+        {
+            if( 0<Len(Increments[i]) && 0<Len(PassiveValues[i]) )
+            {
+                PassiveLocalize = ApocGetPassiveSkillLocalize(Perk, i);
+                S = S $ "|" $ ApocItemPrefix;
+                S = S @ PassiveLocalize.Title[1];
+                S = S @ ":" @ PassiveValues[i];
+                S = S @ Increments[i];
+            }
+        }
+    }
+
+    return S;
+}
+
+function string ApocGetNextPassiveSkillSummary(class<KFPerk> Perk, byte Level)
+{
+	local int i;
+    local string S;
+    local ApocPassiveLocalize PassiveLocalize;
+	local array<string> PassiveValues, Increments;
+
+    if( Perk!=none )
+    {
+        GetPassiveStrings( PassiveValues, Increments, Level);
+
+        for( i=0; i<PassiveValues.length; i++ )
+        {
+            if( 0<Len(Increments[i]) && 0<Len(PassiveValues[i]) )
+            {
+                PassiveLocalize = ApocGetPassiveSkillLocalize(Perk, i);
+                S = S $ "|" $ ApocItemPrefix;
+                S = S @ PassiveLocalize.Title[1];
+                S = S @ ":" @ PassiveValues[i];
+                S = S @ Increments[i];
+            }
+        }
+    }
+
+    return S;
+}
+
+function string ApocGetSkillCategory(class<KFPerk> Perk, byte SkillIndex)
+{
+    local string S;
+    local int SkillCategoryIndex;
+
+    if( Perk!=none )
+    {
+        SkillCategoryIndex = FCeil(SkillIndex / 2);
+
+        if( 0<=SkillCategoryIndex && SkillCategoryIndex<`MAX_PERK_SKILLS )
+        {
+            S = "[" $ Perk.default.SkillCatagories[SkillCategoryIndex] $ "]";
+        }
+    }
+
+    return S;
+}
+
+function string ApocGetSkillName(class<KFPerk> Perk, byte SkillIndex)
+{
+    local string S;
+	local array<PerkSkill> PerkSkillArr;
+
+    if( Perk!=none )
+    {
+        if( 0<=SkillIndex && SkillIndex<Perk.default.PerkSkills.Length )
+        {
+            PerkSkillArr = Perk.default.PerkSkills;
+            S = Localize(String(Perk.Name), PerkSkillArr[SkillIndex].Name, "KFGame");
+        }
+    }
+
+    return S;
+}
+
+function string ApocGetSkillDescription(class<KFPerk> Perk, byte SkillIndex)
+{
+    local string S;
+	local array<PerkSkill> PerkSkillArr;
+
+    if( Perk!=none )
+    {
+        if( 0<=SkillIndex && SkillIndex<Perk.default.PerkSkills.Length )
+        {
+            PerkSkillArr = Perk.default.PerkSkills;
+            S = Localize(String(Perk.Name), PerkSkillArr[SkillIndex].Name$"Description", "KFGame");
+        }
+    }
+
+    return S;
+}
+
+function string ApocGetActiveSkillSummary(class<KFPerk> Perk, byte Level)
+{
+    local int i;
+    local string S;
+
+    if( Perk!=none )
+    {
+        if( 0<Level && Level<=Perk.default.PerkSkills.Length )
+        {
+            for( i=0; i<Level; i++ )
+            {
+                S = S $ "|" $ ApocItemPrefix;
+                S = S @ ApocGetSkillCategory(BasePerk, i);
+                S = S @ ApocGetSkillName(BasePerk, i) @ ":";
+                S = S @ ApocGetSkillDescription(BasePerk, i);
+            }
+        }
+    }
+
+    return S;
+}
+
+function string ApocGetNextUnlockActiveSkill(class<KFPerk> Perk, byte Level)
+{
+    local string S;
+    local int SkillIndex;
+
+    if( Perk!=none )
+    {
+        SkillIndex = Level - 1;
+        if( 0<=SkillIndex && SkillIndex<Perk.default.PerkSkills.Length )
+        {
+            S = "|" $ ApocItemPrefix;
+            S = S @ ApocGetSkillCategory(BasePerk, SkillIndex);
+            S = S @ ApocGetSkillName(BasePerk, SkillIndex) @ ":";
+            S = S @ ApocGetSkillDescription(BasePerk, SkillIndex);
+        }
+    }
+
+    return S;
+}
+`endif
+
 defaultproperties
 {
+`if(`isdefined(APOC_PATCH))
+    ApocItemPrefix="  *"
+`endif
+
     HeadShotDamageIncrements=0.10f
-       MaxHeadShotComboCount=5
-       HeadShotCountdownInterval=2.f
-       RhytmMethodRTPCName="R_Method"
-       RhythmMethodSoundReset=AkEvent'WW_UI_PlayerCharacter.Play_R_Method_Reset'
+    MaxHeadShotComboCount=5
+    HeadShotCountdownInterval=2.f
+    RhytmMethodRTPCName="R_Method"
+    RhythmMethodSoundReset=AkEvent'WW_UI_PlayerCharacter.Play_R_Method_Reset'
     RhythmMethodSoundHit=AkEvent'WW_UI_PlayerCharacter.Play_R_Method_Hit'
     RhythmMethodSoundTop=AkEvent'WW_UI_PlayerCharacter.Play_R_Method_Top'
 

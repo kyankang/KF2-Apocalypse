@@ -130,7 +130,7 @@ simulated function ModifyDamageGiven( out int InDamage, optional Actor DamageCau
 		`QALog( GetFuncName() @ "Base damage:" @ InDamage , bLogPerk);
 		if( (MyKFWeapon != none && IsWeaponOnPerk( MyKFWeapon,, self.class )) || IsDamageTypeOnPerk( DamageType ) )
 		{
-			TempDamage += InDamage * GetPassiveValue( WeaponDamage,  CurrentLevel );
+			TempDamage += InDamage * GetPassiveValue( WeaponDamage,  CurrentLevel, default.WeaponDamage.Rank );
 			if( IsSpeedActive() )
 			{
 				TempDamage += InDamage * static.GetSpeedDamageModifier();
@@ -323,7 +323,7 @@ function ModifyDamageTaken( out int InDamage, optional class<DamageType> DamageT
  */
 simulated private final static function float GetPassiveDamageResistance( int Level )
 {
-	return default.DamageResistance.Increment * FFloor( float( Level ) / 5.f );
+	return default.DamageResistance.Increment * FFloor( float( Level ) / default.DamageResistance.Rank );
 }
 
 function ModifyBloatBileDoT( out float DoTScaler )
@@ -807,13 +807,13 @@ simulated function float GetCostScaling(byte Level, optional STraderItem TraderI
 
 simulated static function GetPassiveStrings( out array<string> PassiveValues, out array<string> Increments, byte Level )
 {
-	PassiveValues[0] = Round(GetPassiveValue( default.WeaponDamage, Level ) * 100) $ "%";
-	PassiveValues[1] = Round(GetPassiveDamageResistance( Level ) * 100) $ "%";
+	PassiveValues[0] = Round(GetPassiveValue( default.WeaponDamage, Level ) * 100) @ "%";
+	PassiveValues[1] = Round(GetPassiveDamageResistance( Level ) * 100) @ "%";
 	PassiveValues[2] = "";
 	PassiveValues[3] = "";
 
-	Increments[0] = "[" @ Left( string( default.WeaponDamage.Increment * 100 ), InStr(string(default.WeaponDamage.Increment * 100), ".") + 2 )$"% /" @ default.LevelString @ "]";
-	Increments[1] = "[" @ Left( string( default.DamageResistance.Increment * 100 ), InStr(string(default.DamageResistance.Increment * 100), ".") + 2 )$"% / 5" @ default.LevelString @ "]";
+	Increments[0] = "[" @ Left( string( default.WeaponDamage.Increment * 100 ), InStr(string(default.WeaponDamage.Increment * 100), ".") + 2 )@"% / +" $ default.WeaponDamage.Rank @ default.LevelString @ "]";
+	Increments[1] = "[" @ Left( string( default.DamageResistance.Increment * 100 ), InStr(string(default.DamageResistance.Increment * 100), ".") + 2 )@"% / +" $ default.DamageResistance.Rank @ default.LevelString @ "]";
 	Increments[2] = "";
 	Increments[3] = "";
 }
@@ -821,20 +821,23 @@ simulated static function GetPassiveStrings( out array<string> PassiveValues, ou
 simulated function string GetCustomLevelInfo( byte Level )
 {
     local string S;
-    local class<KFWeaponDefinition> SpawnDef;
+	local bool bCurrentVetLevel;
 
-    S = default.CustomLevelInfo;
+	bCurrentVetLevel = (CurrentVetLevel == Level);
 
-    ReplaceText(S,"%d",GetPercentStr(default.WeaponDamage, Level));
-    ReplaceText(S,"%s",GetPercentStr(default.DamageResistance, Level));
-
-    S = S $ "|Can't be grabbed by Clots";
-
-    SpawnDef = GetWeaponDef(Level);
-    if( SpawnDef != None )
-    {
-        S = S $ "|Spawn with a " $ SpawnDef.static.GetItemName();
-    }
+	if (bCurrentVetLevel)
+	{
+		S = ApocGetCurrentRankString();
+		S = S $ ApocGetBasicLoadoutString(BasePerk, Level);
+		S = S $ ApocGetPassiveSkillSummary(BasePerk, Level);
+		S = S $ ApocGetActiveSkillSummary(BasePerk, Level);
+	}
+	else
+	{
+		S = ApocGetNextRankString();
+		S = S $ ApocGetNextPassiveSkillSummary(BasePerk, Level);
+		S = S $ ApocGetNextUnlockActiveSkill(BasePerk, Level);
+	}
 
     return S;
 }
@@ -887,8 +890,8 @@ DefaultProperties
     KnifeWeaponDef=class'KFweapDef_Knife_Berserker'
     GrenadeWeaponDef=class'KFWeapDef_Grenade_Berserker'
 
-    WeaponDamage=(Name="Berserker Damage",Increment=0.01,Rank=0,StartingValue=0.f,MaxValue=0.25)
-	DamageResistance=(Name="Damage Resistance",Increment=0.03f,Rank=0,StartingValue=0.f,MaxValue=0.15f)
+    WeaponDamage=(Name="Berserker Damage",Increment=0.01,Rank=1,StartingValue=0.f,MaxValue=0.25)
+	DamageResistance=(Name="Damage Resistance",Increment=0.03f,Rank=5,StartingValue=0.f,MaxValue=0.15f)
 
     PerkSkills(EBerserkerFortitude)=(Name="Fortitude",IconPath="UI_PerkTalent_TEX.berserker.UI_Talents_Berserker_Fortitude",Increment=0.f,Rank=0,StartingValue=0.75,MaxValue=0.75)
 	PerkSkills(EBerserkerNinja)=(Name="Ninja",IconPath="UI_PerkTalent_TEX.berserker.UI_Talents_Berserker_Ninja",Increment=0.f,Rank=0,StartingValue=0.2f,MaxValue=0.2f)
