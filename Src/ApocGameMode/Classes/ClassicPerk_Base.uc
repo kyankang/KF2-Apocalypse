@@ -112,8 +112,12 @@ simulated function byte GetLevel()
 `if(`isdefined(APOC_PATCH))
 simulated function ApocPerkSkillUnlock( byte NewLevel )
 {
-    if( NewLevel<=PerkSkills.Length )
-        PerkSkills[NewLevel-1].bActive = true;
+    local int SkillIndex;
+
+    SkillIndex = NewLevel - 1;
+
+    if( 0<=SkillIndex && SkillIndex<PerkSkills.Length )
+        PerkSkills[SkillIndex].bActive = true;
 }
 
 simulated function SetLevel( byte NewLevel )
