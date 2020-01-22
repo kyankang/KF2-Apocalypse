@@ -12,11 +12,13 @@ simulated function ModifyDamageGiven( out int InDamage, optional Actor DamageCau
     local float TempDamage;
 
     TempDamage = InDamage;
-    
+
+`if(`notdefined(APOC_REMOVED))
     if( GetIsHeadShotComboActive() && HeadShotComboCount > 0 )
     {
         TempDamage += Indamage * HeadShotDamageIncrements * HeadShotComboCount;
     }
+`endif
 
     InDamage = FCeil(TempDamage);
 }
@@ -82,8 +84,8 @@ simulated function int GetArmorDamageAmount( int AbsorbedAmt )
 }
 
 simulated function bool HasHeavyArmor()
-{ 
-    return true; 
+{
+    return true;
 }
 
 simulated static function class<KFWeaponDefinition> GetWeaponDef(int Level)
@@ -92,7 +94,7 @@ simulated static function class<KFWeaponDefinition> GetWeaponDef(int Level)
     {
         return class'ClassicWeapDef_MP7';
     }
-    
+
     return None;
 }
 
@@ -127,7 +129,7 @@ simulated function string GetCustomLevelInfo( byte Level )
     ReplaceText(S,"%t",GetPercentStr(default.ArmorQuality, Level));
     ReplaceText(S,"%b",GetPercentStr(default.BloatBileResistance, Level));
     ReplaceText(S,"%w",GetPercentStr(default.WeaponDiscount, Level));
-    
+
     SpawnDef = GetWeaponDef(Level);
     if( SpawnDef != None )
     {
@@ -151,25 +153,25 @@ simulated function GetPerkIcons(ObjectReferencer RepInfo)
 DefaultProperties
 {
     BasePerk=class'KFPerk_FieldMedic'
-    
+
     GrenadeWeaponDef=class'KFWeapDef_Grenade_Medic'
-    
+
     EXPActions(0)="Dealing Field Medic weapon damage"
     EXPActions(1)="Healing teammates"
-    
+
     PassiveInfos[0]=(Title="Syringe Recharge Rate")
     PassiveInfos[1]=(Title="Syringe Potency")
     PassiveInfos[2]=(Title="Bloat Bile Resistance")
     PassiveInfos[3]=(Title="Magazine Capacity")
     PassiveInfos[4]=(Title="Movement Speed")
     PassiveInfos[5]=(Title="Armor Bonus")
-    
+
     HealerRecharge=(Name="Syringe Recharge Rate",Increment=0.5f,Rank=0,StartingValue=0.1f,MaxValue=2.5f)
     HealPotency=(Name="Syringe Potency",Increment=0.25f,Rank=0,StartingValue=0.1f,MaxValue=0.75f)
     MagCapacity=(Name="Magazine Capacity",Increment=0.05f,Rank=0,StartingValue=0.f,MaxValue=1.0f)
     MovementSpeed=(Name="Movement Speed",Increment=0.05f,Rank=0,StartingValue=0.05f,MaxValue=0.2f)
     ArmorQuality=(Name="Armor Quality",Increment=0.125f,Rank=0,StartingValue=0.f,MaxValue=0.75f)
     BloatBileResistance=(Name="Bloat Bile Resistance",Increment=0.15f,Rank=0,StartingValue=0.1f,MaxValue=0.75f)
-    
+
     CustomLevelInfo="%d faster syringe recharge rate|%s better healing capabilities|%a increase in perked weapon magazine capacity|%m faster overall movement speed|Armor absorbes %t more damage|%b resistence to bloat bile|%w discount on medic weapons"
 }
