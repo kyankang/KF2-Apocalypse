@@ -28,6 +28,7 @@ var bool bClientAuthorized, bPerkNetReady;
 var SoundCue PerkAchieved;
 var string PerkAchievedName;
 
+`if(`notdefined(APOC_REMOVED))
 var AkEvent RhythmMethodSoundReset;
 var AkEvent RhythmMethodSoundHit;
 var AkEvent RhythmMethodSoundTop;
@@ -39,6 +40,7 @@ var int HeadShotComboCountDisplay;
 var float HeadShotCountdownInterval;
 var int MaxHeadShotComboCount;
 var int HeadShotDamageIncrements;
+`endif
 
 var int FirstLevelExp, // How much EXP needed for first level.
         LevelUpExpCost, // How much EXP needed for every level up.
@@ -349,6 +351,7 @@ static function bool IsBackupDamageTypeOnPerk(class<DamageType> DT)
     return false;
 }
 
+`if(`notdefined(APOC_REMOVED))
 simulated function ModifyDamageGiven( out int InDamage, optional Actor DamageCauser, optional KFPawn_Monster MyKFPM, optional KFPlayerController DamageInstigator, optional class<KFDamageType> DamageType, optional int HitZoneIdx )
 {
     local KFWeapon MyKFWeapon;
@@ -380,6 +383,7 @@ simulated function ModifyDamageGiven( out int InDamage, optional Actor DamageCau
 
     InDamage = Round(TempDamage);
 }
+`endif // `if(`notdefined(APOC_REMOVED))
 
 simulated function float GetCostScaling(byte Level, optional STraderItem TraderItem, optional KFWeapon Weapon)
 {
@@ -627,6 +631,7 @@ static function string GetPercentStr( PerkSkill Skill, byte Level  )
     return Round(GetPassiveValue( Skill, Level ) * 100) $ "%";
 }
 
+`if(`notdefined(APOC_REMOVED))
 simulated event bool GetIsHeadShotComboActive()
 {
     return bEnableRackEmUp;
@@ -734,6 +739,7 @@ function Destroyed()
         ServerClearHeadShotsCombo();
     }
 }
+`endif // `if(`notdefined(APOC_REMOVED))
 
 simulated function GetPerkIcons(ObjectReferencer RepInfo);
 
@@ -963,6 +969,7 @@ defaultproperties
     ApocItemPrefix="  *"
 `endif
 
+`if(`notdefined(APOC_REMOVED))
     HeadShotDamageIncrements=0.10f
     MaxHeadShotComboCount=5
     HeadShotCountdownInterval=2.f
@@ -970,6 +977,7 @@ defaultproperties
     RhythmMethodSoundReset=AkEvent'WW_UI_PlayerCharacter.Play_R_Method_Reset'
     RhythmMethodSoundHit=AkEvent'WW_UI_PlayerCharacter.Play_R_Method_Hit'
     RhythmMethodSoundTop=AkEvent'WW_UI_PlayerCharacter.Play_R_Method_Top'
+`endif
 
     FirstLevelExp=7500
     LevelUpExpCost=9375
