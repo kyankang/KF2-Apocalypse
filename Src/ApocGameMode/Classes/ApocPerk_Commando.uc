@@ -71,7 +71,7 @@ simulated function ModifyDamageGiven( out int InDamage, optional Actor DamageCau
 
 	if( (KFW != none && IsWeaponOnPerk( KFW,, self.class )) || (DamageType != none && IsDamageTypeOnPerk( DamageType )) )
 	{
-		TempDamage += InDamage * GetPassiveValue( WeaponDamage, CurrentLevel, default.WeaponDamage.Rank );
+		TempDamage += InDamage * GetPassiveValue( WeaponDamage, CurrentLevel, WeaponDamage.Rank );
 		if( IsRapidFireActive() )
 		{
 			`QALog( "RapidFire Damage" @ KFW @ GetPercentage( InDamage, InDamage * GetSkillValue( PerkSkills[ECommandoRapidFire] )), bLogPerk );
@@ -111,7 +111,7 @@ simulated function ModifyDamageGiven( out int InDamage, optional Actor DamageCau
  */
 simulated function float GetCloakDetectionRange()
 {
-	return GetPassiveValue( CloakedEnemyDetection, CurrentLevel, default.CloakedEnemyDetection.Rank );
+	return GetPassiveValue( CloakedEnemyDetection, CurrentLevel, CloakedEnemyDetection.Rank );
 }
 
 /**
@@ -355,7 +355,7 @@ simulated function ModifyRecoil( out float CurrentRecoilModifier, KFWeapon KFW )
 {
 	if (IsWeaponOnPerk(KFW, , self.class))
     {
-        CurrentRecoilModifier *= (1.f - GetPassiveValue(Recoil, CurrentLevel, default.Recoil.Rank));
+        CurrentRecoilModifier *= (1.f - GetPassiveValue(Recoil, CurrentLevel, Recoil.Rank));
     }
 }
 
@@ -499,11 +499,11 @@ simulated final private function bool IsProfessionalActive()
 
 simulated static function GetPassiveStrings( out array<string> PassiveValues, out array<string> Increments, byte Level )
 {
-	PassiveValues[0] = Round( GetPassiveValue( default.WeaponDamage, Level) * 100 ) @ "%";
-	PassiveValues[1] = Round( GetPassiveValue( default.CloakedEnemyDetection, Level ) / 100 ) @ "m";		// Divide by 100 to convert unreal units to meters
+	PassiveValues[0] = Round( GetPassiveValue( default.WeaponDamage, Level, default.WeaponDamage.Rank) * 100 ) @ "%";
+	PassiveValues[1] = Round( GetPassiveValue( default.CloakedEnemyDetection, Level, default.CloakedEnemyDetection.Rank ) / 100 ) @ "m";		// Divide by 100 to convert unreal units to meters
 	PassiveValues[2] = string(Round( GetZedTimeExtension( Level )));
 	PassiveValues[3] = Round( GetExtraReloadSpeed( Level ) * 100 ) @ "%";
-	PassiveValues[4] = Round(GetPassiveValue( default.Recoil, Level ) * 100) @ "%";
+	PassiveValues[4] = Round(GetPassiveValue( default.Recoil, Level, default.Recoil.Rank ) * 100) @ "%";
 	PassiveValues[5] = "";
 
 	Increments[0] = "["@Left( string( default.WeaponDamage.Increment * 100 ), InStr(string(default.WeaponDamage.Increment * 100), ".") + 2 ) @"% / +" $ default.WeaponDamage.Rank @default.LevelString @"]";
@@ -541,7 +541,7 @@ simulated function DrawSpecialPerkHUD(Canvas C)
 
 	if( CheckOwnerPawn() )
 	{
-		DetectionRangeSq = Square( GetPassiveValue(CloakedEnemyDetection, CurrentVetLevel) );
+		DetectionRangeSq = Square( GetPassiveValue(CloakedEnemyDetection, CurrentVetLevel, CloakedEnemyDetection.Rank) );
 
 		HealthbarLength = FMin( 50.f * (float(C.SizeX) / 1024.f), 50.f );
 		HealthbarHeight = FMin( 6.f * (float(C.SizeX) / 1024.f), 6.f );
@@ -626,11 +626,11 @@ simulated function LogPerkSkills()
 	if( bLogPerk )
 	{
 /**		`log( "PASSIVE PERKS" );
-		`log( "-Weapon Damage Modifier:" @ GetPassiveValue( WeaponDamage, CurrentLevel ) * 100 $"%" );
-		`log( "-Cloak Detection Range:" @ GetPassiveValue(CloakedEnemyDetection, CurrentLevel)/100 @"Meters" );
-		`log( "-Health Bar Detection Range:" @ GetPassiveValue(HealthBarDetection, CurrentLevel) /100 @"Meters" );
+		`log( "-Weapon Damage Modifier:" @ GetPassiveValue( WeaponDamage, CurrentLevel, WeaponDamage.Rank ) * 100 $"%" );
+		`log( "-Cloak Detection Range:" @ GetPassiveValue(CloakedEnemyDetection, CurrentLevel, CloakedEnemyDetection.Rank)/100 @"Meters" );
+		`log( "-Health Bar Detection Range:" @ GetPassiveValue(HealthBarDetection, CurrentLevel, HealthBarDetection.Rank) /100 @"Meters" );
 		`log( "-ZED Time Extension:" @ GetZedTimeExtension( CurrentLevel ) @"Seconds" );
-		`log( "-Health Increase:" @ GetPassiveValue(ExtraHealth, CurrentLevel) $"%" );
+		`log( "-Health Increase:" @ GetPassiveValue(ExtraHealth, CurrentLevel, ExtraHealth.Rank) $"%" );
 
 	    `log( "Skill Tree" );
 	    `log( "-Nightvision Active:" @ HasNightVision() );
@@ -724,7 +724,7 @@ DefaultProperties
 	HeadshotAccuracyHandicap=-3.0
 	AutoBuyLoadOutPath=(class'KFWeapDef_AR15', class'KFWeapDef_Bullpup', class'KFWeapDef_AK12', class'KFWeapDef_SCAR', class'KFWeapDef_MedicRifleGrenadeLauncher')
 
-	// ClassicPerk
+	// Classic Perk
 	BasePerk=class'KFPerk_Commando'
 	EXPActions(0)="Dealing Commando weapon damage"
     EXPActions(1)="Killing Stalkers with Commando weapons"

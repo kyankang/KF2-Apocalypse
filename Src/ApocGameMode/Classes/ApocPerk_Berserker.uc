@@ -130,7 +130,7 @@ simulated function ModifyDamageGiven( out int InDamage, optional Actor DamageCau
 		`QALog( GetFuncName() @ "Base damage:" @ InDamage , bLogPerk);
 		if( (MyKFWeapon != none && IsWeaponOnPerk( MyKFWeapon,, self.class )) || IsDamageTypeOnPerk( DamageType ) )
 		{
-			TempDamage += InDamage * GetPassiveValue( WeaponDamage,  CurrentLevel, default.WeaponDamage.Rank );
+			TempDamage += InDamage * GetPassiveValue( WeaponDamage,  CurrentLevel, WeaponDamage.Rank );
 			if( IsSpeedActive() )
 			{
 				TempDamage += InDamage * static.GetSpeedDamageModifier();
@@ -807,7 +807,7 @@ simulated function float GetCostScaling(byte Level, optional STraderItem TraderI
 
 simulated static function GetPassiveStrings( out array<string> PassiveValues, out array<string> Increments, byte Level )
 {
-	PassiveValues[0] = Round(GetPassiveValue( default.WeaponDamage, Level ) * 100) @ "%";
+	PassiveValues[0] = Round(GetPassiveValue( default.WeaponDamage, Level, default.WeaponDamage.Rank ) * 100) @ "%";
 	PassiveValues[1] = Round(GetPassiveDamageResistance( Level ) * 100) @ "%";
 	PassiveValues[2] = "";
 	PassiveValues[3] = "";
@@ -888,7 +888,7 @@ DefaultProperties
 	HeadshotAccuracyHandicap=-2.0
     AutoBuyLoadOutPath=(class'KFWeapDef_Crovel', class'KFWeapDef_Katana', class'KFWeapDef_Pulverizer', class'KFWeapDef_Eviscerator', class'KFWeapDef_AbominationAxe')
 
-	// ClassicPerk
+	// Classic Perk
     BasePerk=class'KFPerk_Berserker'
 	EXPActions(0)="Dealing Berserker weapon damage"
     EXPActions(1)="Killing Zeds near a player with a Berserker weapon"
