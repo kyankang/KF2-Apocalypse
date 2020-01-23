@@ -2,6 +2,16 @@ Class xUI_MapRank extends KFGUI_FloatingWindow;
 
 var xVotingReplication RepInfo;
 
+function InitMenu()
+{
+    Super.InitMenu();
+
+`if(`isdefined(APOC_PATCH))
+    KFGUI_Button(Components[1]).ButtonText = `APOC_YES;
+    KFGUI_Button(Components[2]).ButtonText = `APOC_NO;
+`endif
+}
+
 function CloseMenu()
 {
     Super.CloseMenu();
@@ -52,7 +62,9 @@ defaultproperties
         XSize=0.2
         YSize=0.3
         ExtravDir=1
+`if(`notdefined(APOC_REMOVED))
         TextColor=(R=128,G=255,B=128,A=255)
+`endif
         OnClickLeft=ButtonClicked
         OnClickRight=ButtonClicked
     End Object
@@ -65,7 +77,9 @@ defaultproperties
         YPosition=0.5
         XSize=0.2
         YSize=0.3
+`if(`notdefined(APOC_REMOVED))
         TextColor=(R=255,G=128,B=128,A=255)
+`endif
         OnClickLeft=ButtonClicked
         OnClickRight=ButtonClicked
     End Object

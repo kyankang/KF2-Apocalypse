@@ -961,6 +961,19 @@ function string ApocGetNextUnlockActiveSkill(class<KFPerk> Perk, byte Level)
 
     return S;
 }
+
+function string ApocGetExpActionString()
+{
+    local string S;
+
+    if( BasePerk!=none )
+    {
+        S = Localize(String(BasePerk.Name), "EXPAction1", "KFGame");
+        S = S $ "|" $ Localize(String(BasePerk.Name), "EXPAction2", "KFGame");
+    }
+
+    return S;
+}
 `endif
 
 defaultproperties

@@ -24,6 +24,23 @@ function InitMenu()
     PageSwitcher = KFGUI_SwitchMenuBar(FindComponentID('Pager'));
     Super(KFGUI_Page).InitMenu();
 
+`if(`isdefined(APOC_PATCH))
+    SettingsButton = AddMenuButton('Settings',`APOC_SETTINGS,"Enter the game settings");
+    MapvoteButton = AddMenuButton('Mapvote',`APOC_MAPVOTE,"Show mapvote menu");
+    SkipTraderButton = AddMenuButton('SkipTrader',`APOC_SKIPTRADER,"Vote to skip the trader");
+    //GearButton = AddMenuButton('Gear',`APOC_GEAR,"");
+    SpectateButton = AddMenuButton('Spectate',`APOC_SPECTATE,"");
+    SuicideButton = AddMenuButton('Suicide', `APOC_SUICIDE, "Causes you to have a sudden heart attack");
+    AddMenuButton('Profile',`APOC_VIEWPROFILE,"Show your Steam Profile");
+    AddMenuButton('Disconnect',`APOC_DISCONNECT,"Disconnect from this server");
+    AddMenuButton('Close',`APOC_CLOSE,"Close this menu");
+
+    Pages[0].Caption = `APOC_NEWS;
+    Pages[1].Caption = `APOC_PERKS_SELECTION;
+    Pages[2].Caption = `APOC_SETTINGS;
+    Pages[3].Caption = `APOC_FILTER;
+    Pages[4].Caption = `APOC_PLAYERS;
+`else
     SettingsButton = AddMenuButton('Settings',"Settings","Enter the game settings");
     MapvoteButton = AddMenuButton('Mapvote',"Map Voting","Show mapvote menu");
     SkipTraderButton = AddMenuButton('SkipTrader',"Skip Trader","Vote to skip the trader");
@@ -33,6 +50,7 @@ function InitMenu()
     AddMenuButton('Profile',"Profile","Show your Steam Profile");
     AddMenuButton('Disconnect',"Disconnect","Disconnect from this server");
     AddMenuButton('Close',"Close","Close this menu");
+`endif
 
     for( i=0; i<Pages.Length; ++i )
     {
@@ -58,7 +76,11 @@ function Timer()
     {
         bInitSpectate = true;
         bOldSpectate = PRI.bOnlySpectator;
+`if(`isdefined(APOC_PATCH))
+        SpectateButton.ButtonText = (bOldSpectate ? `APOC_JOIN : `APOC_SPECTATE);
+`else
         SpectateButton.ButtonText = (bOldSpectate ? "Join" : "Spectate");
+`endif
         SpectateButton.ChangeToolTip(bOldSpectate ? "Click to become an active player" : "Click to become a spectator");
     }
 }

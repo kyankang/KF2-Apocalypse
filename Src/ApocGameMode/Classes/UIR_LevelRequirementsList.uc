@@ -27,7 +27,7 @@ function InitMenu()
 function ShowMenu()
 {
     Super.ShowMenu();
-    
+
     SetTimer(0.1,true);
     Timer();
 }
@@ -82,14 +82,14 @@ function DrawEffectInfo(Canvas C, int Index, float YOffset, float Height, float 
 
     // Draw the Requirement string
     Canvas.SetDrawColor(192, 192, 192, 255);
-    
+
     SplitText = SplitString(RequirementsText[Index], "|");
     for ( i = 0; i < SplitText.Length; i++ )
     {
         Canvas.TextSize(SplitText[i], XL, YL, Sc, Sc);
         Canvas.SetPos(TempX, TempY);
         Canvas.DrawText(SplitText[i], , Sc, Sc);
-        
+
         TempY += (YL * 0.75);
     }
 
@@ -120,24 +120,31 @@ function Timer()
 {
     local UIP_PerkSelection SelectionParent;
     local array<string> ReqInfos;
+
+`if(`notdefined(APOC_REMOVED))
     local int i;
-    
+`endif
+
     if( !bTextureInit )
     {
         GetStyleTextures();
     }
-    
+
     SelectionParent = UIP_PerkSelection(ParentComponent);
     if( SelectionParent == None || CurrentSelectedPerk == SelectionParent.SelectedPerk )
         return;
 
     CurrentSelectedPerk = SelectionParent.SelectedPerk;
-    
+
+`if(`isdefined(APOC_PATCH))
+    ReqInfos[0] = CurrentSelectedPerk.ApocGetExpActionString();
+`else
     for( i = 0; i < CurrentSelectedPerk.EXPActions.Length; i++ )
     {
         ReqInfos[i / 2] = ReqInfos[i / 2]$"|"$CurrentSelectedPerk.EXPActions[i];
     }
-    
+`endif
+
     RequirementsText = ReqInfos;
     RequirementList.ChangeListSize(ReqInfos.Length);
 }
@@ -148,13 +155,13 @@ function GetStyleTextures()
     {
         return;
     }
-    
+
     ItemBackground = Owner.CurrentStyle.BorderTextures[`BOX_SMALL];
     ProgressBarBackground = Owner.CurrentStyle.BorderTextures[`BOX_INNERBORDER];
     ProgressBarForeground = Owner.CurrentStyle.ProgressBarTextures[`PROGRESS_BAR_NORMAL];
-    
+
     RequirementList.OnDrawItem = DrawEffectInfo;
-    
+
     bTextureInit = true;
 }
 
@@ -164,16 +171,16 @@ defaultproperties
     ItemSpacing=0.0
     ProgressBarHeight=0.25
     TextTopOffset=-0.14
-    
+
     OneThousandSuffix="K"
     OneMillionSuffix="M"
-    
+
     Begin Object Class=KFGUI_List Name=RequirementList
         ID="Requirements"
         ListItemsPerPage=3
         bHideScrollbar=true
         bClickable=false
     End Object
-    
+
     Components.Add(RequirementList)
 }

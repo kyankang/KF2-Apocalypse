@@ -6,6 +6,11 @@ function InitMenu()
 {
     InfoLabel = KFGUI_TextLable(FindComponentID('Info'));
     Super.InitMenu();
+
+`if(`isdefined(APOC_PATCH))
+    KFGUI_Button(Components[1]).ButtonText = `APOC_YES;
+    KFGUI_Button(Components[2]).ButtonText = `APOC_NO;
+`endif
 }
 
 function SetupTo( ClassicPerk_Base P )
@@ -15,7 +20,7 @@ function SetupTo( ClassicPerk_Base P )
 
 function MessageTo()
 {
-    InfoLabel.SetText("Are you sure you want to disconnect from the server?");  
+    InfoLabel.SetText("Are you sure you want to disconnect from the server?");
 }
 
 function ButtonClicked( KFGUI_Button Sender )
@@ -46,7 +51,7 @@ defaultproperties
     WindowTitle="Disconnect"
     bAlwaysTop=true
     bOnlyThisFocus=true
-    
+
     Begin Object Class=KFGUI_TextLable Name=WarningLabel
         ID="Info"
         YPosition=0.3
@@ -75,7 +80,7 @@ defaultproperties
         OnClickLeft=ButtonClicked
         OnClickRight=ButtonClicked
     End Object
-    
+
     Components.Add(WarningLabel)
     Components.Add(YesButten)
     Components.Add(NoButten)

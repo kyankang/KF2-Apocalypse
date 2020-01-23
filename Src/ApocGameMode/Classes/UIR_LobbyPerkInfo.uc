@@ -21,31 +21,35 @@ function DrawMenu()
     local KFPlayerController PC;
     local ClassicPerk_Base CurrentPerk;
     local Texture2D PerkIcon, PerkStarIcon;
-    
+
     if( !bTextureInit )
     {
         GetStyleTextures();
         return;
     }
-    
+
     Super.DrawMenu();
-    
+
     PC = KFPlayerController(GetPlayer());
     if( PC == None )
         return;
-        
+
     CurrentPerk = ClassicPerk_Base(PC.CurrentPerk);
     if( CurrentPerk == None )
         return;
 
     PerkName =  CurrentPerk.static.GetPerkName();
+`if(`isdefined(APOC_PATCH))
+    PerkLevelString = `APOC_LEVEL @ CurrentPerk.GetLevel();
+`else
     PerkLevelString = "Lvl" @ CurrentPerk.GetLevel();
+`endif
     PerkProgress = CurrentPerk.GetProgressPercent();
 
     //Get the position size etc in pixels
     Width = CompPos[2] - 10;
     Height = CompPos[3] - 37;
-    
+
     X = 5.f;
     Y = 30.f;
 
@@ -71,10 +75,10 @@ function DrawMenu()
 
     // Draw Icon
     CurrentPerk.static.PreDrawPerk(Canvas, CurrentPerk.GetLevel(), PerkIcon, PerkStarIcon);
-    
+
     Canvas.SetPos(TempX + IconBorder * Height, TempY + IconBorder * Height);
     Canvas.DrawTile(PerkIcon, IconSize, IconSize, 0, 0, PerkIcon.GetSurfaceWidth(), PerkIcon.GetSurfaceHeight());
-    
+
     TempX += IconSize + (IconToInfoSpacing * Width);
     TempY += TextTopOffset * Height + ItemBorder * Height;
 
@@ -109,11 +113,11 @@ function DrawMenu()
 function MouseRelease( bool bRight )
 {
     local ClassicPlayerController PC;
-    
+
     if( !bDisabled && !bRight )
     {
         PlayMenuSound(MN_ClickButton);
-        
+
         PC = ClassicPlayerController(GetPlayer());
         if( PC != None )
         {
@@ -121,7 +125,7 @@ function MouseRelease( bool bRight )
             {
                 PC.LobbyMenu.MainMenu.DoClose();
             }
-            
+
             PC.LobbyMenu.MainMenu = Owner.OpenMenu(PC.MidGameMenuClass);
         }
     }
@@ -145,12 +149,12 @@ function GetStyleTextures()
     {
         return;
     }
-    
+
     ItemBoxTexture = Owner.CurrentStyle.ItemBoxTextures[`ITEMBOX_NORMAL];
     ItemBarTexture = Owner.CurrentStyle.ItemBoxTextures[`ITEMBOX_BAR_NORMAL];
     ProgressBarBackground = Owner.CurrentStyle.BorderTextures[`BOX_INNERBORDER];
     ProgressBarForeground = Owner.CurrentStyle.ProgressBarTextures[`PROGRESS_BAR_NORMAL];
-    
+
     bTextureInit = true;
 }
 

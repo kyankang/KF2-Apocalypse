@@ -11,12 +11,18 @@ function InitMenu()
     PerkInfoBox = UIR_PerkInfoContainer(FindComponentID('PerksBox'));
     PerkEffectList = UIR_PerkEffectContainer(FindComponentID('PerkEffects'));
     NextLevelRequirementList = UIR_LevelRequirementsList(FindComponentID('NextLevelRequirements'));
-    
+
+`if(`isdefined(APOC_PATCH))
+    PerkInfoBox.WindowTitle = `APOC_PERKS_SELECTION;
+    PerkEffectList.WindowTitle = `APOC_PERK_BONUSES;
+    NextLevelRequirementList.WindowTitle = `APOC_PERKS_XP_OBJECTIVES;
+`endif
+
     PC = ClassicPlayerController(GetPlayer());
     PC.PerkSelectionBox = Self;
-    
+
     SetTimer(0.1, true);
-    
+
     Super.InitMenu();
 }
 
@@ -27,7 +33,7 @@ function Timer()
         GetStyleTextures();
         return;
     }
-    
+
     SetTimer(0.f);
 }
 
@@ -37,11 +43,11 @@ function GetStyleTextures()
     {
         return;
     }
-    
+
     PerkInfoBox.FrameTex = Owner.CurrentStyle.BorderTextures[`BOX_MEDIUM_SLIGHTTRANSPARENT];
     PerkEffectList.FrameTex = Owner.CurrentStyle.BorderTextures[`BOX_MEDIUM_SLIGHTTRANSPARENT];
     NextLevelRequirementList.FrameTex = Owner.CurrentStyle.BorderTextures[`BOX_MEDIUM_SLIGHTTRANSPARENT];
-    
+
     bTextureInit = true;
 }
 
@@ -54,8 +60,8 @@ defaultproperties
         XSize=0.465
         YSize=1.08
         WindowTitle="Select Perk"
-    End Object  
-    
+    End Object
+
     Begin Object Class=UIR_PerkEffectContainer Name=PerkEffectsList
         ID="PerkEffects"
         XPosition=0.49
@@ -64,7 +70,7 @@ defaultproperties
         YSize=0.53
         WindowTitle="Perk Effects"
     End Object
-    
+
     Begin Object Class=UIR_LevelRequirementsList Name=NextLevelRequirementsList
         ID="NextLevelRequirements"
         XPosition=0.49
@@ -73,7 +79,7 @@ defaultproperties
         YSize=0.53
         WindowTitle="Next Level Requirements"
     End Object
-    
+
     Components.Add(PerksContainer)
     Components.Add(PerkEffectsList)
     Components.Add(NextLevelRequirementsList)

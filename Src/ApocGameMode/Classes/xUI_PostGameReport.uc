@@ -11,17 +11,24 @@ function InitMenu()
     local int i;
     local KFGUI_Base PageItem;
     local KFGUI_Button B;
-    
+
     PageSwitcher = KFGUI_SwitchMenuBar(FindComponentID('Pager'));
-    
+
     Super(KFGUI_Page).InitMenu();
-    
+
+`if(`isdefined(APOC_PATCH))
+    Pages[0].Caption = `APOC_TEAMAWARDS;
+    Pages[1].Caption = `APOC_MAPVOTE;
+    KFGUI_Button(Components[1]).ButtonText = `APOC_CLOSE;
+    KFGUI_Button(Components[2]).ButtonText = `APOC_DISCONNECT;
+`endif
+
     WindowTitle = class'KFGFxMenu_PostGameReport'.default.PostGameReportString;
     for( i=0; i<Pages.Length; ++i )
     {
         PageItem = PageSwitcher.AddPage(Pages[i].PageClass,Pages[i].Caption,Pages[i].Hint,B);
         PageItem.InitMenu();
-        
+
         if( UIP_MapVote(PageItem) != None )
         {
             VotePage = UIP_MapVote(PageItem);
@@ -36,12 +43,12 @@ function InitMenu()
 function ShowMenu()
 {
     local bool bGameEnded;
-    
+
     Super.ShowMenu();
-    
+
     bGameEnded = KFGameReplicationInfo(GetPlayer().WorldInfo.GRI).bMatchIsOver;
     AwardsButton.SetDisabled(!bGameEnded);
-    
+
     if( bGameEnded )
     {
         PageSwitcher.SelectPage(0);
@@ -55,7 +62,7 @@ function ShowMenu()
 function ButtonClicked( KFGUI_Button Sender )
 {
     local KFGUI_Page T;
-    
+
     switch( Sender.ID )
     {
     case 'Close':
@@ -74,13 +81,13 @@ defaultproperties
     YPosition=0.1
     XSize=0.6
     YSize=0.8
-    
+
     // bAlwaysTop=true
     // bOnlyThisFocus=true
-    
+
     Pages.Add((PageClass=Class'UIP_TeamAwards',Caption="Team Awards",Hint="Show team awards!"))
     Pages.Add((PageClass=Class'UIP_MapVote',Caption="Map Vote",Hint="Vote for the next map!"))
-    
+
     Begin Object Class=KFGUI_SwitchMenuBar Name=MultiPager
         ID="Pager"
         XPosition=0.015
@@ -112,7 +119,7 @@ defaultproperties
         OnClickLeft=ButtonClicked
         OnClickRight=ButtonClicked
     End Object
-    
+
     Components.Add(MultiPager)
     Components.Add(CloseButton)
     Components.Add(DisconnectButton)

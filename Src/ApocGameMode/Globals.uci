@@ -83,3 +83,39 @@
 `define APOC_REMOVED
 `define APOC_PATCH
 `define APOC_MAX_PERK_LEVEL 6
+
+`define APOC_LOADING Localize("KFCommon_LocalizedStrings", "LoadingString", "KFGame")
+`define APOC_WAITING Localize("KFGFxWidget_BaseParty", "WaitingString", "KFGame")
+`define APOC_DELOYING Localize("KFGFxWidget_BaseParty", "DeployingString", "KFGame")
+
+`define APOC_LEVEL Localize("KFPerk", "LevelString", "KFGame")
+`define APOC_START_MAP Localize("KFGFxMenu_StartGame", "MapTitle", "KFGame")
+`define APOC_DIFFICULTY Localize("KFGFxMenu_StartGame", "DifficultyTitle", "KFGame")
+
+`define APOC_PERKS Localize("KFGFxMenu_Inventory", "PerkFilterString", "KFGame")
+`define APOC_PERK_BONUSES Localize("KFGFxPerksContainer_Details", "PerkBonusesString", "KFGame")
+`define APOC_PERKS_SELECTION Localize("KFGFxPerksContainer_Selection", "HeaderTitle", "KFGame")
+`define APOC_PERKS_XP_OBJECTIVES Localize("KFGFxPerksContainer_Details", "ObjectivesString", "KFGame")
+
+`define APOC_GEAR Localize("KFGFxWidget_MenuBar", "MenuStrings[2]", "KFGame")
+`define APOC_SETTINGS Localize("KFGFxWidget_MenuBar", "MenuStrings[6]", "KFGame")
+`define APOC_VIEWMAP Localize("KFGFxMenu_ServerBrowser", "MapString", "KFGame")
+`define APOC_READY Localize("Objectives", "Ready", "KFGame")
+`define APOC_NOTREADY Localize("Objectives", "NotReady", "KFGame")
+`define APOC_DISCONNECT Localize("KFGFxWidget_MenuBar", "MenuStrings[7]", "KFGame")
+
+`define APOC_NEWS Localize("KFGFxMenu_StartGame", "NewsPageString", "KFGame")
+`define APOC_FILTER Localize("KFGFxMenu_ServerBrowser", "FiltersString", "KFGame")
+`define APOC_PLAYERS Localize("KFGFxMenu_ServerBrowser", "PlayersString", "KFGame")
+
+`define APOC_TEAMAWARDS Localize("KFGFxPostGameContainer_TeamAwards", "TeamAwardsString", "KFGame")
+`define APOC_MAPVOTE Localize("KFGFxMenu_PostGameReport", "MapVoteString", "KFGame")
+`define APOC_SKIPTRADER Localize("KFGFxWidget_BaseParty", "SkipTraderString", "KFGame")
+`define APOC_SPECTATE Localize("KFGFxServerBrowser_ServerList", "SpectateString", "KFGame")
+`define APOC_JOIN Localize("KFGFxServerBrowser_ServerDetails", "JoinGameString", "KFGame")
+`define APOC_SUICIDE Localize("ZedMoves", "Suicide", "KFGame")
+`define APOC_VIEWPROFILE Localize("KFGFxWidget_BaseParty", "ViewProfileString", "KFGame")
+`define APOC_CLOSE Localize("KFCommon_LocalizedStrings", "ConfirmString", "KFGame")
+
+`define APOC_YES Localize("KFCommon_LocalizedStrings", "YesString", "KFGame")
+`define APOC_NO Localize("KFCommon_LocalizedStrings", "NoString", "KFGame")
