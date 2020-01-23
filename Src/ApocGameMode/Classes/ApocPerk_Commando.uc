@@ -1,13 +1,14 @@
-class ApocPerk_Commando extends ClassicPerk_Base;
+class ApocPerk_Commando extends ClassicPerk_Base
+	config(ApocPerksStat);
 
 //Passives
-//var private const PerkSkill WeaponDamage;			// weapon dmg modifier
-var private const PerkSkill	CloakedEnemyDetection;  // Can see cloaked zeds x UUs far (100UUs = 100cm = 1m)
-var private const PerkSkill	ZedTimeExtension;       // How many times a zed time ext can happen
-var private const PerkSkill	ReloadSpeed;		    // 2% increase every 5 levels (max 10% increase)
-var private const PerkSkill	CallOut;		        // allow teammates to see cloaked units
-var private const PerkSkill	NightVision;            // Night vision
-var private	const PerkSkill	Recoil;					// Recoil reduction
+var config PerkSkill 	RifleDamage;			// weapon dmg modifier
+var config PerkSkill	CloakedEnemyDetection;  // Can see cloaked zeds x UUs far (100UUs = 100cm = 1m)
+var config PerkSkill	ZedTimeExtension;       // How many times a zed time ext can happen
+var config PerkSkill	ReloadSpeed;		    // 2% increase every 5 levels (max 10% increase)
+var config PerkSkill	CallOut;		        // allow teammates to see cloaked units
+var config PerkSkill	NightVision;            // Night vision
+var config PerkSkill	Recoil;					// Recoil reduction
 
 var private const float	RapidFireFiringRate;    	// Faster firing rate in %  NOTE:This is needed for combinations with the Skill: RapidFire (Damage and Rate)
 var private const float BackupWeaponSwitchModifier;
@@ -71,7 +72,7 @@ simulated function ModifyDamageGiven( out int InDamage, optional Actor DamageCau
 
 	if( (KFW != none && IsWeaponOnPerk( KFW,, self.class )) || (DamageType != none && IsDamageTypeOnPerk( DamageType )) )
 	{
-		TempDamage += InDamage * GetPassiveValue( WeaponDamage, CurrentLevel, WeaponDamage.Rank );
+		TempDamage += InDamage * GetPassiveValue( RifleDamage, CurrentLevel, RifleDamage.Rank );
 		if( IsRapidFireActive() )
 		{
 			`QALog( "RapidFire Damage" @ KFW @ GetPercentage( InDamage, InDamage * GetSkillValue( PerkSkills[ECommandoRapidFire] )), bLogPerk );
@@ -499,14 +500,14 @@ simulated final private function bool IsProfessionalActive()
 
 simulated static function GetPassiveStrings( out array<string> PassiveValues, out array<string> Increments, byte Level )
 {
-	PassiveValues[0] = Round( GetPassiveValue( default.WeaponDamage, Level, default.WeaponDamage.Rank) * 100 ) @ "%";
+	PassiveValues[0] = Round( GetPassiveValue( default.RifleDamage, Level, default.RifleDamage.Rank) * 100 ) @ "%";
 	PassiveValues[1] = Round( GetPassiveValue( default.CloakedEnemyDetection, Level, default.CloakedEnemyDetection.Rank ) / 100 ) @ "m";		// Divide by 100 to convert unreal units to meters
 	PassiveValues[2] = string(Round( GetZedTimeExtension( Level )));
 	PassiveValues[3] = Round( GetExtraReloadSpeed( Level ) * 100 ) @ "%";
 	PassiveValues[4] = Round(GetPassiveValue( default.Recoil, Level, default.Recoil.Rank ) * 100) @ "%";
 	PassiveValues[5] = "";
 
-	Increments[0] = "["@Left( string( default.WeaponDamage.Increment * 100 ), InStr(string(default.WeaponDamage.Increment * 100), ".") + 2 ) @"% / +" $ default.WeaponDamage.Rank @default.LevelString @"]";
+	Increments[0] = "["@Left( string( default.RifleDamage.Increment * 100 ), InStr(string(default.RifleDamage.Increment * 100), ".") + 2 ) @"% / +" $ default.RifleDamage.Rank @default.LevelString @"]";
 	Increments[1] = "["@ Int(default.CloakedEnemyDetection.StartingValue / 100 ) @"+" @Int(default.CloakedEnemyDetection.Increment / 100 ) @"m / +" $ default.CloakedEnemyDetection.Rank @default.LevelString @"]";
 	Increments[2] = "["@Round(default.ZedTimeExtension.StartingValue) @"+" @Round(default.ZedTimeExtension.Increment) @" / +" $ default.ZedTimeExtension.Rank @default.LevelString @"]";
 	Increments[3] = "["@Left( string( default.ReloadSpeed.Increment * 100 ), InStr(string(default.ReloadSpeed.Increment * 100), ".") + 2 ) @ "% / +" $ default.ReloadSpeed.Rank @ default.LevelString @ "]";
@@ -626,7 +627,7 @@ simulated function LogPerkSkills()
 	if( bLogPerk )
 	{
 /**		`log( "PASSIVE PERKS" );
-		`log( "-Weapon Damage Modifier:" @ GetPassiveValue( WeaponDamage, CurrentLevel, WeaponDamage.Rank ) * 100 $"%" );
+		`log( "-Weapon Damage Modifier:" @ GetPassiveValue( RifleDamage, CurrentLevel, RifleDamage.Rank ) * 100 $"%" );
 		`log( "-Cloak Detection Range:" @ GetPassiveValue(CloakedEnemyDetection, CurrentLevel, CloakedEnemyDetection.Rank)/100 @"Meters" );
 		`log( "-Health Bar Detection Range:" @ GetPassiveValue(HealthBarDetection, CurrentLevel, HealthBarDetection.Rank) /100 @"Meters" );
 		`log( "-ZED Time Extension:" @ GetZedTimeExtension( CurrentLevel ) @"Seconds" );
@@ -700,13 +701,13 @@ DefaultProperties
 
 	WhiteMaterial=Texture2D'EngineResources.WhiteSquareTexture'
 
-	WeaponDamage=(Name="Weapon Damage",Increment=0.01,Rank=1,StartingValue=0.0f,MaxValue=0.25)
-	CloakedEnemyDetection=(Name="Cloaked Enemy Detection Range",Increment=200.f,Rank=1,StartingValue=1000.f,MaxValue=6000.f)
-	ZedTimeExtension=(Name="Zed Time Extension",Increment=1.f,Rank=2,StartingValue=1.f,MaxValue=6.f)
-	ReloadSpeed=(Name="Reload Speed",Increment=0.02,Rank=5,StartingValue=0.0f,MaxValue=0.10)
-	CallOut=(Name="Call Out",Increment=2.f,Rank=0,StartingValue=1.f,MaxValue=50.f)
-	NightVision=(Name="Night Vision",Increment=0.f,Rank=0,StartingValue=0.f,MaxValue=0.f)
-	Recoil=(Name="Recoil",Increment=0.02f,Rank=1,StartingValue=0.0f,MaxValue=0.5f)
+	//RifleDamage=(Name="Weapon Damage",Increment=0.01,Rank=1,StartingValue=0.0f,MaxValue=0.25)
+	//CloakedEnemyDetection=(Name="Cloaked Enemy Detection Range",Increment=200.f,Rank=1,StartingValue=1000.f,MaxValue=6000.f)
+	//ZedTimeExtension=(Name="Zed Time Extension",Increment=1.f,Rank=2,StartingValue=1.f,MaxValue=6.f)
+	//ReloadSpeed=(Name="Reload Speed",Increment=0.02,Rank=5,StartingValue=0.0f,MaxValue=0.10)
+	//CallOut=(Name="Call Out",Increment=2.f,Rank=0,StartingValue=1.f,MaxValue=50.f)
+	//NightVision=(Name="Night Vision",Increment=0.f,Rank=0,StartingValue=0.f,MaxValue=0.f)
+	//Recoil=(Name="Recoil",Increment=0.02f,Rank=1,StartingValue=0.0f,MaxValue=0.5f)
 
 	PerkSkills(ECommandoTacticalReload)=(Name="TacticalReload",IconPath="UI_PerkTalent_TEX.commando.UI_Talents_Commando_TacticalReload",Increment=0.f,Rank=0,StartingValue=0.f,MaxValue=0.f)
 	PerkSkills(ECommandoLargeMags)=(Name="LargeMags",IconPath="UI_PerkTalent_TEX.commando.UI_Talents_Commando_LargeMag",Increment=0.f,Rank=0,StartingValue=0.5f,MaxValue=0.5f)

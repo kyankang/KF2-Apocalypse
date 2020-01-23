@@ -1,7 +1,9 @@
-class ApocPerk_Demolitionist extends ClassicPerk_Base;
+class ApocPerk_Demolitionist extends ClassicPerk_Base
+	config(ApocPerksStat);
 
-var 			const	PerkSkill					ExplosiveResistance;        // 10% explosive resistance, additional 2% resistance per level (max 60%)
-var 			const	PerkSkill					ExplosiveAmmo;            	// 1 extra explosive ammo for every 5 levels. Weapons only
+var				config	PerkSkill 					ExplosiveDamage;			// 1% increased explosive damage per level (max 25%)
+var 			config	PerkSkill					ExplosiveResistance;        // 10% explosive resistance, additional 2% resistance per level (max 60%)
+var 			config	PerkSkill					ExplosiveAmmo;            	// 1 extra explosive ammo for every 5 levels. Weapons only
 
 var						Array<KFPawn_Human>			SuppliedPawnList;
 
@@ -130,8 +132,8 @@ simulated function ModifyDamageGiven( out int InDamage, optional Actor DamageCau
 	{
 		`QALog( "Base Damage Given" @ DamageType @ KFW @ InDamage, bLogPerk );
 		//Passive
-		TempDamage +=  InDamage * GetPassiveValue( WeaponDamage, CurrentLevel, WeaponDamage.Rank );
-		`QALog( "WeaponDamage Given" @ DamageType @ KFW @ InDamage * GetPassiveValue( WeaponDamage, CurrentLevel, WeaponDamage.Rank ), bLogPerk );
+		TempDamage +=  InDamage * GetPassiveValue( ExplosiveDamage, CurrentLevel, ExplosiveDamage.Rank );
+		`QALog( "ExplosiveDamage Given" @ DamageType @ KFW @ InDamage * GetPassiveValue( ExplosiveDamage, CurrentLevel, ExplosiveDamage.Rank ), bLogPerk );
 		//Damage skill
 		if( IsDamageActive() )
 		{
@@ -563,7 +565,7 @@ function NotifyPerkSacrificeExploded()
  *
  * @param InDamage the damage to modify
  */
-simulated static function ModifyWeaponDamage( out float InDamage )
+simulated static function ModifyExplosiveDamage( out float InDamage )
 {
 	InDamage -= Indamage * GetSharedExplosiveResistance();
 }
@@ -945,14 +947,14 @@ simulated static function int GetFleshpoundKillXP( byte Difficulty )
 ********************************************************************************************* */
 simulated static function GetPassiveStrings( out array<string> PassiveValues, out array<string> Increments, byte Level )
 {
-	PassiveValues[0] = Round( GetPassiveValue( default.WeaponDamage, Level, default.WeaponDamage.Rank ) * 100 ) @ "%";
+	PassiveValues[0] = Round( GetPassiveValue( default.ExplosiveDamage, Level, default.ExplosiveDamage.Rank ) * 100 ) @ "%";
 	PassiveValues[1] = Round( GetPassiveValue( default.ExplosiveResistance, Level, default.ExplosiveResistance.Rank ) * 100 ) @ "%";
 	PassiveValues[2] = string(GetExtraAmmo( Level ));
 	PassiveValues[3] = "";
 	PassiveValues[4] = "";
 	PassiveValues[5] = "";
 
-	Increments[0] = "[" @ Round(default.WeaponDamage.Increment * 100)  @ "% / +" $ default.WeaponDamage.Rank @ default.LevelString @ "]";
+	Increments[0] = "[" @ Round(default.ExplosiveDamage.Increment * 100)  @ "% / +" $ default.ExplosiveDamage.Rank @ default.LevelString @ "]";
 	Increments[1] = "[" @ Round(default.ExplosiveResistance.StartingValue * 100)  @ "% +" $ int(default.ExplosiveResistance.Increment * 100) @ "%" @ "/ +" $ default.ExplosiveResistance.Rank @ default.LevelString @ "]";
 	Increments[2] = "[" @ Round(default.ExplosiveAmmo.Increment) @ "/ +" $ default.ExplosiveAmmo.Rank @ default.LevelString @ "]";
 	Increments[3] = "";
@@ -971,7 +973,7 @@ simulated function LogPerkSkills()
 	if( bLogPerk )
 	{
 		`log( "PASSIVE PERKS" );
-		`log( "-WeaponDamage:" @ GetPassiveValue( WeaponDamage, CurrentVetLevel, WeaponDamage.Rank ) $ "%" );
+		`log( "-ExplosiveDamage:" @ GetPassiveValue( ExplosiveDamage, CurrentVetLevel, ExplosiveDamage.Rank ) $ "%" );
 		`log( "-ExplosiveResistance:" @ GetPassiveValue( ExplosiveResistance, CurrentVetLevel, ExplosiveResistance.Rank ) $ "%" );
 		`log( "-ExplosiveAmmo:" @ GetExtraAmmo( CurrentVetLevel ) $ "%" );
 
@@ -1046,10 +1048,10 @@ DefaultProperties
 
 	ProfessionalAoEModifier=0.25
 
-  	WeaponDamage=(Name="Explosive Damage",Increment=0.01f,Rank=1,StartingValue=0.f,MaxValue=0.25)
-	ExplosiveResistance=(Name="Explosive Resistance",Increment=0.02f,Rank=1,StartingValue=0.1f,MaxValue=0.6f)
-	ExplosiveAmmo=(Name="Explosive Ammo",Increment=1.f,Rank=5,StartingValue=0.0f,MaxValue=5.f)
-    //AOERadius=(Name="AOE Radius",Increment=0.05f,Rank=0,StartingValue=0.f,MaxValue=0.5f)
+  	//ExplosiveDamage=(Name="Explosive Damage",Increment=0.01f,Rank=1,StartingValue=0.f,MaxValue=0.25)
+	//ExplosiveResistance=(Name="Explosive Resistance",Increment=0.02f,Rank=1,StartingValue=0.1f,MaxValue=0.6f)
+	//ExplosiveAmmo=(Name="Explosive Ammo",Increment=1.f,Rank=5,StartingValue=0.0f,MaxValue=5.f)
+    ////AOERadius=(Name="AOE Radius",Increment=0.05f,Rank=0,StartingValue=0.f,MaxValue=0.5f)
 
 	PerkSkills(EDemoDamage)=(Name="Damage",IconPath="UI_PerkTalent_TEX.demolition.UI_Talents_Demolition_GrenadeSupplier",Increment=0.f,Rank=0,StartingValue=0.25f,MaxValue=0.25f)
 	PerkSkills(EDemoTacticalReload)=(Name="Speed",IconPath="UI_PerkTalent_TEX.demolition.UI_Talents_Demolition_Speed",Increment=0.f,Rank=0,StartingValue=0.10f,MaxValue=0.10f)

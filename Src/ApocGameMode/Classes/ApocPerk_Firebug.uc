@@ -1,11 +1,13 @@
-class ApocPerk_Firebug extends ClassicPerk_Base;
+class ApocPerk_Firebug extends ClassicPerk_Base
+	config(ApocPerksStat);
 
 //`include(KFOnlineStats.uci)
 
-var 	const	PerkSkill			WeaponReload;              			// 1% faster perk weapon reload per level (max 25%)
-var 	const	PerkSkill			FireResistance;            			// 30% resistance to fire, additional 2% resistance per level (max 80%)
-var 	const	PerkSkill			OwnFireResistance;           		// 25% resistance to personal fire damage (max 100%)
-var 	const	PerkSkill			StartingAmmo;   	        		// 5% more starting ammo for every 5 levels (max 25%)
+var		config	PerkSkill 			FlameDamage;						// 1% increased Perk weapon damage per level (max 25%)
+var 	config	PerkSkill			WeaponReload;              			// 1% faster perk weapon reload per level (max 25%)
+var 	config	PerkSkill			FireResistance;            			// 30% resistance to fire, additional 2% resistance per level (max 80%)
+var 	config	PerkSkill			OwnFireResistance;           		// 25% resistance to personal fire damage (max 100%)
+var 	config	PerkSkill			StartingAmmo;   	        		// 5% more starting ammo for every 5 levels (max 25%)
 
  /** The range that an enemy needs to be within for the "Heat Wave" skill to function */
 var 	const 	int 				HeatWaveRadiusSQ;
@@ -79,7 +81,7 @@ simulated function ModifyDamageGiven( out int InDamage, optional Actor DamageCau
 
 	if( (KFW != none && IsWeaponOnPerk( KFW,, self.class )) || (DamageType != none && IsDamageTypeOnPerk( DamageType )) )
 	{
-		TempDamage *= GetPassiveValue( WeaponDamage, CurrentLevel, WeaponDamage.Rank );
+		TempDamage *= GetPassiveValue( FlameDamage, CurrentLevel, FlameDamage.Rank );
 
 		if( IsBringTheHeatActive() )
 		{
@@ -556,13 +558,13 @@ simulated static function int GetBloatKillXP( byte Difficulty )
 ********************************************************************************************* */
 simulated static function GetPassiveStrings( out array<string> PassiveValues, out array<string> Increments, byte Level )
 {
-	PassiveValues[0] = Round( GetPassiveValue( default.WeaponDamage, Level, default.WeaponDamage.Rank ) * 100  - 100 ) @ "%";
+	PassiveValues[0] = Round( GetPassiveValue( default.FlameDamage, Level, default.FlameDamage.Rank ) * 100  - 100 ) @ "%";
 	PassiveValues[1] = Round( GetPassiveValue( default.WeaponReload, Level, default.WeaponReload.Rank ) * 100 ) @ "%";
 	PassiveValues[2] = Round( GetPassiveValue( default.FireResistance, Level, default.FireResistance.Rank ) * 100 ) @ "%";
 	PassiveValues[3] = Round( GetPassiveValue( default.OwnFireResistance, Level, default.OwnFireResistance.Rank ) * 100 ) @ "%";
 	PassiveValues[4] = Round( GetStartingAmmoPercent( Level ) * 100 ) @ "%";
 
-	Increments[0] = "[" @ Left( string( default.WeaponDamage.Increment * 100 ), InStr(string(default.WeaponDamage.Increment * 100), ".") + 2 ) @ "% / +" $ default.WeaponDamage.Rank @ default.LevelString @ "]";
+	Increments[0] = "[" @ Left( string( default.FlameDamage.Increment * 100 ), InStr(string(default.FlameDamage.Increment * 100), ".") + 2 ) @ "% / +" $ default.FlameDamage.Rank @ default.LevelString @ "]";
 	Increments[1] = "[" @ Left( string( default.WeaponReload.Increment * 100 ), InStr(string(default.WeaponReload.Increment * 100), ".") + 2 ) @ "% / +" $ default.WeaponReload.Rank @ default.LevelString @ "]";
 	Increments[2] = "[" @ Left( string( default.FireResistance.StartingValue * 100 ), InStr(string(default.FireResistance.StartingValue * 100), ".") + 2 ) @ "%" @ "+"
 						@Left( string( default.FireResistance.Increment * 100 ), InStr(string(default.FireResistance.Increment * 100), ".") + 2 ) @ "% / +" $ default.FireResistance.Rank @ default.LevelString @ "]";
@@ -582,7 +584,7 @@ simulated function LogPerkSkills()
 	if( bLogPerk )
 	{
 		`log( "PASSIVE PERKS" );
-		`log( "-WeaponDamage:" @ GetPassiveValue( default.WeaponDamage, CurrentVetLevel, default.WeaponDamage.Rank ) - 1 $ "%" );
+		`log( "-FlameDamage:" @ GetPassiveValue( default.FlameDamage, CurrentVetLevel, default.FlameDamage.Rank ) - 1 $ "%" );
 		`log( "-WeaponReload:" @ GetPassiveValue( default.WeaponReload, CurrentVetLevel, default.WeaponReload.Rank ) $ "%" );
 		`log( "-FireResistance:" @ GetPassiveValue( default.FireResistance, CurrentVetLevel, default.FireResistance.Rank ) $ "%" );
 		`log( "-OwnFireResistance:" @ GetPassiveValue( default.OwnFireResistance, CurrentVetLevel, default.OwnFireResistance.Rank ) $ "%" );
@@ -658,11 +660,11 @@ DefaultProperties
 	SnareSpeedModifier=0.7
    	SnareCausingDmgTypeClass="KFDT_Fire_Ground"
 
-	WeaponDamage=(Name="Weapon Damage",Increment=0.008f,Rank=1,StartingValue=1.f,MaxValue=1.20) //1.25
-	WeaponReload=(Name="Weapon Reload Speed",Increment=0.008f,Rank=1,StartingValue=0.f,MaxValue=0.20)
-	FireResistance=(Name="Fire Resistance",Increment=0.02,Rank=2,StartingValue=0.3f,MaxValue=0.8f)
-	OwnFireResistance=(Name="Own fire Resistance",Increment=0.03,Rank=1,StartingValue=0.25f,MaxValue=1.f)
-	StartingAmmo=(Name="Starting Ammo",Increment=0.1,Rank=5,StartingValue=0.f,MaxValue=0.50)
+	//FlameDamage=(Name="Weapon Damage",Increment=0.008f,Rank=1,StartingValue=1.f,MaxValue=1.20) //1.25
+	//WeaponReload=(Name="Weapon Reload Speed",Increment=0.008f,Rank=1,StartingValue=0.f,MaxValue=0.20)
+	//FireResistance=(Name="Fire Resistance",Increment=0.02,Rank=2,StartingValue=0.3f,MaxValue=0.8f)
+	//OwnFireResistance=(Name="Own fire Resistance",Increment=0.03,Rank=1,StartingValue=0.25f,MaxValue=1.f)
+	//StartingAmmo=(Name="Starting Ammo",Increment=0.1,Rank=5,StartingValue=0.f,MaxValue=0.50)
 
 	PerkSkills(EFirebugBringTheHeat)=(Name="BringTheHeat",IconPath="UI_PerkTalent_TEX.Firebug.UI_Talents_Firebug_BringtheHeat",Increment=0.f,Rank=0,StartingValue=0.35f,MaxValue=0.35f) //0.1 //0.25
 	PerkSkills(EFirebugHighCapFuelTank)=(Name="HighCapFuelTank",IconPath="UI_PerkTalent_TEX.Firebug.UI_Talents_Firebug_HighCapacityFuel",Increment=0.f,Rank=0,StartingValue=1.f,MaxValue=1.f)

@@ -1,6 +1,8 @@
-class ApocPerk_Berserker extends ClassicPerk_Base;
+class ApocPerk_Berserker extends ClassicPerk_Base
+	config(ApocPerksStat);
 
-var const PerkSkill DamageResistance;
+var	config				PerkSkill 	BerserkerDamage;
+var config				PerkSkill	DamageResistance;                   // 0% resistance to all damage – Max 25%
 
 var const 	private 	float 		NinjaSprintModifer;
 var const 	private 	float		SmashStumbleModifier;
@@ -130,7 +132,7 @@ simulated function ModifyDamageGiven( out int InDamage, optional Actor DamageCau
 		`QALog( GetFuncName() @ "Base damage:" @ InDamage , bLogPerk);
 		if( (MyKFWeapon != none && IsWeaponOnPerk( MyKFWeapon,, self.class )) || IsDamageTypeOnPerk( DamageType ) )
 		{
-			TempDamage += InDamage * GetPassiveValue( WeaponDamage,  CurrentLevel, WeaponDamage.Rank );
+			TempDamage += InDamage * GetPassiveValue( BerserkerDamage,  CurrentLevel, BerserkerDamage.Rank );
 			if( IsSpeedActive() )
 			{
 				TempDamage += InDamage * static.GetSpeedDamageModifier();
@@ -807,12 +809,12 @@ simulated function float GetCostScaling(byte Level, optional STraderItem TraderI
 
 simulated static function GetPassiveStrings( out array<string> PassiveValues, out array<string> Increments, byte Level )
 {
-	PassiveValues[0] = Round(GetPassiveValue( default.WeaponDamage, Level, default.WeaponDamage.Rank ) * 100) @ "%";
+	PassiveValues[0] = Round(GetPassiveValue( default.BerserkerDamage, Level, default.BerserkerDamage.Rank ) * 100) @ "%";
 	PassiveValues[1] = Round(GetPassiveDamageResistance( Level ) * 100) @ "%";
 	PassiveValues[2] = "";
 	PassiveValues[3] = "";
 
-	Increments[0] = "[" @ Left( string( default.WeaponDamage.Increment * 100 ), InStr(string(default.WeaponDamage.Increment * 100), ".") + 2 )@"% / +" $ default.WeaponDamage.Rank @ default.LevelString @ "]";
+	Increments[0] = "[" @ Left( string( default.BerserkerDamage.Increment * 100 ), InStr(string(default.BerserkerDamage.Increment * 100), ".") + 2 )@"% / +" $ default.BerserkerDamage.Rank @ default.LevelString @ "]";
 	Increments[1] = "[" @ Left( string( default.DamageResistance.Increment * 100 ), InStr(string(default.DamageResistance.Increment * 100), ".") + 2 )@"% / +" $ default.DamageResistance.Rank @ default.LevelString @ "]";
 	Increments[2] = "";
 	Increments[3] = "";
@@ -866,8 +868,8 @@ DefaultProperties
     KnifeWeaponDef=class'KFweapDef_Knife_Berserker'
     GrenadeWeaponDef=class'KFWeapDef_Grenade_Berserker'
 
-    WeaponDamage=(Name="Berserker Damage",Increment=0.01,Rank=1,StartingValue=0.f,MaxValue=0.25)
-	DamageResistance=(Name="Damage Resistance",Increment=0.03f,Rank=5,StartingValue=0.f,MaxValue=0.15f)
+    //BerserkerDamage=(Name="Berserker Damage",Increment=0.01,Rank=1,StartingValue=0.f,MaxValue=0.25)
+	//DamageResistance=(Name="Damage Resistance",Increment=0.03f,Rank=5,StartingValue=0.f,MaxValue=0.15f)
 
     PerkSkills(EBerserkerFortitude)=(Name="Fortitude",IconPath="UI_PerkTalent_TEX.berserker.UI_Talents_Berserker_Fortitude",Increment=0.f,Rank=0,StartingValue=0.75,MaxValue=0.75)
 	PerkSkills(EBerserkerNinja)=(Name="Ninja",IconPath="UI_PerkTalent_TEX.berserker.UI_Talents_Berserker_Ninja",Increment=0.f,Rank=0,StartingValue=0.2f,MaxValue=0.2f)

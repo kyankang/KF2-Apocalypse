@@ -1,10 +1,11 @@
-class ApocPerk_Sharpshooter extends ClassicPerk_Base;
+class ApocPerk_Sharpshooter extends ClassicPerk_Base
+	config(ApocPerksStat);
 
 //`include(KFOnlineStats.uci)
 
-var private const PerkSkill		HeadshotDamage;
-var private	const PerkSkill		Recoil;
-var private	const PerkSkill		WeaponSwitchSpeed;
+var config PerkSkill			HeadshotDamage;
+var config PerkSkill			Recoil;
+var config PerkSkill			WeaponSwitchSpeed;
 var private	const AkEvent		RhythmMethodSoundReset;
 var private	const AkEvent		RhythmMethodSoundHit;
 var private	const AkEvent		RhythmMethodSoundTop;
@@ -687,9 +688,9 @@ DefaultProperties
 	AdditionalOnPerkDTNames(2)="KFDT_Ballistic_Rem1858"
 
 
-   	HeadshotDamage=(Name="Headshot Damage",Increment=0.01f,Rank=1,StartingValue=0.0f,MaxValue=0.25f)
-   	Recoil=(Name="Recoil",Increment=0.01f,Rank=1,StartingValue=0.0f,MaxValue=0.25f)
-   	WeaponSwitchSpeed=(Name="Weapon Switch Speed",Increment=0.02f,Rank=1,StartingValue=0.0f,MaxValue=0.50f)
+   	//HeadshotDamage=(Name="Headshot Damage",Increment=0.01f,Rank=1,StartingValue=0.0f,MaxValue=0.25f)
+   	//Recoil=(Name="Recoil",Increment=0.01f,Rank=1,StartingValue=0.0f,MaxValue=0.25f)
+   	//WeaponSwitchSpeed=(Name="Weapon Switch Speed",Increment=0.02f,Rank=1,StartingValue=0.0f,MaxValue=0.50f)
 
    	ZedTimeModifyingStates(0)="WeaponFiring"
    	ZedTimeModifyingStates(1)="WeaponBurstFiring"

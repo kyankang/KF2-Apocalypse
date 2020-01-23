@@ -1,11 +1,13 @@
-class ApocPerk_SWAT extends ClassicPerk_Base;
+class ApocPerk_SWAT extends ClassicPerk_Base
+	config(ApocPerksStat);
 
 //`include(KFOnlineStats.uci)
 
 /** Passives */
-var private	const PerkSkill					BulletResistance;
-var private	const PerkSkill					MagSize;
-var private	const PerkSkill					WeaponSwitchSpeed;
+var	config PerkSkill						BulletDamage;						// 1% increased Perk weapon damage per level (max 25%)
+var config PerkSkill						BulletResistance;
+var config PerkSkill						MagSize;
+var config PerkSkill						WeaponSwitchSpeed;
 
 var private const float						RapidAssaultFiringRate;    			// Faster firing rate in %  NOTE:This is needed for combinations with the Skill: RapidAssault (Stumble Power and Rate)
 var private const float 					SnarePower;
@@ -272,8 +274,8 @@ simulated function ModifyDamageGiven( out int InDamage, optional Actor DamageCau
 		}
 		else if( IsWeaponOnPerk( KFW,, self.class ) || (DamageType != none && IsDamageTypeOnPerk(DamageType)) )
 		{
-			`QALog( "Passive Damage" @KFW @ GetPercentage( InDamage, InDamage * GetPassiveValue(WeaponDamage, CurrentLevel, WeaponDamage.Rank)), bLogPerk );
-			TempDamage *= GetPassiveValue( WeaponDamage, CurrentLevel, WeaponDamage.Rank );
+			`QALog( "Passive Damage" @KFW @ GetPercentage( InDamage, InDamage * GetPassiveValue(BulletDamage, CurrentLevel, BulletDamage.Rank)), bLogPerk );
+			TempDamage *= GetPassiveValue( BulletDamage, CurrentLevel, BulletDamage.Rank );
 		}
 	}
 
@@ -588,13 +590,13 @@ simulated static function int GetClotKillXP( byte Difficulty )
 
 simulated static function GetPassiveStrings( out array<string> PassiveValues, out array<string> Increments, byte Level )
 {
-	PassiveValues[0] = Round( GetPassiveValue( default.WeaponDamage, Level, default.WeaponDamage.Rank ) * 100 - 100 ) @ "%";
+	PassiveValues[0] = Round( GetPassiveValue( default.BulletDamage, Level, default.BulletDamage.Rank ) * 100 - 100 ) @ "%";
 	PassiveValues[1] = Round( GetPassiveValue( default.BulletResistance, Level, default.BulletResistance.Rank ) * 100 ) @ "%";
 	PassiveValues[2] = Round( GetPassiveValue( default.MagSize, Level, default.MagSize.Rank ) * 100 ) @ "%";		// Divide by 100 to convert unreal units to meters
 	PassiveValues[3] = Round( GetPassiveValue( default.WeaponSwitchSpeed, Level, default.WeaponSwitchSpeed.Rank ) * 100 ) @ "%";
 	PassiveValues[4] = "";
 
-	Increments[0] = "[" @ Left( string( default.WeaponDamage.Increment * 100 ), InStr(string(default.WeaponDamage.Increment * 100), ".") + 2 ) @ "% / +" $ default.WeaponDamage.Rank @ default.LevelString @ "]";
+	Increments[0] = "[" @ Left( string( default.BulletDamage.Increment * 100 ), InStr(string(default.BulletDamage.Increment * 100), ".") + 2 ) @ "% / +" $ default.BulletDamage.Rank @ default.LevelString @ "]";
 	Increments[1] = "[" @ "5% +" @ Round( default.BulletResistance.Increment * 100 ) @ "% / +" $ default.BulletResistance.Rank @ default.LevelString @"]";
 	Increments[2] = "[" @ Round( default.MagSize.Increment * 100 )  @"% / +" $ default.MagSize.Rank @default.LevelString @"]";
 	Increments[3] = "[" @ Round( default.WeaponSwitchSpeed.Increment *100 )  @"% / +" $ default.WeaponSwitchSpeed.Rank @ default.LevelString @"]";
@@ -648,11 +650,11 @@ DefaultProperties
 
 	SnarePower=15 //20
 
-	WeaponDamage=(Name="Weapon Damage",Increment=0.01f,Rank=1,StartingValue=1.f,MaxValue=1.25) //1.25
-	BulletResistance=(Name="Bullet Resistance",Increment=0.01,Rank=1,StartingValue=0.05,MaxValue=0.3f)
-	MagSize=(Name="Increased Mag Size",Increment=0.04,Rank=1,StartingValue=0.f,MaxValue=1.f)
-	WeaponSwitchSpeed=(Name="Weapon Switch Speed",Increment=0.01,Rank=1,StartingValue=0.f,MaxValue=0.25)
-	HeavyArmorAbsorptionPct=0.65f
+	//BulletDamage=(Name="Weapon Damage",Increment=0.01f,Rank=1,StartingValue=1.f,MaxValue=1.25) //1.25
+	//BulletResistance=(Name="Bullet Resistance",Increment=0.01,Rank=1,StartingValue=0.05,MaxValue=0.3f)
+	//MagSize=(Name="Increased Mag Size",Increment=0.04,Rank=1,StartingValue=0.f,MaxValue=1.f)
+	//WeaponSwitchSpeed=(Name="Weapon Switch Speed",Increment=0.01,Rank=1,StartingValue=0.f,MaxValue=0.25)
+	//HeavyArmorAbsorptionPct=0.65f
 
  	PerkSkills(ESWAT_HeavyArmor)=(Name="HeavyArmor",IconPath="UI_PerkTalent_TEX.SWAT.UI_Talents_SWAT_HeavyArmor", Increment=0.f,Rank=0,StartingValue=0.5f,MaxValue=0.5f)    //0.1
 	PerkSkills(ESWAT_TacticalMovement)=(Name="TacticalMovement",IconPath="UI_PerkTalent_TEX.SWAT.UI_Talents_SWAT_TacticalMovement", Increment=0.f,Rank=0,StartingValue=2.5f,MaxValue=2.5f)

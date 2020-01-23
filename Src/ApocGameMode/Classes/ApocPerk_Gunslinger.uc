@@ -1,12 +1,14 @@
-class ApocPerk_Gunslinger extends ClassicPerk_Base;
+class ApocPerk_Gunslinger extends ClassicPerk_Base
+	config(ApocPerksStat);
 
 //`include(KFOnlineStats.uci)
 
 //Passives
-var const				PerkSkill				BulletResistance;
-var const				PerkSkill				MovementSpeed;
-var const				PerkSkill				Recoil;
-var	const 				PerkSkill				ZedTimeReload;
+var	config				PerkSkill 				BulletDamage;
+var config				PerkSkill				BulletResistance;
+var config				PerkSkill				MovementSpeed;
+var config				PerkSkill				Recoil;
+var	config 				PerkSkill				ZedTimeReload;
 
 var	protected 	const	array<Name>				SpecialZedClassNames;
 var	protected 	const	array<Name>				AdditionalOnPerkWeaponNames;
@@ -129,7 +131,7 @@ simulated function ModifyDamageGiven( out int InDamage, optional Actor DamageCau
 
 	if( (KFW != none && IsWeaponOnPerk( KFW,, self.class )) || (DamageType != none && IsDamageTypeOnPerk( DamageType )) )
 	{
-		TempDamage += InDamage * GetPassiveValue( WeaponDamage, CurrentLevel, WeaponDamage.Rank );
+		TempDamage += InDamage * GetPassiveValue( BulletDamage, CurrentLevel, BulletDamage.Rank );
 
 		if( IsBoneBreakerActive() )
 		{
@@ -734,13 +736,13 @@ static function int GetMaxHeadShotsValue()
 
 simulated static function GetPassiveStrings( out array<string> PassiveValues, out array<string> Increments, byte Level )
 {
-	PassiveValues[0] = Round( GetPassiveValue( default.WeaponDamage, Level, default.WeaponDamage.Rank ) * 100 ) @ "%";
+	PassiveValues[0] = Round( GetPassiveValue( default.BulletDamage, Level, default.BulletDamage.Rank ) * 100 ) @ "%";
 	PassiveValues[1] = Round( GetPassiveValue( default.BulletResistance, Level, default.BulletResistance.Rank ) * 100 ) @ "%";
 	PassiveValues[2] = Round( GetPassiveValue( default.MovementSpeed, Level, default.MovementSpeed.Rank ) * 100 ) @ "%";
 	PassiveValues[3] = Round( GetPassiveValue( default.Recoil, Level, default.Recoil.Rank ) * 100 ) @ "%";
 	PassiveValues[4] = Round( GetPassiveValue( default.ZedTimeReload, Level, default.ZedTimeReload.Rank ) * 100 ) @ "%";
 
-	Increments[0] = "[" @ Left( string( default.WeaponDamage.Increment * 100 ), InStr(string(default.WeaponDamage.Increment * 100), ".") + 2 )  @ "% / +" $ default.WeaponDamage.Rank @ default.LevelString @ "]";
+	Increments[0] = "[" @ Left( string( default.BulletDamage.Increment * 100 ), InStr(string(default.BulletDamage.Increment * 100), ".") + 2 )  @ "% / +" $ default.BulletDamage.Rank @ default.LevelString @ "]";
 	Increments[1] = "[" @ "5% +" @ Left( string( default.BulletResistance.Increment * 100 ), InStr(string(default.BulletResistance.Increment * 100), ".") + 2 )  @ "% / +" $ default.BulletResistance.Rank @ default.LevelString @ "]";
 	Increments[2] = "[" @ Left( string( default.MovementSpeed.Increment * 100 ), InStr(string(default.MovementSpeed.Increment * 100), ".") + 2 )  @ "% / +" $ default.MovementSpeed.Rank @ default.LevelString @ "]";
 	Increments[3] = "[" @ Left( string( default.Recoil.Increment * 100 ), InStr(string(default.Recoil.Increment * 100), ".") + 2 )  @ "% / +" $ default.Recoil.Rank @ default.LevelString @ "]";
@@ -758,7 +760,7 @@ simulated function LogPerkSkills()
 	if( bLogPerk )
 	{
 		`log( "PASSIVE PERKS" );
-		`log( "-WeaponDamage:" @ GetPassiveValue( WeaponDamage, CurrentVetLevel, WeaponDamage.Rank ) * 100 $ "%" );
+		`log( "-BulletDamage:" @ GetPassiveValue( BulletDamage, CurrentVetLevel, BulletDamage.Rank ) * 100 $ "%" );
 		`log( "-BulletResistance:" @ GetPassiveValue( BulletResistance, CurrentVetLevel, BulletResistance.Rank ) * 100 $ "%" );
 		`log( "-MovementSpeed:" @ GetPassiveValue( MovementSpeed, CurrentVetLevel, MovementSpeed.Rank ) * 100 $ "%" );
 		`log( "-Recoil:" @ GetPassiveValue( Recoil, CurrentVetLevel, Recoil.Rank ) * 100 $ "%" );
@@ -821,11 +823,11 @@ DefaultProperties
 	SnarePower=100 //this is for the head hit. need to test out if 100 is to powerful or not.
 	SnareSpeedModifier=0.7f
 
-   	WeaponDamage=(Name="Weapon Damage",Increment=0.01f,Rank=1,StartingValue=0.0f,MaxValue=0.25f)
-   	BulletResistance=(Name="Bullet Resistance",Increment=0.01f,Rank=1,StartingValue=0.05f,MaxValue=0.3f)
-   	MovementSpeed=(Name="Movement Speed",Increment=0.008f,Rank=1,StartingValue=0.0f,MaxValue=0.20f)
-   	Recoil=(Name="Recoil",Increment=0.01f,Rank=1,StartingValue=0.0f,MaxValue=0.25f)
-   	ZedTimeReload=(Name="Zed Time Reload",Increment=0.03f,Rank=1,StartingValue=0.f,MaxValue=0.75f) //0.5
+   	//BulletDamage=(Name="Weapon Damage",Increment=0.01f,Rank=1,StartingValue=0.0f,MaxValue=0.25f)
+   	//BulletResistance=(Name="Bullet Resistance",Increment=0.01f,Rank=1,StartingValue=0.05f,MaxValue=0.3f)
+   	//MovementSpeed=(Name="Movement Speed",Increment=0.008f,Rank=1,StartingValue=0.0f,MaxValue=0.20f)
+   	//Recoil=(Name="Recoil",Increment=0.01f,Rank=1,StartingValue=0.0f,MaxValue=0.25f)
+   	//ZedTimeReload=(Name="Zed Time Reload",Increment=0.03f,Rank=1,StartingValue=0.f,MaxValue=0.75f) //0.5
 
    	// xp per headshot (all headshots, not just lethal)
    	SecondaryXPModifier(0)=1

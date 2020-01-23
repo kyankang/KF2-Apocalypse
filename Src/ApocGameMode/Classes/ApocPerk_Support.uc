@@ -1,4 +1,5 @@
-class ApocPerk_Support extends ClassicPerk_Base;
+class ApocPerk_Support extends ClassicPerk_Base
+	config(ApocPerksStat);
 
 //`include(KFOnlineStats.uci)
 
@@ -10,11 +11,11 @@ struct native sSuppliedPawnInfo
 };
 
 /** Passives */
-var private	const PerkSkill 					Ammo;       				// Increased ammo
-var private const PerkSkill 					WeldingProficiency;         // Welding speed modifier
-var	private const PerkSkill 					ShotgunDamage;              // Shotgun dmg modifier
-var	private const PerkSkill 					ShotgunPenetration;			// Shotgun extra penetration Use INTs only
-var	private const PerkSkill 					Strength;
+var config 	PerkSkill 							Ammo;       				// Increased ammo
+var config 	PerkSkill 							WeldingProficiency;         // Welding speed modifier
+var	config 	PerkSkill 							ShotgunDamage;              // Shotgun dmg modifier
+var	config 	PerkSkill 							ShotgunPenetration;			// Shotgun extra penetration Use INTs only
+var	config 	PerkSkill 							Strength;
 
 var	private		  Array<sSuppliedPawnInfo> 		SuppliedPawnList;
 var	private const float 						BarrageFiringRate;
@@ -829,11 +830,11 @@ DefaultProperties
 	ReceivedAmmoAndArmorSound=AkEvent'WW_UI_PlayerCharacter.Play_UI_Pickup_Armor'
 	ReceivedArmorSound=AkEvent'WW_UI_PlayerCharacter.Play_UI_Pickup_Armor'
 
-	Ammo=(Name="Ammo",Increment=0.01f,Rank=1,StartingValue=0.0,MaxValue=0.25f) //0.4
-	WeldingProficiency=(Name="Welding Proficiency",Increment=0.03f,Rank=1,StartingValue=1.f,MaxValue=1.75f) //1.5
-	ShotgunDamage=(Name="Shotgun Damage",Increment=0.01f,Rank=1,StartingValue=0.f,MaxValue=0.25f)
-	ShotgunPenetration=(Name="Shotgun Penetration",Increment=0.20,Rank=1,StartingValue=0.0f,MaxValue=5.0f) //6.25
-	Strength=(Name="Strength",Increment=1.f,Rank=5,StartingValue=0.f,MaxValue=5.f)
+	//Ammo=(Name="Ammo",Increment=0.01f,Rank=1,StartingValue=0.0,MaxValue=0.25f) //0.4
+	//WeldingProficiency=(Name="Welding Proficiency",Increment=0.03f,Rank=1,StartingValue=1.f,MaxValue=1.75f) //1.5
+	//ShotgunDamage=(Name="Shotgun Damage",Increment=0.01f,Rank=1,StartingValue=0.f,MaxValue=0.25f)
+	//ShotgunPenetration=(Name="Shotgun Penetration",Increment=0.20,Rank=1,StartingValue=0.0f,MaxValue=5.0f) //6.25
+	//Strength=(Name="Strength",Increment=1.f,Rank=5,StartingValue=0.f,MaxValue=5.f)
 
 	PerkSkills(ESupportHighCapMags)=(Name="HighCapMags",IconPath="UI_PerkTalent_TEX.support.UI_Talents_Support_HighCapacityMags",Increment=0.f,Rank=0,StartingValue=0.5,MaxValue=0.5) //0.25
 	PerkSkills(ESupportTacticalReload)=(Name="TacticalReload",IconPath="UI_PerkTalent_TEX.Support.UI_Talents_Support_TacticalReload",Increment=0.f,Rank=0,StartingValue=0.8f,MaxValue=0.f)

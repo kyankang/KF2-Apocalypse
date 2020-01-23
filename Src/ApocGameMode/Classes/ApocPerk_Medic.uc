@@ -1,13 +1,14 @@
-class ApocPerk_Medic extends ClassicPerk_Base;
+class ApocPerk_Medic extends ClassicPerk_Base
+	config(ApocPerksStat);
 
 //`include(KFOnlineStats.uci)
 
 /** Passive skills */
-var	const PerkSkill 				HealerRecharge;
-var	const PerkSkill 				HealPotency;
-var	const PerkSkill					BloatBileResistance;
-var	const PerkSkill					MovementSpeed;
-var	const PerkSkill					Armor;
+var	config PerkSkill 				HealerRecharge;
+var	config PerkSkill 				HealPotency;
+var	config PerkSkill				BloatBileResistance;
+var	config PerkSkill				MovementSpeed;
+var	config PerkSkill				Armor;
 
 var const private float				SelfHealingSurgePct;
 var const private float				MaxSurvivalistResistance;
@@ -610,11 +611,11 @@ DefaultProperties
 	AAExplosionTemplate=ExploTemplate0
 
    	/** Passive skills */
-   	HealerRecharge=(Name="Healer Recharge",Increment=0.08f,Rank=1,StartingValue=1.f,MaxValue=3.f)
-   	HealPotency=(Name="Healer Potency",Increment=0.02f,Rank=1,StartingValue=1.0f,MaxValue=1.5f)
-	BloatBileResistance=(Name="Bloat Bile Resistance",Increment=0.02,Rank=1,StartingValue=0.f,MaxValue=0.5f)
-	MovementSpeed=(Name="Movement Speed",Increment=0.004f,Rank=1,StartingValue=0.f,MaxValue=0.1f)
-	Armor=(Name="Armor",Increment=0.03f,Rank=1,StartingValue=1.f,MaxValue=1.75f)
+   	//HealerRecharge=(Name="Healer Recharge",Increment=0.08f,Rank=1,StartingValue=1.f,MaxValue=3.f)
+   	//HealPotency=(Name="Healer Potency",Increment=0.02f,Rank=1,StartingValue=1.0f,MaxValue=1.5f)
+	//BloatBileResistance=(Name="Bloat Bile Resistance",Increment=0.02,Rank=1,StartingValue=0.f,MaxValue=0.5f)
+	//MovementSpeed=(Name="Movement Speed",Increment=0.004f,Rank=1,StartingValue=0.f,MaxValue=0.1f)
+	//Armor=(Name="Armor",Increment=0.03f,Rank=1,StartingValue=1.f,MaxValue=1.75f)
 
 	PerkSkills(EMedicHealingSurge)=(Name="HealingSurge",IconPath="UI_PerkTalent_TEX.Medic.UI_Talents_Medic_HealingSurge", Increment=0.f,Rank=0,StartingValue=0.25,MaxValue=0.25)
 	PerkSkills(EMedicSurvivalist)=(Name="Survivalist",IconPath="ui_perktalent_tex.Medic.UI_Talents_Medic_Resilience", Increment=0.f,Rank=0,StartingValue=0.01f,MaxValue=0.01f)
