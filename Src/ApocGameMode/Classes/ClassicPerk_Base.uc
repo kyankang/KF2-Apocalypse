@@ -833,7 +833,7 @@ function string ApocGetPassiveSkillSummary(class<KFPerk> Perk, byte Level)
                 S = S $ "|" $ ApocItemPrefix;
                 S = S @ PassiveLocalize.Title[1];
                 S = S @ ":" @ PassiveValues[i];
-                S = S @ Increments[i];
+                S = S @ " " @ Increments[i];
             }
         }
     }
@@ -860,7 +860,7 @@ function string ApocGetNextPassiveSkillSummary(class<KFPerk> Perk, byte Level)
                 S = S $ "|" $ ApocItemPrefix;
                 S = S @ PassiveLocalize.Title[1];
                 S = S @ ":" @ PassiveValues[i];
-                S = S @ Increments[i];
+                S = S @ " " @ Increments[i];
             }
         }
     }
