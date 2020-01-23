@@ -573,10 +573,10 @@ simulated static function GetPassiveStrings( out array<string> PassiveValues, ou
 	PassiveValues[4] = "";
 	PassiveValues[5] = "";
 
-	Increments[0] = "[" @ Left( string( default.WeldingProficiency.Increment * 100 ), InStr(string(default.WeldingProficiency.Increment * 100), ".") + 2 )	$ "% /" @ default.LevelString @ "]";
-	Increments[1] = "[" @ Left( string( default.ShotgunDamage.Increment * 100 ), InStr(string(default.ShotgunDamage.Increment * 100), ".") + 2 )			$ "% /" @ default.LevelString @ "]";
-	Increments[2] = "[" @ Left( string( default.ShotgunPenetration.Increment * 100 ), InStr(string(default.ShotgunPenetration.Increment * 100), ".") + 2 )	$ "% /" @ default.LevelString @ "]";
-	Increments[3] = "[" @ Left( string( default.Ammo.Increment * 100 ), InStr(string(default.Ammo.Increment * 100), ".") + 2 )								$ "% /" @ default.LevelString @ "]";
+	Increments[0] = "[" @ Left( string( default.WeldingProficiency.Increment * 100 ), InStr(string(default.WeldingProficiency.Increment * 100), ".") + 2 )	$ "% / +" $ default.WeldingProficiency.Rank @ default.LevelString @ "]";
+	Increments[1] = "[" @ Left( string( default.ShotgunDamage.Increment * 100 ), InStr(string(default.ShotgunDamage.Increment * 100), ".") + 2 )			$ "% / +" $ default.ShotgunDamage.Rank @ default.LevelString @ "]";
+	Increments[2] = "[" @ Left( string( default.ShotgunPenetration.Increment * 100 ), InStr(string(default.ShotgunPenetration.Increment * 100), ".") + 2 )	$ "% / +" $ default.ShotgunPenetration.Rank @ default.LevelString @ "]";
+	Increments[3] = "[" @ Left( string( default.Ammo.Increment * 100 ), InStr(string(default.Ammo.Increment * 100), ".") + 2 )								$ "% / +" $ default.Ammo.Rank @ default.LevelString @ "]";
 	Increments[4] = "";
 	Increments[5] = "";
 }
