@@ -55,10 +55,10 @@ function bool NotifyInputChar(int Key, string Unicode)
     if( UniCode!="" )
         S = Unicode;
     else S = Chr(Key);
-    
+
     if( Asc(S) == 13 || Asc(S) == 8 || Asc(S) == 27 )
         return false;
-        
+
     if( bCtrl )
         return false;
 
@@ -107,7 +107,7 @@ function SetInputText(string S)
             S = Locs(S);
             break;
     }
-    
+
     TextStr = S;
     TextChanged();
 }
@@ -177,12 +177,12 @@ function bool ProcessControlKey(name Key, EInputEvent Event)
 function bool NotifyInputKey(int ControllerId, name Key, EInputEvent Event, float AmountDepressed, bool bGamepad)
 {
     local string Temp;
-    
+
     if( bReadOnly )
     {
         return false;
     }
-    
+
     if (ProcessControlKey(Key, Event))
     {
         return false;
@@ -307,18 +307,18 @@ function DrawMenu()
     local int MaskIndex,StorageLength;
     local float XL,YL,BoxWidth,FontScale,CursorY,BorderSize;
     local FontRenderInfo FRI;
-    
+
     Super.DrawMenu();
-    
+
     if( bDrawBackground )
     {
         Canvas.SetDrawColor(250,250,250,255);
         Canvas.SetPos(0.f,0.f);
         Canvas.DrawTileStretched(Owner.CurrentStyle.BorderTextures[`BOX_SMALL],CompPos[2],CompPos[3],0,0,Owner.CurrentStyle.BorderTextures[`BOX_SMALL].GetSurfaceWidth(),Owner.CurrentStyle.BorderTextures[`BOX_SMALL].GetSurfaceHeight());
     }
-    
+
     BorderSize = Owner.CurrentStyle.ScreenScale(4.f);
-    
+
     FRI.bClipText = true;
     FRI.bEnableShadow = true;
 
@@ -327,19 +327,19 @@ function DrawMenu()
     if ( bMaskText && Len(Storage)>0 )
     {
         StorageLength = Len(Storage);
-        
+
         Storage = "";
         for(MaskIndex=1; MaskIndex <= StorageLength; MaskIndex++ )
         {
             Storage $= "*";
         }
     }
-    
+
     Canvas.Font = Owner.CurrentStyle.PickFont(FontScale);
     FontScale *= TextScale;
 
     BoxWidth=CompPos[2]*0.9875;
-    
+
     if ( (Len(Storage) != LastLength) || (CaretPos!=LastCaret) )
     {
         if (CaretPos<=FirstVis)
@@ -395,7 +395,7 @@ function DrawMenu()
             Canvas.DrawTile( Owner.DefaultPens[`PEN_WHITE], 3, YL-Owner.HUDOwner.ScaledBorderSize, 0, 0, Owner.DefaultPens[`PEN_WHITE].GetSurfaceWidth(), Owner.DefaultPens[`PEN_WHITE].GetSurfaceHeight() );
         }
     }
-    
+
     Canvas.DrawColor = FontColor;
     Canvas.SetPos(BorderSize, (CompPos[3]/2) - (YL/2));
     Canvas.DrawText(FinalDraw,,FontScale,FontScale,FRI);
@@ -407,7 +407,7 @@ function HandleMouseClick( bool bRight )
     {
         GrabKeyFocus();
     }
-        
+
     CaretPos = Len(TextStr);
     bAllSelected = !bAllSelected;
 }
@@ -419,10 +419,14 @@ defaultproperties
 {
     FontColor=(R=255,G=255,B=255,A=255)
     MaxWidth=768
+`if(`isdefined(APOC_PATCH))
+    TextScale=1.2
+`else
     TextScale=1
+`endif
     TextCase=TXTC_None
     LastCaret=-1
     LastLength=-1
-    
+
     YSize=0.06
 }

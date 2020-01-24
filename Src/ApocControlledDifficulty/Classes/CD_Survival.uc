@@ -1465,7 +1465,11 @@ function StartWave()
 
 private function DisplayWaveStartMessageInChat()
 {
+`if(`isdefined(APOC_PATCH))
+	BroadcastCDEcho( "[Apocalypse]\n" $ ChatCommander.GetCDInfoChatString( "brief" ) );
+`else
 	BroadcastCDEcho( "[Controlled Difficulty - "$ `CD_BUILD_TYPE $" \""$ `CD_COMMIT_HASH $"\"]\n" $ ChatCommander.GetCDInfoChatString( "brief" ) );
+`endif
 }
 
 private function DisplayDynamicSettingSummaryInChat()

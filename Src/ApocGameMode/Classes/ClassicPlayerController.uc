@@ -51,6 +51,30 @@ var globalconfig bool bHideKillMsg, bHideDamageMsg, bHidePlayerDeathMsg, bEnable
 var globalconfig bool bAlwaySprint, bAutoFire;
 `endif
 
+`if(`isdefined(APOC_CDPATCH))
+var config string AlphaGlitter;
+var bool AlphaGlitterBool;
+var config int ChatCharThreshold;
+var config int ChatLineThreshold;
+var config bool ClientLogging;
+var CD_ConsolePrinter Client_CDCP;
+var const string CDEchoMessageColor;
+
+/* CD introduces custom alpha and crawler zed classes to
+   control albinism.  KF2's zed kill count (displayed at
+   the after-action report screen) is based on exact class
+   name matches.  This function override treats CD's
+   subclasses like their parent classes for the purposes
+   of zed kill tracking.
+*/
+function AddZedKill( class<KFPawn_Monster> MonsterClass, byte Difficulty, class<DamageType> DT, bool bKiller )
+{
+	MonsterClass = class'CD_ZedNameUtils'.static.CheckMonsterClassRemap( MonsterClass, "CD_PlayerController.AddZedKill", ClientLogging );
+
+	super.AddZedKill( MonsterClass, Difficulty, DT, bKiller );
+}
+`endif // `if(`isdefined(APOC_CD_PATCH))
+
 replication
 {
     if( bNetDirty )
@@ -250,7 +274,29 @@ simulated function PostBeginPlay()
     SetServerIgnoreDrops(bDisallowOthersToPickupWeapons);
     SetTimer(1.f, true, 'UpdatEventState');
     bSkipNonCriticalForceLookAt = !bDisableGameplayChanges;
+
+`if(`isdefined(APOC_CDPATCH))
+    CD_PostBeginPlay();
+`endif
 }
+
+`if(`isdefined(APOC_CDPATCH))
+simulated function CD_PostBeginPlay()
+{
+	Client_CDCP = new class'CD_ConsolePrinter';
+
+	if ( 0 >= ChatLineThreshold )
+		ChatLineThreshold = 7;
+
+	if ( 0 >= ChatCharThreshold )
+		ChatCharThreshold = 340;
+
+	if ( "" == AlphaGlitter )
+		AlphaGlitter = "true";
+
+	AlphaGlitterBool = bool( AlphaGlitter );
+}
+`endif
 
 simulated function UpdatEventState()
 {
@@ -1108,10 +1154,64 @@ function ClearOnPlayerChatDelegates()
     OnPlayerChatDelegates.Remove(0,OnPlayerChatDelegates.Length);
 }
 
+`if(`isdefined(APOC_CDPATCH))
+function bool CD_TeamMessage( PlayerReplicationInfo PRI, coerce string S, name Type, optional float MsgLifeTime )
+{
+    local string Msg;
+	local int MessageChars, MessageLines;
+	local array<string> Tokens;
+
+	// Messages from CD bypass the usual chat display code
+	if ( PRI == None && S != "" && Type == 'CDEcho' )
+	{
+		// Log a copy of this message to the client's console;
+		// this happens regardless of what menu state the client is in (lobby, postgame, action)
+		LocalPlayer(Player).ViewportClient.ViewportConsole.OutputText("[Server Message]\n  " $ Repl(S, "\n", "\n"));
+		MessageChars = Len(s);
+
+		// Count newlines by splitting string on \n... this seems awful, but I don't see a less-awful way
+		ParseStringIntoArray( S, Tokens, "\n", false );
+		MessageLines = Tokens.Length;
+
+		if ( MessageLines > ChatLineThreshold )
+		{
+			S = "[See Console]";
+			`log( "chatdebug: Squelching chat message with lines=" $ MessageLines, ClientLogging );
+		}
+		else
+		{
+			`log( "chatdebug: Displaying chat message with lines=" $ MessageLines, ClientLogging );
+		}
+
+		if ( MessageChars > ChatCharThreshold )
+		{
+			S = "[See Console]";
+			`log( "chatdebug: Squelching chat message with charlength=" $ MessageChars, ClientLogging );
+		}
+		else
+		{
+			`log( "chatdebug: Displaying chat message with charlength=" $ MessageChars, ClientLogging );
+		}
+
+        Msg = "#{"$class'KFLocalMessage'.default.EventColor$"}"$Repl(S, "\n", "<LINEBREAK>")$"<LINEBREAK>";
+        CurrentChatBox.AddText(Msg);
+        LocalPlayer( Player ).ViewportClient.ViewportConsole.OutputText( "("$Type$") "$StripColorMessage(S) );
+        return true;
+	}
+
+    return false;
+}
+`endif
+
 reliable client event TeamMessage( PlayerReplicationInfo PRI, coerce string S, name Type, optional float MsgLifeTime  )
 {
     local string Msg,PlayerName,NamePrefix,NamePostfix,ChatColor,SayColor;
     local ClassicPlayerReplicationInfo CPRI;
+
+`if(`isdefined(APOC_CDPATCH))
+    if( CD_TeamMessage( PRI, S, Type, MsgLifeTime ) )
+        return;
+`endif
 
     if( CurrentChatBox == None || PRI == None || Player == None  || (PRI.Team != None && Type == 'TeamSay' && PRI.Team.TeamIndex != PlayerReplicationInfo.Team.TeamIndex) )
         return;

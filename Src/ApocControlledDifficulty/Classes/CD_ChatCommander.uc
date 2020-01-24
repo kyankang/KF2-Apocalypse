@@ -14,8 +14,8 @@ class CD_ChatCommander extends Object
 
 struct StructChatCommand
 {
-	var array<string> Names; 
-	var array<string> ParamHints; 
+	var array<string> Names;
+	var array<string> ParamHints;
 	var delegate<ChatCommandNullaryImpl> NullaryImpl;
 	var delegate<ChatCommandParamsImpl> ParamsImpl;
 	var CD_Setting CDSetting;
@@ -338,18 +338,31 @@ function string GetCDInfoChatString( const string Verbosity )
 			{
 				Result $= "\n";
 			}
+`if(`isdefined(APOC_PATCH))
+			Result $= "*" @ AllSettings[i].GetChatLine();
+`else
 			Result $= AllSettings[i].GetChatLine();
+`endif
 		}
 	}
 	else
 	{
 		Result =
+`if(`isdefined(APOC_PATCH))
+			"*" @ MaxMonstersSetting.GetBriefChatLine() $ "\n" $
+			"*" @ WaveSizeFakesSetting.GetBriefChatLine() $ "\n" $
+			"*" @ SpawnPollSetting.GetBriefChatLine() $ "\n" $
+			"*" @ SpawnModSetting.GetBriefChatLine() $ "\n" $
+			"*" @ CohortSizeSetting.GetBriefChatLine() $ "\n" $
+			"*" @ SpawnCycleSetting.GetBriefChatLine();
+`else
 			MaxMonstersSetting.GetBriefChatLine() $ "\n" $
 			WaveSizeFakesSetting.GetBriefChatLine() $ "\n" $
 			SpawnPollSetting.GetBriefChatLine() $ "\n" $
 			SpawnModSetting.GetBriefChatLine() $ "\n" $
 			CohortSizeSetting.GetBriefChatLine() $ "\n" $
 			SpawnCycleSetting.GetBriefChatLine();
+`endif
 	}
 
 	return Result;
@@ -394,7 +407,7 @@ private function string GetCDWhoChatString()
 		{
 			Code = KFPC.Pawn.IsAliveAndWell() ? "L" : "D";
 		}
-		
+
 		if ( 0 < TotalCount )
 		{
 			Result $= "\n";

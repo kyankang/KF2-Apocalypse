@@ -13,7 +13,7 @@ struct FTextPart
     var ETextFieldStyles TextType;
     var Color C;
     var float X;
-    
+
     structdefaultproperties
     {
         TextType=TEXT_FIELD_NONE
@@ -76,11 +76,11 @@ final function ParseTextLines()
     for( i=0; i<SA.Length; ++i )
     {
         Lines[i].Text.Length = 0;
-        
+
         S = SA[i];
         if( S=="" )
             continue;
-        
+
         z = 0;
         while( true )
         {
@@ -120,7 +120,7 @@ final function ParseTextLines()
                 C.A = 0;
                 S = Mid(S,7);
                 TextType = TEXT_FIELD_FLASH;
-                
+
                 C.R = GrabHexValue(Mid(S,0,2));
                 C.G = GrabHexValue(Mid(S,2,2));
                 C.B = GrabHexValue(Mid(S,4,2));
@@ -147,7 +147,7 @@ final function ParseTextLines()
 final function byte GrabHexValue( string S )
 {
     local byte n;
-    
+
     n = (HexToInt(Asc(Left(S,1)))<<4) | HexToInt(Asc(Right(S,1)));
     S = Mid(S,2);
     return n;
@@ -171,7 +171,7 @@ function InitSize()
 
     if( Canvas == None )
         return;
-    
+
     OldSize[0] = CompPos[2];
     OldSize[1] = CompPos[3];
     if( !bTextParsed )
@@ -183,7 +183,7 @@ function InitSize()
 
     InitFont = Owner.CurrentStyle.PickFont(InitFontScale);
     InitFontScale *= FontScale;
-    
+
     // Compute Y-offsets of each line.
     Canvas.Font = InitFont;
     Canvas.TextSize("ABC",XS,TextHeight,InitFontScale,InitFontScale);
@@ -193,7 +193,7 @@ function InitSize()
     bShowScrollbar = (MaxHeight>=CompPos[3]);
     bClickable = bShowScrollbar;
     bCanFocus = bShowScrollbar;
-    
+
     if( bShowScrollbar )
     {
         if( ScrollBar==None )
@@ -205,7 +205,7 @@ function InitSize()
             ScrollBar.InitMenu();
             ScrollBar.SetVisibility(bVisible);
         }
-        
+
         // Compute scrollbar size and X-position.
         for( i=0; i<4; ++i )
             ScrollBar.InputPos[i] = CompPos[i];
@@ -243,28 +243,28 @@ final function ParseLines( float ClipX )
         {
             Lines[i].Text[j].X = (X*InitFontScale);
             Canvas.TextSize(Lines[i].Text[j].S,XS,YS);
-            
+
             if( (X+XS)>ClipX )
             {
                 z = FindSplitPoint(Lines[i].Text[j].S,X,ClipX);
 
                 // Add new line.
                 Lines.Insert(i+1,1);
-                
+
                 // Append the remaining lines there.
                 for( n=j; n<Lines[i].Text.Length; ++n )
                     Lines[i+1].Text.AddItem(Lines[i].Text[n]);
-                
+
                 // Split the string at wrapping point.
                 Lines[i+1].Text[0].S = Mid(Lines[i].Text[j].S,z);
-                
+
                 // Remove whitespaces in front of the string.
                 Lines[i+1].Text[0].S = StripWhiteSpaces(Lines[i+1].Text[0].S);
-                
+
                 // If empty, clean it up.
                 if( Lines[i+1].Text[0].S=="" )
                     Lines[i+1].Text.Remove(0,1);
-                
+
                 // End the current line at wrapping point.
                 Lines[i].Text[j].S = Left(Lines[i].Text[j].S,z);
                 Lines[i].Text.Length = j+1;
@@ -281,7 +281,7 @@ final function int FindSplitPoint( string S, float X, float ClipX )
     local int i,l,PrevWord;
     local float XL,YL;
     local bool bWasWhite,bStartedZero;
-    
+
     bStartedZero = (X==0.f);
     Canvas.TextSize(Mid(S,0,1),XL,YL);
     X += XL;
@@ -338,7 +338,7 @@ function DrawMenu()
     // Need to figure out best fitting font.
     if( OldSize[0]!=CompPos[2] || OldSize[1]!=CompPos[3] )
         InitSize();
-        
+
     if( MaxHistory != 0 )
     {
         if( Lines.Length >= MaxHistory )
@@ -358,7 +358,7 @@ function DrawMenu()
         i = ScrollBar.GetValue();
     }
     else i = 0;
-    
+
     if( i<Lines.Length )
     {
         Y = Lines[i].Y;
@@ -368,7 +368,7 @@ function DrawMenu()
             {
                 if( (Lines[i].Y-Y+TextHeight)>=CompPos[3] )
                     break;
-                    
+
                 for( j=0; j<Lines[i].Text.Length; ++j )
                 {
                     DrawTextField(Lines[i].Text[j].S, i, Lines[i].Text[j].X, Lines[i].Y-Y, Lines[i].Text[j].C, Lines[i].Text[j].TextType);
@@ -383,13 +383,13 @@ function DrawTextField(string S, int Index, float X, float Y, optional Color C, 
     local float TempSize;
     local int FadeAlpha;
     local Color MainColor;
-    
+
     MainColor = C;
     if( MainColor.A==0 )
         MainColor = TextColor;
-    
+
     Canvas.DrawColor = GetColorFromStyle(MainColor, TextStyle);
-        
+
     if( bFadeInOut )
     {
         TempSize = `TimeSinceEx(GetPlayer(), FadeStartTime);
@@ -397,7 +397,7 @@ function DrawTextField(string S, int Index, float X, float Y, optional Color C, 
         {
             return;
         }
-        
+
         if ( TempSize < MessageFadeInTime )
         {
             FadeAlpha = int((TempSize / MessageFadeInTime) * 255.0);
@@ -410,7 +410,7 @@ function DrawTextField(string S, int Index, float X, float Y, optional Color C, 
         {
             FadeAlpha = 255;
         }
-    
+
         Canvas.DrawColor.A = FadeAlpha;
     }
 
@@ -429,16 +429,16 @@ function Color GetColorFromStyle(Color MainColor, ETextFieldStyles TextStyle)
 {
     local float ColorHUE,Value;
     local HSVColour HSV;
-    
+
     if( TextStyle == TEXT_FIELD_HSV )
     {
         ColorHUE = Abs(Sin(GetPlayer().WorldInfo.TimeSeconds * 0.9) * 335);
-        
+
         HSV.H = ColorHUE;
         HSV.S = 1.f;
         HSV.V = 1.f;
         HSV.A = MainColor.A / 255;
-            
+
         return class'KFColorHelper'.static.LinearColorToColor(class'KFColorHelper'.static.HSVToRGB(HSV));
     }
     else if( TextStyle == TEXT_FIELD_FLASH )
@@ -446,10 +446,10 @@ function Color GetColorFromStyle(Color MainColor, ETextFieldStyles TextStyle)
         Value = Abs(Sin(GetPlayer().WorldInfo.TimeSeconds * 0.9) * 1);
         HSV = class'KFColorHelper'.static.RGBToHSV(ColorToLinearColor(MainColor));
         HSV.V = Value;
-        
+
         return class'KFColorHelper'.static.LinearColorToColor(class'KFColorHelper'.static.HSVToRGB(HSV));
     }
-    
+
     return MainColor;
 }
 
@@ -467,7 +467,7 @@ function ScrollMouseWheel( bool bUp )
 function SetVisibility(bool Visible)
 {
     Super.SetVisibility(Visible);
-    
+
     if( ScrollBar != None )
     {
         ScrollBar.SetVisibility(Visible);
@@ -478,7 +478,11 @@ defaultproperties
 {
     bNoReset=false
     LineSplitter="|"
+`if(`isdefined(APOC_PATCH))
+    FontScale=1.2
+`else
     FontScale=1
+`endif
     MaxHistory=0
     OutlineSize=1
     Text="TextField"
