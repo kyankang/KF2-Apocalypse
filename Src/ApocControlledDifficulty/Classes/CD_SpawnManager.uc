@@ -52,7 +52,7 @@ function Update()
 	CohortVolumeIndex = 0;
 	CohortSaturated = false;
 
-	// As soon as SpawnSquadResult reaches zero on an attempt, we assume that 
+	// As soon as SpawnSquadResult reaches zero on an attempt, we assume that
 	// the eligible spawners/spawnvolumes are saturated
 	while ( ShouldAddAI() )
 	{
@@ -191,7 +191,7 @@ function string GetWaveAverageSpawnrate()
 private function string FormatFloatToOneDecimalPlace( const float f )
 {
 	local int l;
-	local string s;	
+	local string s;
 
 	s = string( f );
 
@@ -207,7 +207,7 @@ private function string FormatFloatToOneDecimalPlace( const float f )
 private function string FormatFloatToTwoDecimalPlaces( const float f )
 {
 	local int l;
-	local string s;	
+	local string s;
 
 	s = string( f );
 
@@ -521,7 +521,7 @@ function int GetBestSpawnVolumeIndex( optional array< class<KFPawn_Monster> > AI
 
 	while ( CohortVolumeIndex < SpawnVolumes.Length )
 	{
-		if ( SpawnVolumes[CohortVolumeIndex].IsValidForSpawn(DesiredSquadType, OtherController) 
+		if ( SpawnVolumes[CohortVolumeIndex].IsValidForSpawn(DesiredSquadType, OtherController)
 			&& SpawnVolumes[CohortVolumeIndex].CurrentRating > 0 )
 		{
 			`log(GetFuncName()@"returning chosen spawn volume"@SpawnVolumes[CohortVolumeIndex]@"with a rating of"@SpawnVolumes[CohortVolumeIndex].CurrentRating, bLogAISpawning);
@@ -547,7 +547,7 @@ function array< class<KFPawn_Monster> > GetNextSpawnList()
 	{
 		LeftoverSpawnSquad.Length = 0;
 	}
-	
+
 	if( LeftoverSpawnSquad.Length > 0 )
 	{
 		if( bLogAISpawning )
@@ -812,9 +812,9 @@ function GetSpawnListFromSquad(byte SquadIdx, out array< KFAISpawnSquad > Squads
 		// Replace all standard crawler classes with forced-regular crawers
 		MatchClasses.Length = 2;
 		MatchClasses[0] = AIClassList[AT_Crawler];
-		MatchClasses[1] = class'ControlledDifficulty.CD_Pawn_ZedCrawler_Special';
+		MatchClasses[1] = class'ApocControlledDifficulty.CD_Pawn_ZedCrawler_Special';
 		ReplaceZedClass( MatchClasses,
-		                 class'ControlledDifficulty.CD_Pawn_ZedCrawler_Regular',
+		                 class'ApocControlledDifficulty.CD_Pawn_ZedCrawler_Regular',
 		                 AISpawnList );
 	}
 
@@ -824,9 +824,9 @@ function GetSpawnListFromSquad(byte SquadIdx, out array< KFAISpawnSquad > Squads
 		// Replace all standard alpha classes with forced-regular alphas
 		MatchClasses.Length = 2;
 		MatchClasses[0] = AIClassList[AT_AlphaClot];
-		MatchClasses[1] = class'ControlledDifficulty.CD_Pawn_ZedClot_Alpha_Special';
+		MatchClasses[1] = class'ApocControlledDifficulty.CD_Pawn_ZedClot_Alpha_Special';
 		ReplaceZedClass( MatchClasses,
-		                 class'ControlledDifficulty.CD_Pawn_ZedClot_Alpha_Regular',
+		                 class'ApocControlledDifficulty.CD_Pawn_ZedClot_Alpha_Regular',
 		                 AISpawnList );
 	}
 	else
@@ -839,7 +839,7 @@ function GetSpawnListFromSquad(byte SquadIdx, out array< KFAISpawnSquad > Squads
 		MatchClasses.Length = 1;
 		MatchClasses[0] = AIClassList[AT_AlphaClot];
 		ReplaceZedClass( MatchClasses,
-		                 class'ControlledDifficulty.CD_Pawn_ZedClot_Alpha',
+		                 class'ApocControlledDifficulty.CD_Pawn_ZedClot_Alpha',
 		                 AISpawnList );
 	}
 
@@ -850,9 +850,9 @@ function GetSpawnListFromSquad(byte SquadIdx, out array< KFAISpawnSquad > Squads
 		// Replace all standard gorefast classes with forced-regular gorefasts
 		MatchClasses.Length = 2;
 		MatchClasses[0] = AIClassList[AT_GoreFast];
-		MatchClasses[1] = class'ControlledDifficulty.CD_Pawn_ZedGorefast_Special';
+		MatchClasses[1] = class'ApocControlledDifficulty.CD_Pawn_ZedGorefast_Special';
 		ReplaceZedClass( MatchClasses,
-		                 class'ControlledDifficulty.CD_Pawn_ZedGorefast_Regular',
+		                 class'ApocControlledDifficulty.CD_Pawn_ZedGorefast_Regular',
 		                 AISpawnList );
 	}
 
@@ -863,17 +863,17 @@ function GetSpawnListFromSquad(byte SquadIdx, out array< KFAISpawnSquad > Squads
 		// Replace all standard fleshpound classes with forced-lazy fleshpounds
 		MatchClasses.Length = 2;
 		MatchClasses[0] = AIClassList[AT_FleshPound];
-		MatchClasses[1] = class'ControlledDifficulty.CD_Pawn_ZedFleshpound_RS';
+		MatchClasses[1] = class'ApocControlledDifficulty.CD_Pawn_ZedFleshpound_RS';
 		ReplaceZedClass( MatchClasses,
-		                 class'ControlledDifficulty.CD_Pawn_ZedFleshpound_NRS',
+		                 class'ApocControlledDifficulty.CD_Pawn_ZedFleshpound_NRS',
 		                 AISpawnList );
 
 		// Same, but for minis
 		MatchClasses.Length = 2;
 		MatchClasses[0] = AIClassList[AT_FleshpoundMini];
-		MatchClasses[1] = class'ControlledDifficulty.CD_Pawn_ZedFleshpoundMini_RS';
+		MatchClasses[1] = class'ApocControlledDifficulty.CD_Pawn_ZedFleshpoundMini_RS';
 		ReplaceZedClass( MatchClasses,
-		                 class'ControlledDifficulty.CD_Pawn_ZedFleshpoundMini_NRS',
+		                 class'ApocControlledDifficulty.CD_Pawn_ZedFleshpoundMini_NRS',
 		                 AISpawnList );
 	}
 }

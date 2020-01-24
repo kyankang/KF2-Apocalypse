@@ -3,7 +3,7 @@
 set KF2_BIN="G:\SteamLibrary\SteamApps\common\killingfloor2\Binaries\Win64"
 
 set Map=KF-Outpost
-set GameMode=?game=ApocGameModeSrv.ApocGameInfo_Survival
+set GameMode=?game=ApocControlledDifficulty.CD_Survival
 set Mutators=?mutator=ApocMutLoader.ApocMutLoader
 set Difficulty=?Difficulty=1
 set Length=?GameLength=1

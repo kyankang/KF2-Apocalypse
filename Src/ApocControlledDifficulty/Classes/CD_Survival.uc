@@ -4,7 +4,8 @@
 // Survival with less bullshit
 //=============================================================================
 
-class CD_Survival extends KFGameInfo_Survival;
+class CD_Survival extends KFGameInfo_Survival
+	config(ApocControlledDifficulty);
 
 `include(CD_BuildInfo.uci)
 `include(CD_Log.uci)
@@ -120,7 +121,7 @@ var int MaxMonstersInt;
 // #### SpawnMod
 //
 // The forced spawn modifier, expressed as a float between 0 and 1.
-// 
+//
 // 1.0 is KFGameConductor's player-friendliest state.  0.75 is
 // KFGameConductor's player-hostile state.
 //
@@ -161,7 +162,7 @@ var float SpawnModFloat;
 // spawnvolume entities.  In the unmodded game, this is hardcoded to one
 // second.
 var config string SpawnPoll;
-var config const array<string> SpawnPollDefs; 
+var config const array<string> SpawnPollDefs;
 var float SpawnPollFloat;
 
 // #### ZTSpawnMode
@@ -309,8 +310,8 @@ var array<CD_AIWaveInfo> SpawnCycleWaveInfos;
 // you that bonus dosh, it could end up being gamebreaking for some runs.  In
 // short, WaveSizeFakes increases both your budget and the zed count in each
 // wave.
-var config string WaveSizeFakes; 
-var config const array<string> WaveSizeFakesDefs; 
+var config string WaveSizeFakes;
+var config const array<string> WaveSizeFakesDefs;
 var int WaveSizeFakesInt;
 
 // #### FakesMode
@@ -329,7 +330,7 @@ var int WaveSizeFakesInt;
 // setting "add_with_humans" and playing solo with WaveSizeFakes=1.
 //
 // If this is set to "ignore_humans" and any fake option is set to zero, then
-// that option is treated as though it had been set to one instead.  
+// that option is treated as though it had been set to one instead.
 var config string FakesMode;
 var ECDFakesMode FakesModeEnum;
 
@@ -990,7 +991,7 @@ private function string UnpauseTraderTime()
 	return "Unpaused Trader";
 }
 
-/* 
+/*
  * We override PreLogin to disable a comically overzealous
  * GameMode integrity check added in v1046 or v1048 (not
  * sure exactly which, but it appeared after v1043 for sure).
@@ -1222,7 +1223,7 @@ final function int GetEffectivePlayerCountForZedType( KFPawn_Monster P, int Huma
 
 /*
  * Configure CD_SpawnManager (particularly MaxMonsters and SpawnCycle)
- */ 
+ */
 function InitSpawnManager()
 {
 	super.InitSpawnManager();
@@ -1282,7 +1283,7 @@ function BroadcastCDEcho( coerce string Msg )
         local PlayerController P;
 
 	// Skip the AllowsBroadcast check
-        
+
         foreach WorldInfo.AllControllers(class'PlayerController', P)
         {
                 BroadcastHandler.BroadcastText( None, P, Msg, 'CDEcho' );
@@ -1326,7 +1327,7 @@ function WaveEnded( EWaveEndCondition WinCondition )
  *
  *    function float GetDamageResistanceModifierForZedType( KFPawn_Monster P, byte NumLivingPlayers )
  *
- */  
+ */
 function SetMonsterDefaults( KFPawn_Monster P )
 {
 	local float HealthMod;
@@ -1447,7 +1448,7 @@ function StartWave()
 	// low (say 1s), but very noticable when it is long (say 30s)
 	SetSpawnManagerTimer();
 	SetGameSpeed( WorldInfo.TimeDilation );
-	
+
 	super.StartWave();
 
 	// If this is the first wave, print CD's settings
@@ -1547,7 +1548,7 @@ function ECDAuthLevel GetAuthorizationLevelForUser( Actor Sender )
 		return DefaultAuthLevel;
 	}
 
-	SteamIdHexString = OnlineSub.UniqueNetIdToString(KFPRI.UniqueId); 
+	SteamIdHexString = OnlineSub.UniqueNetIdToString(KFPRI.UniqueId);
 
 	`cdlog("Beginning authorization check for UniqueId=" $ SteamIdHexString $ " (current nickname: "$ KFPRI.PlayerName $")", bLogControlledDifficulty);
 
@@ -1559,12 +1560,12 @@ function ECDAuthLevel GetAuthorizationLevelForUser( Actor Sender )
 		return DefaultAuthLevel;
 	}
 
-	`cdlog("Unpacked int32 steam account number: " $ SteamIdAccountNumber $ " (current nickname: "$ KFPRI.PlayerName $")", bLogControlledDifficulty); 
+	`cdlog("Unpacked int32 steam account number: " $ SteamIdAccountNumber $ " (current nickname: "$ KFPRI.PlayerName $")", bLogControlledDifficulty);
 
 	SteamIdSuffix = ":" $ string(SteamIdAccountNumber % 2) $ ":" $ string(SteamIdAccountNumber / 2);
 	SteamIdSuffixLength = Len( SteamIdSuffix );
 
-	`cdlog("Formatted account number as STEAMID2-style string: "$ SteamIdSuffix $ " (current nickname: "$ KFPRI.PlayerName $")", bLogControlledDifficulty); 
+	`cdlog("Formatted account number as STEAMID2-style string: "$ SteamIdSuffix $ " (current nickname: "$ KFPRI.PlayerName $")", bLogControlledDifficulty);
 
 	for ( i = 0; i < AuthorizedUsers.Length; i++ )
 	{
@@ -1597,7 +1598,7 @@ private function MaybeLoadIniWaveInfos()
 		// This doesn't seem to work (am I forcing a SaveConfig() beforehand?)
 		//`cdlog("Forcing a config reload because SpawnCycle="$SpawnCycle$"...", bLogControlledDifficulty);
 		//ConsoleCommand("reloadcfg ControlledDifficulty.CD_Survival", true);
-		//ConsoleCommand("reloadcfg 'ControlledDifficulty.CD_Survival'", true);
+		//ConsoleCommand("reloadcfg 'ApocControlledDifficulty.CD_Survival'", true);
 		//ConsoleCommand("reloadcfg \"ControlledDifficulty.CD_Survival\"", true);
 
 		if ( !SpawnCycleCatalog.ParseIniSquadCycle( SpawnCycleDefs, GameLength, IniWaveInfos ) )
@@ -1679,8 +1680,8 @@ exec function CDSpawnSummaries( optional string CycleName, optional int AssumedP
 	}
 
 	cdsmClass = class<CD_SpawnManager>( SpawnManagerClasses[GameLength] );
-	// No need to instantiate; we just want to check its default 
-	// values for about Wave MaxAI 
+	// No need to instantiate; we just want to check its default
+	// values for about Wave MaxAI
 	DWS = cdsmClass.default.DifficultyWaveSettings[ Min(GameDifficulty, cdsmClass.default.DifficultyWaveSettings.Length-1) ];
 
 	class'CD_WaveInfoUtils'.static.PrintSpawnSummaries( WaveInfosToSummarize, AssumedPlayerCount,
@@ -1818,15 +1819,15 @@ private function PrintScheduleSlug( string CycleName )
 
 defaultproperties
 {
-	GameConductorClass=class'ControlledDifficulty.CD_DummyGameConductor'
+	GameConductorClass=class'ApocControlledDifficulty.CD_DummyGameConductor'
 
-	DifficultyInfoClass=class'ControlledDifficulty.CD_DifficultyInfo'
+	DifficultyInfoClass=class'ApocControlledDifficulty.CD_DifficultyInfo'
 
-	SpawnManagerClasses(0)=class'ControlledDifficulty.CD_SpawnManager_Short'
-	SpawnManagerClasses(1)=class'ControlledDifficulty.CD_SpawnManager_Normal'
-	SpawnManagerClasses(2)=class'ControlledDifficulty.CD_SpawnManager_Long'
+	SpawnManagerClasses(0)=class'ApocControlledDifficulty.CD_SpawnManager_Short'
+	SpawnManagerClasses(1)=class'ApocControlledDifficulty.CD_SpawnManager_Normal'
+	SpawnManagerClasses(2)=class'ApocControlledDifficulty.CD_SpawnManager_Long'
 
-	PlayerControllerClass=class'ControlledDifficulty.CD_PlayerController'
+	PlayerControllerClass=class'ApocControlledDifficulty.CD_PlayerController'
 
 	Begin Object Class=CD_ConsolePrinter Name=Default_CDCP
 	End Object

@@ -16,5 +16,5 @@ simulated event PostBeginPlay()
 
 defaultproperties
 {
-	ElitePawnClass=class'CD_Pawn_ZedClot_AlphaKing'
+	ElitePawnClass.Add(class'CD_Pawn_ZedClot_AlphaKing')
 }

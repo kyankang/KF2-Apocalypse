@@ -47,7 +47,7 @@ function SetLogging( const bool l )
 	EnableLogging = l;
 }
 
-/* 
+/*
  * True or false depending on whether the last call to
  * ParseFullSpawnCycle failed or succeeded, respectively.
  */
@@ -111,7 +111,7 @@ function bool ParseFullSpawnCycle( const array<string> fullRawSchedule, const ou
 	{
 		`cdlog("Attempting to parse wave "$(ParserState.WaveIndex + 1)$"...", EnableLogging);
 		WaveInfos.AddItem( ParseSpawnCycleDef( fullRawSchedule[ParserState.WaveIndex], AIClassList ) );
-		
+
 		// If the wave was empty, log a fatal parse error, but keep processing later waves to
 		// try to log as much information/errors as possible
 		if ( WaveInfos[WaveInfos.length - 1].CustomSquads.length < 1 )
@@ -137,7 +137,7 @@ private function CD_AIWaveInfo ParseSpawnCycleDef( const string rawSchedule, con
 	local ESquadType CurElementVolume;
 	local int CurSquadSize;
 
-	CurWaveInfo = new class'ControlledDifficulty.CD_AIWaveInfo';
+	CurWaveInfo = new class'ApocControlledDifficulty.CD_AIWaveInfo';
 
 	// Split on , and drop empty elements
 	SquadDefs = SplitString( rawSchedule, ",", true );
@@ -145,7 +145,7 @@ private function CD_AIWaveInfo ParseSpawnCycleDef( const string rawSchedule, con
 	// Iterate through the squads
 	for ( ParserState.SquadIndex = 0; ParserState.SquadIndex < SquadDefs.length; ParserState.SquadIndex++ )
 	{
-		CurSquad = new class'ControlledDifficulty.CD_AISpawnSquad';
+		CurSquad = new class'ApocControlledDifficulty.CD_AISpawnSquad';
 		CurSquadSize = 0;
 
 		LargestVolumeInSquad = EST_Crawler;
@@ -153,7 +153,7 @@ private function CD_AIWaveInfo ParseSpawnCycleDef( const string rawSchedule, con
 		// Squads may in general be heterogeneous, e.g.
 		// 2Cyst_3Crawler_2Gorefast_2Siren
 		//
-		// But specific squads may be homogeneous, e.g. 
+		// But specific squads may be homogeneous, e.g.
 		// 6Crawler
 		//
 		// In the following code, we split on _ and loop through
@@ -350,6 +350,6 @@ private function bool ParseSquadElement( const out String ElemDef, out AISquadEl
 	{
 		return PrintElemParseError("\""$ ElemDef $"\" could not be parsed: " $ ZedNameResolv);
 	}
-	
+
 	return true;
 }

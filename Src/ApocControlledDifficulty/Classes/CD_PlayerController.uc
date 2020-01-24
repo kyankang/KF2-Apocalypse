@@ -24,11 +24,11 @@ var const string CDEchoMessageColor;
    subclasses like their parent classes for the purposes
    of zed kill tracking.
 */
-function AddZedKill( class<KFPawn_Monster> MonsterClass, byte Difficulty, class<DamageType> DT )
+function AddZedKill( class<KFPawn_Monster> MonsterClass, byte Difficulty, class<DamageType> DT, bool bKiller )
 {
 	MonsterClass = class'CD_ZedNameUtils'.static.CheckMonsterClassRemap( MonsterClass, "CD_PlayerController.AddZedKill", ClientLogging );
 
-	super.AddZedKill( MonsterClass, Difficulty, DT );
+	super.AddZedKill( MonsterClass, Difficulty, DT, bKiller );
 }
 
 simulated event PostBeginPlay()
@@ -78,7 +78,7 @@ reliable client event TeamMessage( PlayerReplicationInfo PRI, coerce string S, n
 		{
 			S = "[See Console]";
 			`cdlog( "chatdebug: Squelching chat message with lines=" $ MessageLines, ClientLogging );
-		} 
+		}
 		else
 		{
 			`cdlog( "chatdebug: Displaying chat message with lines=" $ MessageLines, ClientLogging );
@@ -88,7 +88,7 @@ reliable client event TeamMessage( PlayerReplicationInfo PRI, coerce string S, n
 		{
 			S = "[See Console]";
 			`cdlog( "chatdebug: Squelching chat message with charlength=" $ MessageChars, ClientLogging );
-		} 
+		}
 		else
 		{
 			`cdlog( "chatdebug: Displaying chat message with charlength=" $ MessageChars, ClientLogging );
@@ -113,7 +113,7 @@ reliable client event TeamMessage( PlayerReplicationInfo PRI, coerce string S, n
 			}
 		}
 
-		// Attempt to append it to GFxHUD.HudChatBox (this is at the lower-left 
+		// Attempt to append it to GFxHUD.HudChatBox (this is at the lower-left
 		// of the player's screen after the game starts)
 		if( None != MyGFxHUD && None != MyGFxHUD.HudChatBox )
 		{
@@ -129,6 +129,6 @@ reliable client event TeamMessage( PlayerReplicationInfo PRI, coerce string S, n
 
 defaultproperties
 {
-	MatchStatsClass=class'ControlledDifficulty.CD_EphemeralMatchStats'
+	MatchStatsClass=class'ApocControlledDifficulty.CD_EphemeralMatchStats'
 	CDEchoMessageColor="00DCCE"
 }
