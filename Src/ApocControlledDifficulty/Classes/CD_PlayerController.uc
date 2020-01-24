@@ -1,4 +1,5 @@
-class CD_PlayerController extends KFPlayerController;
+class CD_PlayerController extends KFPlayerController
+	config(ApocControlledDifficulty);
 
 `include(CD_Log.uci)
 
