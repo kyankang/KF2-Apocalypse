@@ -1,0 +1,286 @@
+4218dda3 built 2016-11-18
+-------------------------
+
+NM_DedicatedServer fixes
+
+Most importantly, this commit disables a gametype integrity check
+that TWI appears to have added after v1043 to make quickjoin less
+buggy.  The problem is that it executes every time the map changes,
+and it kicks everyone if the gametype is not standard.  CD's is
+not standard.
+
+I disabled this check. It didn't exist in v1043, and it's not
+really necessary for a custom gametype.
+
+This commit also contains two less-important fixes:
+
+* made CD_ConsolePrinter stop spamming (noisily but harmlessly)
+  about CachedGVC being None when running in dedicated server mode
+
+* expanded FakePlayers value range from [0,5] to [0,32]
+
+
+39cdcc74 built 2016-11-18
+-------------------------
+
+* GetNextSpawnList() was substantially modified upstream.  TWI made
+  it so that new squads are not appended to the LeftoverSpawnSquad
+  unless LSS is incapable of supplying AINeeded.  This means that LSS
+  no longer grows monotonically in solo play.  Indeed, it's now hard
+  to get LSS.Length above single digits, and it is routinely emptied
+  during play now.
+
+  This has the side effect of slowing down the spawnrate, because
+  LSS.Length > 0 triggers an early "return 0" in
+  CalcNextSpawnGroupTime(). Now that LSS is kept small and repeatedly
+  emptied midwave, CNSGT() uses this early return less often, resulting
+  in more time overall between the first zed spawn and the last, assuming
+  the team kills fewer than a squad's worth of enemies each second (~5).
+
+  The preceding version of the game (v1043) only really applied any
+  spawnrate modifiers, including CD SpawnMod, for the first few squads.
+  After the first few squads spawned, and assuming the player killed less
+  than an entire squad a second on average, LeftoverSpawnSquad's size
+  would grow effectively without bound, and this would trigger early
+  return in CNSGT().  This basically meant the game overrode SpawnMod to
+  zero after the first few squads.  So, it is possible to emulate v1043
+  behavior by setting SpawnMod=0 in this new version.  It's not exactly
+  the same -- SpawnMod=0 is actually slightly harder, because you don't
+  get any slack for those first few squads -- but it is close.
+
+  In the long term, this is probably a good move by TWI, because it
+  makes SpawnMod influential throughout the wave instead of just for
+  the first few squads.  For that reason, and because a similar and
+  slightly more difficult behavior can be simulated with SpawnMod=0,
+  I've decided to adopt TWI's new behavior in CD.  Maintaining the old
+  behavior as an option would have been kind of error-prone and clumsy.
+
+  To follow this change, I copied GetNextSpawnList() from TWI's
+  KFAISpawnManager and reapplied my CD customizations (which relate
+  to disabling spawn shuffling when a SpawnCycle is in use).
+
+* TWI renamed sDifficultyWaveInfo to DifficultyWaveInfo.  CD used this
+  struct in a couple of places.  The actual struct contents and field
+  names have not changed, just the name of the struct type.
+
+* Added basic_heavy preset.  Thanks to Dandy Boy for helping me tune this
+  preset.
+
+283bbd68 built 2016-10-28
+-------------------------
+
+* New SpawnCycle option for deterministic spawns
+
+  This feature takes the luck out of what zeds spawn and when.  No
+  more guessing about whether you'll get 3FP or just 2SC.  It lets you
+  control what zeds spawn, in what squads, on what waves, in what
+  order.  This covers everything from big zed squads down to every
+  last crawler.  The only thing it does not cover is boss waves.
+
+  If you want, you can exercise full control over every spawn by
+  writing your own detailed SpawnCycle in KFGame.ini and setting
+  SpawnCycle=ini.  Or, you can use the SpawnCycle=basic_moderate
+  preset included in this release, in which case you don't have to
+  touch KFGame.ini at all.
+
+  Detailed documentation on this feature is available here:
+  https://github.com/notblackout/kf2-controlled-difficulty/blob/master/spawn.md
+
+  However, to just get started as quickly as possible without reading
+  anything, run this:
+
+  `open KF-Hillside-B4?game=ControlledDifficulty.CD_Survival?SpawnCycle=basic_moderate`
+
+  After the map loads, type this to see a summary of what you're about
+  to play:
+
+  `CDSpawnSummaries`
+
+  This basic_moderate preset feels similar to a roughly average HOE
+  Long game, with a few tweaks:
+
+  * Big zed presence increases smoothly and linearly, so that each
+    wave is a slight but distinct step up from the preceding wave.
+    There is a total of 54 bigs over the entire long game.
+  
+  * Only 47 husks spawn over the course of the entire game.  This is
+    only about two-thirds-ish the normal number of husks.  The husks
+    also tend to spawn one at a time.
+
+* New Boss=hans|patriarch|unmodded option
+
+  This controls which boss spawns at the end of a game.  It can be set
+  to unmodded to keep the default random behavior.
+
+  New AlbinoAlphas option to complement existing AlbinoCrawlers option
+
+  A past release introduced AlbinoCrawlers, but there was no way to
+  control whether albino alpha clots would spawn.  The new
+  AlbinoAlphas=true|false option does just that.
+
+  As noted in the documentation, activating a SpawnCycle effectively
+  disables the AlbinoAlphas and AlbinoCrawlers options.  Whether and
+  when albinos spawn is controlled by the SpawnCycle definition, in
+  that case.  basic_moderate has no albinos whatsoever, so you will
+  not see any when playing that preset no matter what the
+  AlbinoAlphas/-Crawlers options are set to.
+
+* Logging cleanup
+
+  The old "(GameConductor woken up) ControlledDifficulty forcing
+  SpawnMod =..." message no longer spams once a second into the log.
+  The underlying functionality has not changed, I just removed this
+  extremely noisy log message.
+
+  The mod is also much more consistent about honoring
+  bLogControlledDifficulty.  When bLogControlledDifficulty=false, the
+  only bits it unconditionally logs are error messages and a copy of
+  the information it prints to console (because the console doesn't
+  support copy-paste, but logfiles do).
+
+8bd8ff84 built 2016-09-21
+-------------------------
+
+* Added AlbinoCrawlers=true|false option
+
+  When this is false, the game forces all crawlers to be regular black
+  crawlers.  Effectively, whenever the standard game would have
+  spawned an albino/gas crawler, AlbinoCrawlers=false converts that
+  crawler to a regular/non-gas one.  This neither reduces zed count
+  nor changes the squad or zed composition of a wave, aside from
+  replacing albino crawlers with regular ones.
+
+* Mod version and build date now print to console
+
+  This console line appears just above the lines displaying CD's
+  active settings.
+
+  I use abbreviated git commit hashes as version descriptors.  If you
+  wish, you can cross-reference the version string against the github
+  project's master branch history to see the exact source code you are
+  running:
+  https://github.com/notblackout/kf2-controlled-difficulty/commits/master
+
+* Fixed save-and-load for SpawnMod
+
+  The last build failed to save SpawnMod values to KFGame.ini.
+  SpawnMod was still displayed in the console and applied to the game
+  correctly.  You were affected by this if you left the SpawnMod
+  parameter off the `open` command and saw CD print a SpawnMod value
+  to the console that you did not expect.  The value printed to the
+  console was the effective one.
+
+e048b0e built 2016-09-15
+------------------------
+* reword TraderTime console message
+
+7185b2a built 2016-09-15
+------------------------
+* fixed SpawnMod=0 handling
+    Prior to this commit, specifying SpawnMod=0 as a parameter to the open
+    command had unintuitive behavior that depended on whether a saved
+    SpawnMod value was present in KFGame.ini.
+
+    * If you ran `open ...?SpawnMod=0` and KFGame.ini had a
+      [ControlledDifficulty.CD_Survival] section with a SpawnMod value
+      (true if KFGame.ini is not readonly and you've played the mod
+      before), then the KFGame.ini value was used (which might not be 0!)
+
+    * If you ran `open ...?SpawnMod=0` and KFGame.ini had no SpawnMod
+      value (true if you never played the mod before or if KFGame.ini is
+      readonly), 0.0 was used
+
+    I recommended that people stick to the range [0.75, 1.0] in the mod
+    description, but I probably should have foreseen that people would try
+    0.0 even though it was not recommended.  I see that Kore and Fat Cat
+    have already tried SpawnMod=0, for instance.
+
+    The true SpawnMod value appears in the log, but people don't usually
+    run KF2 with the `-log` option, so that doesn't help them.
+
+    I've made a couple of changes to fix this.
+
+    1. I rewrote the parameter handling to avoid the KFGame.ini-dependence
+    mentioned above.  Now if you run `open ...?SpawnMod=0`, you will
+    actually get SpawnMod=0 regardless of KFGame.ini or anything else.
+    Note that the spawning subsytem in the base game still only spawns one
+    squad of zeds per second, and squads tend to be about 5 zeds in size,
+    give or take a couple.  So, even with SpawnMod=0, it could take
+    several seconds to reach the MaxMonsters limit.
+
+    2. I made the mod print its effective configuration values to the
+    console every time you run the `open` command (technically, this
+    happens in the `InitGame()` function).  So, when you open a map with
+    the mod, you now see something like printed to your console:
+
+    [ControlledDifficulty] FakePlayers=2
+    [ControlledDifficulty] TraderTime=45
+    [ControlledDifficulty] SpawnMod=0.75
+    [ControlledDifficulty] MaxMonsters=<unmodded default>
+
+    To those who set SpawnMod=0 and got burned by this weird
+    KFGame.ini-dependence, I apologize.  I hope the change above will make
+    the mod's effective values more transparent, in addition to just
+    fixing this specific problem.
+
+* added MaxMonsters param
+    Before this commit, the mod did not alter the vanilla game's
+    MaxMonsters logic.  MaxMonsters is an int correspoding to the maximum
+    amount of concurrent live zeds the spawning subsystem allows on a map.
+    In the vanilla game, dedicated servers use 32 (even if you play by
+    yourself on a dedicated server), whereas non-dedicated (NM_StandAlone)
+    use 16.  So, if you run KF2 and open a modded game from the main menu,
+    you had MaxMonsters=16, consistent with the vanilla game.
+
+    This is now configurable.  You can append ?MaxMonsters=32 or whatever
+    you like.  Values greater than zero are interpreted literally.  For
+    instance, if you specify ?MaxMonsters=32, you will see this printed to
+    the console after the map loads:
+
+    [ControlledDifficulty] MaxMonsters=32
+
+    Nonpositive values are interpreted to mean "use the vanilla game's
+    MaxMonsters" (which will be 16 if you play non-dedicated solo).  For
+    instance, if you specify ?MaxMonsters=0 or ?MaxMonsters=-1 (or any
+    other negative value), you will see this printed to the console after
+    the map loads:
+
+    [ControlledDifficulty] MaxMonsters=<unmodded default>
+
+* fixed delayed param handling on FakePlayers and TraderTime
+    mike5879 noticed that changes to the FakePlayers and TraderTime
+    options only take effect after running the open command twice.  It was
+    as though changes to these values were delayed by one invocation of
+    `open` command.  Fortunately, this only affected FakePlayers and
+    TraderTime, which are easy to check.  It did not affect SpawnMod.
+
+    This was caused by an ordering bug in my config handling code.  This
+    is now fixed.  All options specified on the `open` command line should
+    take effect immediately (and they will also be saved to KFGame.ini if
+    it is not readonly, as happens already).
+
+4dbb062 built 2016-08-28
+------------------------
+* updated to KF2 v1043
+* followed upstream restructuring of KFDifficultyInfo
+* rewrote CD_Survival's GameConductor and DifficultyInfo customization to
+override the InitGameConductor and CreateDifficultyInfo functions rather than
+overriding the entire PreBeginPlay event
+
+b334b8e built 2016-08-09
+------------------------
+* stopped scaling down per-zed dosh kill rewards in the presence of faked
+players; each zed's kill award is now the identical to the award given if the
+faked players had been real
+
+c0f63e1 built 2016-08-06 
+------------------------
+* added logging statements around fake player counts
+* added bLogControlledDifficulty=bool KFGame.ini option
+* added `logControlledDifficulty bool` console command
+
+(unnamed initial version) 2016-08-06
+------------------------------------
+* support player faking
+* support trader time configuration
+* support spawnmod configuration

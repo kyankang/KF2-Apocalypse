@@ -1,0 +1,63 @@
+[h1]Summary[/h1]
+
+This open source mod creates a custom game mode called ControlledDifficulty.CD_Survival.  This game mode stays close to TWI's vanilla gameplay, but puts you in control of aspects TWI hardcoded or made random.  CD can be configured to present much harder difficulty than Hell on Earth.  That is CD's main purpose.  However, CD is offers powerful configuration mechanisms, so it can also be configured to present easy difficulty, or exotic difficulties, such as large groups of infrequently spawning zeds (e.g. 64 zeds every 30 seconds).
+
+[h1]Feature Overview[/h1]
+
+* Disabling the game conductor's variation of the zed spawn intensity and move speed
+* 'Faking' players; this increases the zed count (but not zed health) as though additional players were present
+* Setting an arbitrary, fixed spawn intensity, without conductor interference
+* Setting the max amount live zeds
+* Multiple parameters for fine-tuning the spawn system, allowing a continuum of spawnrates ranging from more than 192 zeds a second to less than one zed a second
+* Setting a SpawnCycle, which controls exactly which zeds spawn and in what order
+* Chat commands to read and modify the configuration
+* Configuring and/or pausing trader time
+* Displaying live stats after each wave showing the true spawnrate and squad/cohort count
+* Optionally automatically scaling difficulty parameters in response to playercount and wave number
+* Setting the dropped weapon timeout
+* Selectively disabling albino crawlers, alphas, and gorefasts
+* Optionally disabling the glitter-like alpha clot's red particle effects
+* Controlling whether fleshpounds are allowed to spawn already enraged
+* Controlling which boss spawns
+
+[h1]Current Release Info[/h1]
+
+[b]Version[/b]: $MOD_VERSION
+[b]Date[/b]: $MOD_DATE
+[b]Last Tested KF2 Version[/b]: KF2 v1054
+[b]Source[/b]: https://github.com/notblackout/kf2-controlled-difficulty
+
+[h1]Installation[/h1]
+
+Click subscribe.  Restart the game if it is running (to make the game sync workshop items).  That's it.  You don't have to edit any files or manually download anything.
+
+To play, paste one of the console commands from the "getting started" documentation link below.
+
+[h1]Documentation[/h1]
+
+[b] CD Manual Table of Contents: [/b]
+
+(also at: https://github.com/notblackout/kf2-controlled-difficulty/blob/master/readme.md )
+
+* [url=https://github.com/notblackout/kf2-controlled-difficulty/blob/master/getting_started.md]Getting Started[/url]
+* [url=https://github.com/notblackout/kf2-controlled-difficulty/blob/master/recommended_cfg.md]Advice on CD configuration tuning[/url]
+* [url=https://github.com/notblackout/kf2-controlled-difficulty/blob/master/chat.md]Chat Command Reference[/url]
+* [url=https://github.com/notblackout/kf2-controlled-difficulty/blob/master/client_config.md]Client-side Config Options[/url]
+* [url=https://github.com/notblackout/kf2-controlled-difficulty/blob/master/console.md]Console Commands[/url]
+* [url=https://github.com/notblackout/kf2-controlled-difficulty/blob/master/dynamic_settings.md]Dynamic Settings Reference[/url]
+* [url=https://github.com/notblackout/kf2-controlled-difficulty/blob/master/faq.md]Frequently Asked Questions[/url]
+* [url=https://github.com/notblackout/kf2-controlled-difficulty/blob/master/options.md]Configuration Option Reference[/url]
+* [url=https://github.com/notblackout/kf2-controlled-difficulty/blob/master/server.md]Basic Server Setup[/url]
+* [url=https://github.com/notblackout/kf2-controlled-difficulty/blob/master/spawn.md]SpawnCycle reference[/url]
+
+[b]Chinese CD Tutorial[/b]
+
+The following tutorial, with lots of screenshots, was written by Xylona: https://tieba.baidu.com/p/5303880631.  Please direct feedback about it to Xylona [http://steamcommunity.com/id/oldbird/].  I'm unable to review it for accuracy.
+
+[h1]Special Thanks[/h1]
+
+Thanks to the following people for variously testing the mod, helping find bugs, or sharing their insight (this does not imply that they endorse the mod):
+
+dandyboy66, Fat Cat, Kore, mike5879, Nam, Trance, Skell
+
+All bugs are still my fault.
