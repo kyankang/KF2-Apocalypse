@@ -12,8 +12,10 @@
 // ancillary functions to override in order to get the desired behavior).
 //=============================================================================
 class CD_SpawnManager extends KFAISpawnManager
-	within CD_Survival;
+	within CD_Survival
+	config(ApocControlledDifficulty);
 
+`include(ApocGameMode\Globals.uci);
 `include(CD_Log.uci)
 
 var int CohortZedsSpawned;
@@ -27,6 +29,34 @@ var float FirstSpawnTimestamp;
 var float FinalSpawnTimestamp;
 var float LatestSpawnTimestamp;
 var float WaveEndTimestamp;
+
+`if(`isdefined(APOC_CDPATCH))
+var config int iVersionNumber;
+var config int MinWaveTotalZeds, MaxWaveTotalZeds;
+
+function SetupDefaultConfig()
+{
+	local int VersionNumber;
+
+	VersionNumber = iVersionNumber;
+	if( iVersionNumber < 1 )
+	{
+		MinWaveTotalZeds = 64;
+		MaxWaveTotalZeds = 1200;
+		iVersionNumber++;
+	}
+
+	if( VersionNumber != iVersionNumber )
+		SaveConfig();
+}
+
+function Initialize()
+{
+	super.Initialize();
+
+	SetupDefaultConfig();
+}
+`endif
 
 /** We override this because of TimeUntilNextSpawn.
 	The standard implementation assumes that this
@@ -231,6 +261,10 @@ function SetupNextWave(byte NextWaveIndex, int TimeToNextWaveBuffer = 0)
 	LatestSpawnTimestamp = -1.f;
 	WaveEndTimestamp = -1.f;
 	SpawnEventsThisWave = 0;
+
+`if(`isdefined(APOC_CDPATCH))
+	WaveTotalAI = Lerp(MinWaveTotalZeds, MaxWaveTotalZeds, ((NumPlayers-1) / (MaxPlayers-1)));
+`endif
 }
 
 function WaveEnded()
