@@ -99,18 +99,11 @@ function StartWave()
 	SpawnManager.WaveTotalAI = GetWaveTotalZeds();
 	MyKFGRI.AIRemaining = SpawnManager.WaveTotalAI;
 	MyKFGRI.WaveTotalAICount = SpawnManager.WaveTotalAI;
-
-	SetTimer(2.f, false, 'DisplayBriefWaveStatsInChat');
 }
 
 function EndOfMatch(bool bVictory)
 {
 	super.EndOfMatch(bVictory);
-
-	if ( !bVictory && WaveNum < WaveMax )
-	{
-		SetTimer(2.f, false, 'DisplayBriefWaveStatsInChat');
-	}
 }
 
 event Timer()
