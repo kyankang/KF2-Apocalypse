@@ -60,6 +60,8 @@ function Update()
 		SpawnSquadResult = SpawnSquad( SpawnList );
 		NumAISpawnsQueued += SpawnSquadResult;
 		CohortZedsSpawned += SpawnSquadResult;
+
+		UpdateAIRemaining();
 		if ( 0 == SpawnSquadResult || 0 >= Outer.CohortSizeInt )
 		{
 			CohortSaturated = true;
@@ -418,6 +420,7 @@ function int SpawnSquad( out array< class<KFPawn_Monster> > AIToSpawn, optional 
 	}
 
 	FinalAmount = VolumeAmount + SpawnerAmount;
+	NumAIFinishedSpawning += VolumeAmount;
 
 	RefreshMonsterAliveCount();
 

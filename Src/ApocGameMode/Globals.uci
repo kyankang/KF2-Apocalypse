@@ -82,6 +82,8 @@
 
 `define APOC_REMOVED
 `define APOC_PATCH
+
+`define APOC_CDREMOVED
 `define APOC_CDPATCH
 
 `define APOC_MAX_PERK_LEVEL 6
