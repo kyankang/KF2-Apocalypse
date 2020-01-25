@@ -299,8 +299,10 @@ function int GetMaxMonsters()
 		`cdlog("GetMaxMonsters(): Returning default value "$mm, bLogControlledDifficulty);
 	}
 
-`if(`isdefined(APOC_CDPATCH))
+`if(`isdefined(APOC_PATCH))
 	mm = Max(mm, Lerp(MinSpawnMonsters, MaxSpawnMonsters, ((NumPlayers-1) / (MaxPlayers-1))));
+	Outer.MaxMonsters = string(mm);
+	Outer.MaxMonstersInt = mm;
 `endif
 
 	return mm;

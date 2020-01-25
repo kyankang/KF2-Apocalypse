@@ -1454,6 +1454,10 @@ function StartWave()
 	// If this is the first wave, print CD's settings
 	if ( 1 == WaveNum )
 	{
+`if(`isdefined(APOC_PATCH))
+		SpawnManager.GetMaxMonsters();
+`endif
+
 		SetTimer( 2.0f, false, 'DisplayWaveStartMessageInChat' );
 	}
 	else // If this is a noninitial wave and there are dynamic settings, then print their values
