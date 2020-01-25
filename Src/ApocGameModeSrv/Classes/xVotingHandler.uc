@@ -1,5 +1,5 @@
 Class xVotingHandler extends xVotingHandlerBase
-    config(xMapVote);
+    config(ApocxMapVote);
 
 struct FGameModeOption
 {
