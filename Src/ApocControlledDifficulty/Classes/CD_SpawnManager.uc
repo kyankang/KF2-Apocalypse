@@ -33,6 +33,7 @@ var float WaveEndTimestamp;
 `if(`isdefined(APOC_CDPATCH))
 var config int iVersionNumber;
 var config int MinWaveTotalZeds, MaxWaveTotalZeds;
+var config int MinSpawnMonsters, MaxSpawnMonsters;
 
 function SetupDefaultConfig()
 {
@@ -43,6 +44,8 @@ function SetupDefaultConfig()
 	{
 		MinWaveTotalZeds = 64;
 		MaxWaveTotalZeds = 1200;
+		MinSpawnMonsters = 32;
+		MaxSpawnMonsters = 128;
 		iVersionNumber++;
 	}
 
@@ -263,7 +266,7 @@ function SetupNextWave(byte NextWaveIndex, int TimeToNextWaveBuffer = 0)
 	SpawnEventsThisWave = 0;
 
 `if(`isdefined(APOC_CDPATCH))
-	WaveTotalAI = Lerp(MinWaveTotalZeds, MaxWaveTotalZeds, ((NumPlayers-1) / (MaxPlayers-1)));
+	WaveTotalAI = Max(WaveTotalAI, Lerp(MinWaveTotalZeds, MaxWaveTotalZeds, ((NumPlayers-1) / (MaxPlayers-1))));
 `endif
 }
 
@@ -295,6 +298,10 @@ function int GetMaxMonsters()
 		mm = super.GetMaxMonsters();
 		`cdlog("GetMaxMonsters(): Returning default value "$mm, bLogControlledDifficulty);
 	}
+
+`if(`isdefined(APOC_CDPATCH))
+	mm = Max(mm, Lerp(MinSpawnMonsters, MaxSpawnMonsters, ((NumPlayers-1) / (MaxPlayers-1))));
+`endif
 
 	return mm;
 }
